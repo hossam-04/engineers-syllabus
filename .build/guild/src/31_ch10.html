@@ -1,0 +1,247 @@
+    <section class="chapter prose" id="ch10" data-ch="10">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 10</span><label class="done-toggle"><input type="checkbox" data-id="ch10"><span class="box"></span>Read</label></div>
+        <h3>Leading a project</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Leading a project end to end means owning its outcome, not its code: what's in scope, in what order the work happens, what could kill it, and whether it really lands. Most of the skill is in the order. Do the work that could change the plan first, while little has been built on top of it, and do the comfortable work later. The same project, sequenced risk first, discovers its bad news weeks earlier and throws away far less.</p>
+      </header>
+
+      <h4>What leading means</h4>
+      <p>A technical lead on a project is rarely the person who writes the most code. They're the person who makes sure the project succeeds: that it's solving the right problem, that the plan is realistic, that the risks are known and handled, that the people who depend on it know what's happening, and that it actually finishes. Tanya Reilly's <i>The Staff Engineer's Path</i> describes this as holding the whole project in your head, so that nothing important is nobody's job. The syllabus lists the parts: scoping, sequencing, risk, stakeholders and landing it. This chapter covers all but stakeholders, which have chapter 11.</p>
+
+      <h4>Scoping</h4>
+      <p>Start by writing down what "done" means, in a sentence a stakeholder would agree with: "customers can refund an order from the admin screen, and the money reaches their card within a week". Then find the smallest version of the project that achieves it, and list everything else as explicitly out of scope, in the design document's non-goals. Every project grows during its life, and most of the growth is reasonable on its own; the scope list is what lets you say "that's a good idea for phase two" without an argument.</p>
+      <p>Keep a <b>cut list</b> from the start: the parts you'd drop first if the project ran late, agreed with the stakeholders in advance. Agreeing to cuts when nobody is under pressure is easy. Agreeing to them in the last week, with the date slipping, is a negotiation nobody wins.</p>
+
+      <h4>Sequencing</h4>
+      <p>Most project plans order work by what's comfortable or what's logically first: build the data model, then the screens, then the reports, and leave the integrations and the hard questions until the pieces they connect exist. That ordering has a hidden cost. The hard questions, will the bank's API support refunds, will the risk team accept rules instead of a model, are the ones whose answers can change the plan, and every week they wait, more work is built on assumptions that might be wrong.</p>
+      <p>The alternative is to <b>sequence by risk</b>: of the tasks you can start, do first the one with the most uncertainty per day of work, so bad news arrives while it's still cheap. Two techniques sharpen it. A <b>spike</b> is a short, throwaway experiment that answers one question, two days of prototype calls against the bank's sandbox, before committing to the work that depends on the answer. A <b>walking skeleton</b>, Alistair Cockburn's term, is the thinnest end-to-end version of the system, every component present but barely functional, built first so that integration problems appear in week one instead of the last week. The example measures what sequencing is worth.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">sequence.py &middot; one project of eight tasks, three of them hiding serious unknowns, run in three orders twenty thousand times</span></figcaption><pre><code class="language-python">"""Sequencing a project: the same work in three orders. Some tasks hide an unknown that, if it
+turns out badly, forces a change of plan and throws away part of the work already done."""
+import math
+import random
+
+# task: (days of work, chance its unknown turns out badly)
+TASKS = {
+    "data model":           (5, 0.05),
+    "admin screens":        (8, 0.02),
+    "reporting":            (6, 0.05),
+    "email templates":      (3, 0.02),
+    "bank API integration": (7, 0.35),    # does the bank's API support refunds at all?
+    "fraud rules":          (6, 0.20),    # will the risk team accept rules instead of a model?
+    "migration of old data": (5, 0.15),
+    "load and failover test": (4, 0.10),
+}
+REWORK = 0.5          # share of the work already done that a change of plan throws away
+
+NEEDS = {"migration of old data": ["data model"], "reporting": ["data model"],
+         "load and failover test": [t for t in TASKS if t != "load and failover test"]}
+
+
+def riskiest_first():
+    """Of the tasks whose prerequisites are done, always take the most risk per day of work."""
+    order = []
+    while len(order) < len(TASKS):
+        ready = [t for t in TASKS if t not in order and all(d in order for d in NEEDS.get(t, []))]
+        order.append(max(ready, key=lambda t: (TASKS[t][1] / TASKS[t][0], t)))
+    return order
+
+
+ORDERS = {
+    "comfortable first": ["data model", "email templates", "admin screens", "reporting",
+                          "migration of old data", "fraud rules", "bank API integration",
+                          "load and failover test"],
+    "riskiest first": riskiest_first(),
+}
+
+
+def run(order, rng, spike=False):
+    """Days wasted, and the day the first bad surprise surfaced (None if there was none)."""
+    day, wasted, first = 0, 0.0, None
+    if spike:                                     # two days of prototypes against the two riskiest unknowns
+        day += 2
+        for t in ("bank API integration", "fraud rules"):
+            if rng.random() < TASKS[t][1]:
+                first = first or day              # found before anything is built on it: nothing to redo
+    for t in order:
+        days, p = TASKS[t]
+        day += days
+        if not spike or t not in ("bank API integration", "fraud rules"):
+            if rng.random() < p:
+                first = first or day
+                wasted += REWORK * (day - days)   # the plan changes; half the earlier work is redone
+    return wasted, first
+
+
+rng = random.Random(10)
+print(f"{sum(d for d, _ in TASKS.values())} days of work; chance at least one unknown turns out badly: "
+      f"{1 - math.prod(1 - p for _, p in TASKS.values()):.0%}\n")
+print(f"{'order':40}{'days wasted':>12}{'first surprise':>16}")
+plans = [(name, order, False) for name, order in ORDERS.items()]
+plans.append(("riskiest first, after a 2-day spike", ORDERS["riskiest first"], True))
+for name, order, spike in plans:
+    results = [run(order, rng, spike) for _ in range(20_000)]
+    wasted = sum(w for w, _ in results) / len(results)
+    firsts = sorted(f for _, f in results if f is not None)
+    print(f"{name:40}{wasted:>12.1f}{'day ' + str(firsts[len(firsts) // 2]):>16}")
+print("\n(days wasted: the average over 20,000 runs; first surprise: the median day it surfaced)")
+print("riskiest-first order:", " -> ".join(ORDERS["riskiest first"]))</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">44 days of work; chance at least one unknown turns out badly: 66%
+
+order                                    days wasted  first surprise
+comfortable first                               12.5          day 33
+riskiest first                                   5.5           day 7
+riskiest first, after a 2-day spike              5.3           day 2
+
+(days wasted: the average over 20,000 runs; first surprise: the median day it surfaced)
+riskiest-first order: bank API integration -&gt; fraud rules -&gt; data model -&gt; migration of old data -&gt; reporting -&gt; email templates -&gt; admin screens -&gt; load and failover test</code></pre></figure>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two timelines of the same eight tasks. Comfortable first: data model, email templates, admin screens, reporting, migration of old data, then the risky fraud rules and bank API integration near the end, then the load test; the first surprise surfaces around day 33. Riskiest first: the bank API integration and fraud rules come first, then the data model, migration, reporting, email templates, admin screens and the load test; the first surprise surfaces around day 7. A two-day spike before everything moves it to day 2.">
+          <defs><marker id="f10-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f10-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <text class="dg-small" x="186" y="47" text-anchor="end">comfortable first</text>
+          <rect class="dg-box" x="200" y="30" width="60" height="24"></rect>
+          <text class="dg-tick" x="230" y="46" text-anchor="middle">model</text>
+          <rect class="dg-box" x="260" y="30" width="36" height="24"></rect>
+          <text class="dg-tick" x="278" y="46" text-anchor="middle">mail</text>
+          <rect class="dg-box" x="296" y="30" width="96" height="24"></rect>
+          <text class="dg-tick" x="344" y="46" text-anchor="middle">admin</text>
+          <rect class="dg-box" x="392" y="30" width="72" height="24"></rect>
+          <text class="dg-tick" x="428" y="46" text-anchor="middle">reports</text>
+          <rect class="dg-hot" x="464" y="30" width="60" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="494" y="46" text-anchor="middle">migrate</text>
+          <rect class="dg-hot" x="524" y="30" width="72" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="560" y="46" text-anchor="middle">fraud</text>
+          <rect class="dg-hot" x="596" y="30" width="84" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="638" y="46" text-anchor="middle">bank API</text>
+          <rect class="dg-box" x="680" y="30" width="48" height="24"></rect>
+          <text class="dg-tick" x="704" y="46" text-anchor="middle">test</text>
+          <line class="dg-msg-hot" x1="596" y1="76" x2="596" y2="58" marker-end="url(#f10-h)"></line>
+          <text class="dg-tick" x="588" y="76" text-anchor="end">first surprise, median day 33</text>
+          <text class="dg-small" x="186" y="109" text-anchor="end">riskiest first</text>
+          <rect class="dg-hot" x="200" y="92" width="84" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="242" y="108" text-anchor="middle">bank API</text>
+          <rect class="dg-hot" x="284" y="92" width="72" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="320" y="108" text-anchor="middle">fraud</text>
+          <rect class="dg-box" x="356" y="92" width="60" height="24"></rect>
+          <text class="dg-tick" x="386" y="108" text-anchor="middle">model</text>
+          <rect class="dg-hot" x="416" y="92" width="60" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="446" y="108" text-anchor="middle">migrate</text>
+          <rect class="dg-box" x="476" y="92" width="72" height="24"></rect>
+          <text class="dg-tick" x="512" y="108" text-anchor="middle">reports</text>
+          <rect class="dg-box" x="548" y="92" width="36" height="24"></rect>
+          <text class="dg-tick" x="566" y="108" text-anchor="middle">mail</text>
+          <rect class="dg-box" x="584" y="92" width="96" height="24"></rect>
+          <text class="dg-tick" x="632" y="108" text-anchor="middle">admin</text>
+          <rect class="dg-box" x="680" y="92" width="48" height="24"></rect>
+          <text class="dg-tick" x="704" y="108" text-anchor="middle">test</text>
+          <line class="dg-msg-hot" x1="284" y1="138" x2="284" y2="120" marker-end="url(#f10-h)"></line>
+          <text class="dg-tick" x="292" y="138">first surprise, median day 7</text>
+          <text class="dg-small" x="186" y="171" text-anchor="end">after a 2-day spike</text>
+          <rect class="dg-ok-box" x="200" y="154" width="24" height="24"></rect>
+          <rect class="dg-hot" x="224" y="154" width="84" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="266" y="170" text-anchor="middle">bank API</text>
+          <rect class="dg-hot" x="308" y="154" width="72" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="344" y="170" text-anchor="middle">fraud</text>
+          <rect class="dg-box" x="380" y="154" width="60" height="24"></rect>
+          <text class="dg-tick" x="410" y="170" text-anchor="middle">model</text>
+          <rect class="dg-hot" x="440" y="154" width="60" height="24"></rect>
+          <text class="dg-tick dg-hot-text" x="470" y="170" text-anchor="middle">migrate</text>
+          <rect class="dg-box" x="500" y="154" width="72" height="24"></rect>
+          <text class="dg-tick" x="536" y="170" text-anchor="middle">reports</text>
+          <rect class="dg-box" x="572" y="154" width="36" height="24"></rect>
+          <text class="dg-tick" x="590" y="170" text-anchor="middle">mail</text>
+          <rect class="dg-box" x="608" y="154" width="96" height="24"></rect>
+          <text class="dg-tick" x="656" y="170" text-anchor="middle">admin</text>
+          <rect class="dg-box" x="704" y="154" width="48" height="24"></rect>
+          <text class="dg-tick" x="728" y="170" text-anchor="middle">test</text>
+          <line class="dg-msg-hot" x1="224" y1="200" x2="224" y2="182" marker-end="url(#f10-h)"></line>
+          <text class="dg-tick" x="232" y="200">first surprise, median day 2</text>
+          <line class="dg-axis" x1="200" y1="222" x2="752" y2="222"></line>
+          <text class="dg-tick" x="200" y="240" text-anchor="middle">day 0</text>
+          <text class="dg-tick" x="332" y="240" text-anchor="middle">day 11</text>
+          <text class="dg-tick" x="464" y="240" text-anchor="middle">day 22</text>
+          <text class="dg-tick" x="596" y="240" text-anchor="middle">day 33</text>
+          <text class="dg-tick" x="728" y="240" text-anchor="middle">day 44</text>
+        </svg>
+        <figcaption>Same work, different order. Put the tasks that could change the plan first, and bad news arrives in week one or two instead of week seven, before most of the work that it would invalidate exists.</figcaption>
+      </figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Something will probably go wrong.</b> The eight tasks each have a chance of revealing a problem that changes the plan, mostly small, but the bank integration has a 35% chance and the fraud rules 20%. Together, at least one goes badly 66% of the time. That's realistic for a project with external dependencies, and it means the plan should assume a surprise, not hope to avoid one.</p>
+      <p><b>The order decides what the surprise costs.</b> Comfortable first, the median first surprise came on day 33 of 44, after most of the work was done, and on average 12.5 days of work were thrown away. Riskiest first, respecting the real dependencies, it came on day 7, and the average waste fell to 5.5 days. That's a week of work saved per project, from nothing but the order of the same tasks, plus five extra weeks to react to bad news while there's still room to.</p>
+      <p><b>A spike buys time, more than it saves work.</b> Two days of prototypes against the two riskiest unknowns moved the first surprise from day 7 to day 2 while saving little more work. What it bought was knowing early. On a real project, knowing in week one that the bank doesn't support partial refunds means the product decision, cut the feature or change the design, happens while the team is still flexible, which is usually worth more than the days.</p>
+
+      <h4>Managing risk, on purpose</h4>
+      <p>Keep a <b>risk register</b>: a short list, reviewed weekly, of what could go wrong. Each entry has a description, a rough likelihood and impact, an owner, the mitigation, and a <b>trigger</b>, the observable sign that the risk is happening. "Bank sandbox doesn't support refunds; likely; high impact; owner Ana; mitigation: spike in week 1, fallback of manual refunds; trigger: the refund endpoint returns an error after a day of trying." Ten lines like that, kept current, are worth more than a hundred-row spreadsheet nobody reads.</p>
+      <p>For a risky project, decide <b>kill criteria</b> before starting: the results that would mean stopping or changing course. "If the spike shows the bank can't support refunds through its API, we stop and propose manual refunds instead." Decided in advance, a kill criterion is a plan. Decided afterwards, under the weight of the work already done, it's a fight against the sunk-cost fallacy, which usually wins.</p>
+
+      <h4>Landing it</h4>
+      <p>Projects die in their last ten percent. The feature works, the team's attention moves on, and what's left, migrating the last customers, deleting the old code path and its feature flag, writing the runbook, handing over to the team that will own it, never quite happens. The old and new systems then run side by side for years, and the project's real benefit, simplicity, never arrives. A project is done when the old path is gone, the documentation is written, the on-call team knows how to run it, and the success measure from the scope has been checked. Plan that work explicitly, with dates, from the start.</p>
+      <p>Then close it properly. Tell everyone who depended on it that it's finished and what changed. Hold a short retrospective, what to repeat and what to change, while memories are fresh. And thank the people who did the work, by name, where their managers can see it. Landing a project well is what makes people want to work on your next one.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Ordering work by comfort,</b> so the questions that could change the plan are answered last.</li>
+          <li><b>No agreed cut list,</b> so scope negotiations happen in the final week.</li>
+          <li><b>A risk register that's written once and never read again.</b></li>
+          <li><b>No kill criteria,</b> so a failing project continues on sunk cost.</li>
+          <li><b>Declaring victory at launch,</b> with the old path, the flag and the handover still undone.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 10.1</span><span class="ex-title">When rework is cheap</span></div>
+          <p>Predict what happens to the three orders' waste if a change of plan throws away only 10% of the work done, rather than 50%. Then check it by changing <code>REWORK</code>. What does this tell you about when sequencing matters?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Every order's waste shrinks to a fifth, since waste is proportional to <code>REWORK</code>: about 2.5 days comfortable first and 1.1 days riskiest first. The first-surprise days don't change at all, because the order of the tasks hasn't changed. So the work saved by sequencing scales with how much a surprise invalidates. When the components are independent and a change of plan touches little else, order hardly matters for waste. When everything is built on an early assumption, a data model, an integration, an API contract, it matters a lot. But the time to react to bad news still favours risky-first, whatever the rework rate: learning on day 7 rather than day 33 leaves time to change course, which is often the bigger benefit and the one the waste figure doesn't measure.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 10.2</span><span class="ex-title">Kill criteria</span></div>
+          <p>Write kill criteria for the refunds project, to be agreed with stakeholders before work starts.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">We stop, or return to stakeholders with a new proposal, if:
+1. The week-1 spike shows the bank's API can't issue refunds to cards.
+   -> Propose manual refunds through the bank's portal, with an admin-screen record.
+2. The risk team won't accept rule-based fraud checks by the end of week 2.
+   -> Pause until a model-based approach is scoped; don't build rules they'll reject.
+3. The P85 forecast passes the end of the quarter at any weekly review.
+   -> Cut to the agreed minimum: full refunds only, no partial refunds, no reporting.</code></pre>
+            <p>Each criterion is observable, has a date or a trigger, and says what happens next, so it's a decision made in advance rather than a vague warning. The third is the most important and the least common: a schedule kill criterion connects the forecast from chapter 9 to an action, so a slipping date triggers the cut list automatically instead of a debate. Agree these with the stakeholders in the kickoff, and write them in the design document.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 10.3</span><span class="ex-title">A walking skeleton</span></div>
+          <p>Describe the walking skeleton for the refunds project: what does it contain, and what would you learn from building it in the first week?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>One button on the admin screen that refunds a hard-coded test order in full, through every real component: the admin screen calls the refund API, which writes a refund record, calls the bank's sandbox, waits for its webhook, updates the record and sends the customer an email from the real template. No validation, no partial refunds, no fraud rules, no reporting. Building it in week one tests every integration point at once: authentication to the bank, the webhook arriving through your network, the email sender, the deployment pipeline for the new service. Problems found there would otherwise have surfaced only when the polished components were connected near the end. After that, each week fleshes out one part of the skeleton, and the system works end to end the whole time, which also makes the status report in chapter 11 much easier to write honestly.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Is "done" written down in a sentence stakeholders agree with, with a cut list?</li>
+            <li>Is the work sequenced so the questions that could change the plan are answered first?</li>
+            <li>Do you use spikes and a walking skeleton to surface problems early?</li>
+            <li>Do you keep a short risk register with triggers, and agreed kill criteria?</li>
+            <li>Does your plan include landing: the old path removed, documentation, handover?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind paid">Book</span><div><a href="https://www.oreilly.com/library/view/the-staff-engineers/9781098118723/">The Staff Engineer's Path</a> <span class="by">Tanya Reilly</span></div></li>
+            <li><span class="rkind free">Guide</span><div><a href="https://staffeng.com/guides/">Staff Engineer: guides</a> <span class="by">Will Larson</span></div></li>
+            <li><span class="rkind free">Essay</span><div><a href="https://hbr.org/2007/09/performing-a-project-premortem">Performing a Project Premortem</a> <span class="by">Gary Klein</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

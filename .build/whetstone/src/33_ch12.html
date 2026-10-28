@@ -1,0 +1,333 @@
+    <section class="chapter prose" id="ch12" data-ch="12">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 12</span><label class="done-toggle"><input type="checkbox" data-id="ch12"><span class="box"></span>Read</label></div>
+        <h3>History as a debugging tool</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">A repository's history isn't just a backup. It's the best debugging tool you have for the bug that begins "it used to work". <code>git bisect</code> searches history for the commit that broke something, automatically if you give it a test, and finds it among a thousand commits in ten steps. <code>git log -S</code> finds the commits that added or removed a piece of text, and <code>git blame</code> says which commit last changed each line, which leads to why. All three are only as good as the history they search: small commits, with messages that explain why.</p>
+      </header>
+
+      <h4>Reading history</h4>
+      <p><code>git log</code> shows commits newest first, and a handful of options turn it into a query. <code>--oneline</code> gives one line per commit, <code>--graph --all</code> draws every branch, <code>-p</code> adds each commit's changes, and <code>--stat</code> lists the files each touched. <code>-n 5</code>, <code>--since=2.weeks</code> and <code>--author=Ada</code> limit it, and <code>-- path</code> at the end limits it to commits that changed one file or folder. <code>git log main..feature</code> lists commits on <code>feature</code> that aren't on <code>main</code>, which is what a pull request contains, and <code>git show</code> displays one commit in full. Put a <code>lg</code> alias for <code>log --graph --oneline --all</code> in your dotfiles and you'll use it every day.</p>
+
+      <h4>Bisect: binary search over history</h4>
+      <p>When something worked at an old commit and doesn't now, the commit that broke it is somewhere in between, and checking every one would take as long as there are commits. <code>git bisect</code> does a binary search instead. You mark one commit good and one bad, and Git checks out the commit halfway between them, on a detached <code>HEAD</code>. You test it and say <code>git bisect good</code> or <code>git bisect bad</code>, which throws away half the suspects. Repeat, and after about log<sub>2</sub> of the number of commits, Git names the first bad one: ten steps for a thousand commits, twenty for a million. <code>git bisect reset</code> returns you to where you started.</p>
+      <p>Better still, give bisect a command and let it do the testing: <code>git bisect run ./check.sh</code>. Its exit status decides. 0 means good, 125 means "this commit can't be tested, skip it", and any other status from 1 to 127 means bad. Recent versions of Git also stop with an error if the test can't even run, status 126 or 127, on the commit you marked good. That catches a missing or non-executable script before it can blame an innocent commit. But nothing can catch a test that runs and checks the wrong thing.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Forty commits in a row, numbered 1 to 40. Commit 1 is known good and commit 40 bad. Each bisect step tests the middle of the remaining range and keeps the half that contains the change: commit 20 is good, so the suspects are 21 to 40; 30 is bad, leaving 21 to 30; 25 is good, leaving 26 to 30; 27 is bad, leaving 26 and 27; 26 is good, so commit 27 is the first bad commit. Five tests instead of up to thirty-eight.">
+          <defs><marker id="f12-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f12-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <circle class="dg-dot" cx="282" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="293.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="305" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="316.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="328" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="339.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="351" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="362.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="374" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="385.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="397" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="408.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="420" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="431.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="443" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="454.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="466" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="477.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="489" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="500.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="512" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="523.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="535" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="546.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="558" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="569.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="581" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="592.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="604" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="615.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="627" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="638.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="650" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="661.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="673" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="684.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="696" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="707.5" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="719" cy="34" r="4"></circle>
+          <circle class="dg-dot" cx="730.5" cy="34" r="4"></circle>
+          <circle class="dg-dot-hot" cx="282" cy="34" r="5"></circle>
+          <circle class="dg-dot-hot" cx="730.5" cy="34" r="5"></circle>
+          <text class="dg-tick" x="282" y="58" text-anchor="middle">1</text>
+          <text class="dg-tick" x="385.5" y="58" text-anchor="middle">10</text>
+          <text class="dg-tick" x="500.5" y="58" text-anchor="middle">20</text>
+          <text class="dg-tick" x="615.5" y="58" text-anchor="middle">30</text>
+          <text class="dg-tick" x="730.5" y="58" text-anchor="middle">40</text>
+          <text class="dg-small" x="24" y="38">40 commits</text>
+          <text class="dg-ok-text" x="272" y="20" text-anchor="start">good</text>
+          <text class="dg-gap-text" x="730.5" y="20" text-anchor="middle">bad</text>
+          <text class="dg-ok-text" x="24" y="96">1. 39 suspects; 20 is good</text>
+          <rect class="dg-span" x="287.5" y="84" width="449" height="16"></rect>
+          <circle class="dg-dot" cx="293.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="305" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="316.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="328" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="339.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="351" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="362.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="374" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="385.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="397" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="408.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="420" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="431.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="443" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="454.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="466" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="477.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="489" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="500.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="512" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="523.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="535" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="546.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="558" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="569.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="581" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="592.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="604" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="615.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="627" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="638.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="650" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="661.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="673" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="684.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="696" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="707.5" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="719" cy="92" r="3"></circle>
+          <circle class="dg-dot" cx="730.5" cy="92" r="3"></circle>
+          <circle class="dg-dot-hot" cx="500.5" cy="92" r="6"></circle>
+          <text class="dg-gap-text" x="24" y="134">2. 20 suspects; 30 is bad</text>
+          <rect class="dg-span" x="506" y="122" width="230.5" height="16"></rect>
+          <circle class="dg-dot" cx="512" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="523.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="535" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="546.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="558" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="569.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="581" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="592.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="604" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="615.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="627" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="638.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="650" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="661.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="673" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="684.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="696" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="707.5" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="719" cy="130" r="3"></circle>
+          <circle class="dg-dot" cx="730.5" cy="130" r="3"></circle>
+          <circle class="dg-dot-hot" cx="615.5" cy="130" r="6"></circle>
+          <text class="dg-ok-text" x="24" y="172">3. 10 suspects; 25 is good</text>
+          <rect class="dg-span" x="506" y="160" width="115.5" height="16"></rect>
+          <circle class="dg-dot" cx="512" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="523.5" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="535" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="546.5" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="558" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="569.5" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="581" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="592.5" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="604" cy="168" r="3"></circle>
+          <circle class="dg-dot" cx="615.5" cy="168" r="3"></circle>
+          <circle class="dg-dot-hot" cx="558" cy="168" r="6"></circle>
+          <text class="dg-gap-text" x="24" y="210">4. 5 suspects; 27 is bad</text>
+          <rect class="dg-span" x="563.5" y="198" width="58" height="16"></rect>
+          <circle class="dg-dot" cx="569.5" cy="206" r="3"></circle>
+          <circle class="dg-dot" cx="581" cy="206" r="3"></circle>
+          <circle class="dg-dot" cx="592.5" cy="206" r="3"></circle>
+          <circle class="dg-dot" cx="604" cy="206" r="3"></circle>
+          <circle class="dg-dot" cx="615.5" cy="206" r="3"></circle>
+          <circle class="dg-dot-hot" cx="581" cy="206" r="6"></circle>
+          <text class="dg-ok-text" x="24" y="248">5. 2 suspects; 26 is good</text>
+          <rect class="dg-span" x="563.5" y="236" width="23.5" height="16"></rect>
+          <circle class="dg-dot" cx="569.5" cy="244" r="3"></circle>
+          <circle class="dg-dot" cx="581" cy="244" r="3"></circle>
+          <circle class="dg-dot-hot" cx="569.5" cy="244" r="6"></circle>
+          <text class="dg-label dg-hot-text" x="24" y="290">the first bad commit: 27</text>
+          <circle class="dg-dot-hot" cx="581" cy="286" r="6"></circle>
+        </svg>
+        <figcaption>Each test halves the suspects. The search needs to know only good or bad for each commit it tests, so a script can answer for you.</figcaption>
+      </figure>
+      <p>The example builds a small repository with forty commits. The first adds a <code>slug()</code> function that turns a recipe's title into a web address, and commit 27, "Simplify slug()", quietly breaks it for accented letters. A test script checks one title. The example lets <code>bisect run</code> find the culprit, then asks <code>log -S</code> and <code>blame</code> the same question, and undoes the damage with <code>revert</code>.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">history.py &middot; forty commits, one that breaks a function, found by git bisect run with a test script, then by log -S and blame, and undone with revert</span></figcaption><pre><code class="language-python">import os, pathlib, re, subprocess, sys, tempfile
+
+ENV = {"PATH": os.environ["PATH"], "HOME": "/home/learner", "LC_ALL": "C",
+       "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
+       "GIT_AUTHOR_NAME": "Ada Lovelace", "GIT_AUTHOR_EMAIL": "ada@example.org",
+       "GIT_COMMITTER_NAME": "Ada Lovelace", "GIT_COMMITTER_EMAIL": "ada@example.org"}
+clock = [1772355600]
+
+def git(*args, cwd):
+    clock[0] += 60
+    env = dict(ENV, GIT_AUTHOR_DATE=f"@{clock[0]} +0000", GIT_COMMITTER_DATE=f"@{clock[0]} +0000")
+    return subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, text=True,
+                          check=True).stdout.rstrip()
+
+GOOD = '''import re, unicodedata
+
+def slug(title):
+    """Make a web address from a title: "Creme Brulee, 2 Ways!" -> "creme-brulee-2-ways"."""
+    plain = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", plain.lower()).strip("-")
+'''
+BAD = GOOD.replace('    plain = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode()\n'
+                   '    return re.sub(r"[^a-z0-9]+", "-", plain.lower()).strip("-")\n',
+                   '    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")\n')
+CHECK = ('from recipes import slug\n'
+         'raise SystemExit(slug("Crème Brûlée, 2 Ways!") != "creme-brulee-2-ways")\n')
+
+with tempfile.TemporaryDirectory() as tmp:
+    root = pathlib.Path(tmp); repo = root / "site"; repo.mkdir()
+    git("init", "-q", "-b", "main", cwd=repo)
+    (repo / "recipes.py").write_text(GOOD); (repo / "list.txt").write_text("")
+    git("add", ".", cwd=repo); git("commit", "-q", "-m", "Add slug() for recipe addresses", cwd=repo)
+    number = {git("rev-parse", "HEAD", cwd=repo): 1}
+    for n in range(2, 41):                             # 39 more commits; number 27 breaks slug()
+        if n == 27:
+            (repo / "recipes.py").write_text(BAD); message = "Simplify slug()"
+        else:
+            with (repo / "list.txt").open("a") as f: f.write(f"recipe {n}\n")
+            message = f"Add recipe {n}"
+        git("commit", "-q", "-am", message, cwd=repo)
+        number[git("rev-parse", "HEAD", cwd=repo)] = n
+    (root / "check.py").write_text(CHECK)
+    (root / "check.sh").write_text(f'#!/bin/sh\nPYTHONPATH=. exec "{sys.executable}" ../check.py\n')
+    (root / "check.sh").chmod(0o755)
+    run = lambda: subprocess.run(["../check.sh"], cwd=repo, env=ENV, capture_output=True).returncode
+    first = git("rev-list", "--max-parents=0", "HEAD", cwd=repo)
+    print(f"40 commits. The test (../check.sh) exits with status {run()} at HEAD: something broke.")
+
+    print("1. git bisect run: a binary search over history, with the test deciding good or bad")
+    git("bisect", "start", "HEAD", first, cwd=repo)
+    git("bisect", "run", "../check.sh", cwd=repo)
+    bad = git("rev-parse", "refs/bisect/bad", cwd=repo)
+    steps = [l.split()[2:4] for l in git("bisect", "log", cwd=repo).splitlines()
+             if l.startswith(("git bisect good ", "git bisect bad "))]
+    tried = [f"{number[h]} ({verdict})" for verdict, h in steps]
+    print(f"   it tested commits {', '.join(tried[:-1])} and {tried[-1]}")
+    print(f"   {len(steps)} tests for 39 suspects; the first bad commit is number {number[bad]}: "
+          f"{git('log', '-1', '--format=%h %s', bad, cwd=repo)}")
+    git("bisect", "reset", cwd=repo)
+
+    print("2. git log -S: the commits that added or removed a piece of text")
+    for line in git("log", "-S", "normalize", "--format=%h %s", cwd=repo).splitlines(): print(f"   {line}")
+
+    print("3. git blame: which commit last changed each line")
+    blame = git("blame", "--line-porcelain", "-L", "3,5", "recipes.py", cwd=repo).splitlines()
+    commits = [l.split()[0] for l in blame if re.match(r"[0-9a-f]{40} \d+ \d+", l)]
+    summaries = [l[len("summary "):] for l in blame if l.startswith("summary ")]
+    code = [l[1:] for l in blame if l.startswith("\t")]
+    for h, summary, line in zip(commits, summaries, code):
+        print(f"   {h[:7]} {summary[:31]:31} | {line}")
+
+    print("4. git revert: a new commit that undoes an old one, without rewriting history")
+    git("revert", "--no-edit", bad, cwd=repo)
+    print(f"   {git('log', '-1', '--format=%h %s', cwd=repo)}; the test now exits with status {run()}")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">40 commits. The test (../check.sh) exits with status 1 at HEAD: something broke.
+1. git bisect run: a binary search over history, with the test deciding good or bad
+   it tested commits 20 (good), 30 (bad), 25 (good), 27 (bad) and 26 (good)
+   5 tests for 39 suspects; the first bad commit is number 27: 8ec864a Simplify slug()
+2. git log -S: the commits that added or removed a piece of text
+   8ec864a Simplify slug()
+   dae9473 Add slug() for recipe addresses
+3. git blame: which commit last changed each line
+   dae9473 Add slug() for recipe addresses | def slug(title):
+   dae9473 Add slug() for recipe addresses |     """Make a web address from a title: "Creme Brulee, 2 Ways!" -&gt; "creme-brulee-2-ways"."""
+   8ec864a Simplify slug()                 |     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+4. git revert: a new commit that undoes an old one, without rewriting history
+   e53f276 Revert "Simplify slug()"; the test now exits with status 0</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Bisect needed five tests.</b> It tried commit 20, which was good, then 30, bad, 25, good, 27, bad, and 26, good, and concluded that 27 was the first bad commit. That's every possible culprit among 39 suspects, commits 2 to 40, settled in five runs of the test, with no human involved. On a real project, with a test suite that takes minutes, this is the difference between a ten-minute search and an afternoon.</p>
+      <p><b>Text search and blame answer different questions.</b> <code>git log -S normalize</code> listed the two commits that changed how many times the word <code>normalize</code> appeared: the one that added it and the one that removed it. Without knowing where the bug was, that found it from a guess about what had changed. <code>git blame</code> on the function gave each line's last commit: the first two lines date from the original, and the broken <code>return</code> line from "Simplify slug()". The example reads blame's machine-readable <code>--line-porcelain</code> output, the right choice for scripts; at a terminal, plain <code>git blame</code> marks lines from the very first commit with a <code>^</code>. Finally, <code>git revert</code> made a new commit that applies the opposite of the bad one, and the test passed again. History wasn't rewritten, so it's safe even after the bad commit has been shared.</p>
+
+      <h4>Searching and blaming well</h4>
+      <p><code>-S text</code>, the "pickaxe", finds commits that change the number of occurrences of the text, so it finds where a function was added or deleted, but not where an existing call was edited. For that, <code>-G regex</code> finds commits whose changed lines match. <code>git blame -w</code> ignores changes of whitespace, and <code>-C</code> follows lines that were moved or copied from other files. Large reformatting commits make blame useless for every line they touched. List them in a <code>.git-blame-ignore-revs</code> file, and <code>git blame --ignore-revs-file</code>, or GitHub's blame view, will look past them. Remember what blame is for: a line's commit leads to its message, its pull request and its discussion. That's <i>why</i> the line is the way it is, which is far more useful than who typed it.</p>
+
+      <h4>History worth searching</h4>
+      <p>Each of these tools depends on how history was written. When bisect finds a five-line commit that does one thing, the bug is obvious. When it finds a two-thousand-line commit titled "updates", you've learned little. So make <b>small commits that do one thing each</b>, and make sure each one builds and passes the tests, so bisect can test any of them. Write <b>messages that explain why</b>. The first line is a short summary in the imperative, around fifty characters, as in "Simplify slug()", then a blank line, then whatever a reader will need in a year: the reason for the change, what you considered, what it fixes. <code>git commit</code> without <code>-m</code> opens your editor so there's room for that, which is one reason chapter 14 matters.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Huge commits that mix unrelated changes,</b> which bisect can only point at, not explain.</li>
+          <li><b>Messages like "fix" or "wip",</b> which tell blame's reader nothing.</li>
+          <li><b>Forgetting <code>git bisect reset</code>,</b> and carrying on work on a detached <code>HEAD</code>.</li>
+          <li><b>A bisect test that checks the wrong thing,</b> which makes bisect blame an innocent commit.</li>
+          <li><b>Undoing a shared commit with <code>reset</code></b> instead of <code>revert</code>.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.1</span><span class="ex-title">A thousand commits</span></div>
+          <p>A bug appeared somewhere in the last 1,000 commits. About how many tests will bisect need? Some old commits don't build at all; write a <code>bisect run</code> script for a project tested with <code>make test</code> that copes with them.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-bash">#!/bin/sh
+# check.sh: tell git bisect whether this commit is good (0), bad (1) or untestable (125)
+make > /dev/null 2>&1 || exit 125      # doesn't build: neither good nor bad, so skip it
+make test > /dev/null 2>&1 || exit 1   # builds, tests fail: bad
+exit 0                                 # builds and passes: good</code></pre>
+            <p>About 10, since 2<sup>10</sup> is 1,024: each test halves the suspects. The script turns a build failure into 125, so bisect skips that commit and tests a neighbour instead, rather than wrongly blaming a commit that only failed to build. In a test with a skipped commit in the middle of the range, bisect still named the right first bad commit. Keep the script outside the repository, or untracked, so it doesn't change as bisect checks out old commits, and make it exit 1 for a real failure rather than any status above 127, which would stop the search.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.2</span><span class="ex-title">A message for the future</span></div>
+          <p>A commit changes the API client's timeout from <code>timeout=30</code> to <code>timeout=30_000</code>, because the library it uses changed from seconds to milliseconds in version 4. Its message is "fixed stuff". Write a better one.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">Give the API client's timeout in milliseconds
+
+Version 4 of the HTTP library takes timeouts in milliseconds instead of
+seconds, so after the upgrade our 30-second timeout became 30 ms, and
+every request to the slower reports endpoint timed out.
+
+Keep the same 30-second timeout, now written as 30_000.</code></pre>
+            <p>The summary says what the commit does, in the imperative, short enough to read in <code>git log --oneline</code>. The body explains what nobody can recover from the change itself: why <code>30</code> became <code>30_000</code>, which would otherwise look like a typo someone might "fix" back. The symptom it cured is there for whoever searches for it, and the last line records that the behaviour was meant to stay the same. Someone who finds this line with blame next year will know not to touch it, which is the point.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.3</span><span class="ex-title">Which undo?</span></div>
+          <p>Choose the command for each: (a) you've edited a file and want it back as it was in the last commit; (b) your last commit, not yet pushed, has a typo in its message; (c) a commit from last week, already on <code>main</code>, broke production; (d) your last three local commits should have been one.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>(a) <code>git restore file</code>, which throws away the uncommitted edits in that file, for good, so be sure. (b) <code>git commit --amend</code>, which replaces the last commit with a corrected one, fine because nobody else has it yet. (c) <code>git revert &lt;commit&gt;</code>, which adds a new commit that undoes it and changes no existing history, the only safe choice for a commit others have. (d) <code>git reset --soft HEAD~3</code> then <code>git commit</code>, which moves the branch back three commits while keeping all their changes staged, ready to commit as one; <code>git rebase -i HEAD~3</code> does the same with more control. The test in each case is chapter 11's rule: has anyone else got the commit? If so, add a commit; if not, you may replace it.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you query history by file, author, date and branch with <code>git log</code>?</li>
+            <li>Can you find the commit that introduced a bug with <code>git bisect</code>, by hand and with <code>run</code>?</li>
+            <li>Can you find when a piece of code appeared or disappeared with <code>git log -S</code>?</li>
+            <li>Can you use <code>git blame</code> to find why a line is the way it is?</li>
+            <li>Can you choose between <code>restore</code>, <code>amend</code>, <code>reset</code> and <code>revert</code>?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Docs</span><div><a href="https://git-scm.com/docs/git-bisect">git bisect</a> <span class="by">The Git project</span></div></li>
+            <li><span class="rkind free">Article</span><div><a href="https://cbea.ms/git-commit/">How to Write a Git Commit Message</a> <span class="by">Chris Beams</span></div></li>
+            <li><span class="rkind free">Book</span><div><a href="https://git-scm.com/book/en/v2/Git-Tools-Debugging-with-Git">Pro Git: Debugging with Git</a> <span class="by">Scott Chacon &amp; Ben Straub</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

@@ -1,0 +1,201 @@
+    <section class="chapter prose" id="ch12" data-ch="12">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 12</span><label class="done-toggle"><input type="checkbox" data-id="ch12"><span class="box"></span>Read</label></div>
+        <h3>Mentoring</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Mentoring is the most leveraged work a senior engineer does, and it's a skill, not a personality trait. Start from what the other person actually knows, which is often less solid than what they've used. Teach at the edge of that knowledge, in an order where each idea rests on ones already secure. Give feedback that's specific enough to act on. And sponsor as well as advise: use your standing to give people the opportunities that make them grow.</p>
+      </header>
+
+      <h4>Why mentor deliberately</h4>
+      <p>An engineer who makes three colleagues 20% more effective has added more than most engineers add by their own work, and the effect compounds: those colleagues mentor others. That's the leverage the syllabus means by "the ability to move other engineers". There's a second reason, which the syllabus also names: "teaching is the fastest way to find the holes in your own model". Explaining something to a sharp junior engineer, who asks why at each step, exposes every place where your understanding is a memorised rule rather than a reason. Richard Feynman is often credited with the test: if you can't explain it simply, you don't understand it well enough.</p>
+      <p>Most mentoring happens by accident: a junior engineer absorbs what they can from code reviews and overheard conversations. Deliberate mentoring does better, because it starts from a diagnosis, follows a plan, and checks whether the plan is working.</p>
+
+      <h4>Mentor, coach, sponsor</h4>
+      <p>Lara Hogan, writing about engineering management, distinguishes three roles that are often blurred. A <b>mentor</b> gives advice from experience: "here's how I'd approach this". A <b>coach</b> asks questions that help the other person find their own answer: "what have you tried, and what would you try next?" A <b>sponsor</b> uses their standing to create opportunities: recommending someone for a stretch project, naming them in a meeting they're not in, putting their work in front of people who decide promotions. Each has its place. Advice is fastest for facts and conventions; coaching builds judgement, which can't be handed over; and sponsorship is what changes careers, especially for people whose work tends to be overlooked. A good mentor moves between all three and knows which one the moment calls for.</p>
+
+      <h4>Start from what they really know</h4>
+      <p>People describe what they know by what they've used. A mentee who says they know query planning may mean they've read <code>EXPLAIN</code> output and added indexes when told to. That's real, useful knowledge, and it may rest on nothing: they may not know what a B-tree is, how a page is read from disk, or where the planner's row estimates come from. Knowledge like that is <b>fragile</b>. It works for the cases they've seen and fails, confusingly, on the first case that depends on the missing foundation.</p>
+      <p>So start with a diagnosis, done kindly: ask them to explain, not to recall. "Walk me through what happens when this query runs" reveals far more than "do you know indexes?". Then map what you learn against what each idea builds on. The example does this for a mentee learning database internals: a small graph of concepts and what each needs, the four the mentee says they know, and three questions. What is fragile, what are they ready to learn now, and in what order should they learn their way to crash recovery?</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">curriculum.py &middot; a mentee's knowledge against a graph of what each concept builds on: what's fragile, what's ready to learn, and a teaching order to a goal</span></figcaption><pre><code class="language-python">"""Mentoring as planning: what someone knows, what they're ready to learn next, and where their
+knowledge is fragile because it rests on something they don't yet have."""
+from graphlib import TopologicalSorter
+
+# concept: the concepts it builds on
+NEEDS = {
+    "files and fsync": [],
+    "pages and the buffer pool": ["files and fsync"],
+    "B-trees": ["pages and the buffer pool"],
+    "indexes": ["B-trees"],
+    "query plans": ["indexes", "statistics"],
+    "statistics": [],
+    "transactions": [],
+    "write-ahead log": ["files and fsync", "transactions"],
+    "crash recovery": ["write-ahead log", "pages and the buffer pool"],
+    "MVCC": ["transactions", "pages and the buffer pool"],
+    "isolation anomalies": ["MVCC"],
+    "replication": ["write-ahead log"],
+}
+
+# What a mentee says they know, after a conversation: what they've used, not what they can explain.
+KNOWS = {"transactions", "indexes", "query plans", "replication"}
+
+order = list(TopologicalSorter(NEEDS).static_order())
+
+def ancestors(concept):
+    seen, todo = set(), list(NEEDS[concept])
+    while todo:
+        c = todo.pop()
+        if c not in seen:
+            seen.add(c)
+            todo.extend(NEEDS[c])
+    return seen
+
+print("fragile: known, but resting on something not yet known")
+for c in [c for c in order if c in KNOWS]:
+    gaps = sorted(ancestors(c) - KNOWS, key=order.index)
+    if gaps:
+        print(f"  {c:16} rests on: {', '.join(gaps)}")
+
+ready = [c for c in order if c not in KNOWS and all(d in KNOWS for d in NEEDS[c])]
+print("\nready to learn now (everything it needs is known):", ", ".join(ready))
+
+goal = "crash recovery"
+path = [c for c in order if (c in ancestors(goal) or c == goal) and c not in KNOWS]
+print(f"\nto reach {goal!r}, in an order that never needs what hasn't been taught:")
+for step, c in enumerate(path, 1):
+    print(f"  {step}. {c}")
+print(f"\nshortcut check: of {len(path)} steps, the first is {path[0]!r}: "
+      f"ask them to explain it before teaching anything that rests on it")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">fragile: known, but resting on something not yet known
+  replication      rests on: files and fsync, write-ahead log
+  indexes          rests on: files and fsync, pages and the buffer pool, B-trees
+  query plans      rests on: files and fsync, statistics, pages and the buffer pool, B-trees
+
+ready to learn now (everything it needs is known): files and fsync, statistics
+
+to reach 'crash recovery', in an order that never needs what hasn't been taught:
+  1. files and fsync
+  2. pages and the buffer pool
+  3. write-ahead log
+  4. crash recovery
+
+shortcut check: of 4 steps, the first is 'files and fsync': ask them to explain it before teaching anything that rests on it</code></pre></figure>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The example's concept graph. Files and fsync underlie pages and the buffer pool, which underlie B-trees, which underlie indexes, which with statistics underlie query plans. Transactions and files and fsync underlie the write-ahead log, which underlies replication and, with pages, crash recovery. The mentee knows transactions, indexes, query plans and replication, but indexes, query plans and replication are fragile, resting on concepts not yet known. Files and fsync and statistics are ready to learn now. The path to crash recovery is files and fsync, pages and the buffer pool, the write-ahead log, then crash recovery.">
+          <defs><marker id="f12-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f12-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <line class="dg-edge" x1="174" y1="251" x2="202" y2="251" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="354" y1="251" x2="382" y2="251" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="534" y1="251" x2="542" y2="251" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="99" y1="236" x2="279" y2="148" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="174" y1="131" x2="202" y2="131" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="354" y1="131" x2="382" y2="131" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="279" y1="236" x2="459" y2="148" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="279" y1="116" x2="279" y2="68" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="99" y1="116" x2="459" y2="68" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="612" y1="236" x2="650" y2="108" marker-end="url(#f12-n)"></line>
+          <line class="dg-edge" x1="612" y1="156" x2="650" y2="108" marker-end="url(#f12-n)"></line>
+          <rect class="dg-hot" x="24" y="236" width="150" height="30"></rect>
+          <text class="dg-small dg-hot-text" x="99" y="256" text-anchor="middle">files and fsync</text>
+          <rect class="dg-hot" x="204" y="236" width="150" height="30"></rect>
+          <text class="dg-small dg-hot-text" x="279" y="256" text-anchor="middle">pages, buffer pool</text>
+          <rect class="dg-box" x="384" y="236" width="150" height="30"></rect>
+          <text class="dg-small" x="459" y="256" text-anchor="middle">B-trees</text>
+          <rect class="dg-doubt" x="544" y="236" width="150" height="30"></rect>
+          <text class="dg-small" x="619" y="256" text-anchor="middle">indexes</text>
+          <rect class="dg-hot" x="544" y="156" width="150" height="30"></rect>
+          <text class="dg-small dg-hot-text" x="619" y="176" text-anchor="middle">statistics</text>
+          <rect class="dg-doubt" x="600" y="76" width="150" height="30"></rect>
+          <text class="dg-small" x="675" y="96" text-anchor="middle">query plans</text>
+          <rect class="dg-ok-box" x="24" y="116" width="150" height="30"></rect>
+          <text class="dg-small" x="99" y="136" text-anchor="middle">transactions</text>
+          <rect class="dg-hot" x="204" y="116" width="150" height="30"></rect>
+          <text class="dg-small dg-hot-text" x="279" y="136" text-anchor="middle">write-ahead log</text>
+          <rect class="dg-hot" x="384" y="116" width="150" height="30"></rect>
+          <text class="dg-small dg-hot-text" x="459" y="136" text-anchor="middle">crash recovery</text>
+          <rect class="dg-doubt" x="204" y="36" width="150" height="30"></rect>
+          <text class="dg-small" x="279" y="56" text-anchor="middle">replication</text>
+          <rect class="dg-box" x="384" y="36" width="150" height="30"></rect>
+          <text class="dg-small" x="459" y="56" text-anchor="middle">MVCC</text>
+          <rect class="dg-ok-box" x="24" y="278" width="12" height="12"></rect>
+          <text class="dg-tick" x="42" y="289">known, solid</text>
+          <rect class="dg-doubt" x="224" y="278" width="12" height="12"></rect>
+          <text class="dg-tick" x="242" y="289">known, fragile</text>
+          <rect class="dg-hot" x="424" y="278" width="12" height="12"></rect>
+          <text class="dg-tick" x="442" y="289">ready now, or on the path</text>
+        </svg>
+        <figcaption>What the mentee knows, against what it rests on. Three of their four known concepts are fragile; the frontier, what they're ready to learn now, is two concepts at the bottom of the graph; and the path to the goal starts there too.</figcaption>
+      </figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Three of the four things they know are fragile.</b> Indexes rest on B-trees, pages and the buffer pool, and files and fsync, none of which they know; query plans rest on those and on statistics; replication rests on the write-ahead log. Only transactions stand on their own. That's typical of engineers who learned on the job: competent at the top of the stack, with gaps underneath. It isn't a criticism; it's a map of where their next bug will confuse them.</p>
+      <p><b>The frontier is at the bottom.</b> The concepts they're ready to learn now, everything they need already known, are files and fsync, and statistics. Teaching anything else first would mean explaining an idea in terms of others they don't have, which is how explanations lose people. The path to their goal, crash recovery, is four steps, and starts with files and fsync. The example's last line is the practical advice: before teaching anything on the path, ask them to explain its first step. If they can, you're further along than the map says; if they can't, you've found the place to begin.</p>
+
+      <h4>Teaching at the edge</h4>
+      <p>Lev Vygotsky called it the zone of proximal development: what a learner can't yet do alone but can do with help. Teaching works there and nowhere else. Below it, they're bored; above it, they're lost. The example's frontier is that zone, computed. In practice, three techniques work well. <b>Worked examples, then faded guidance</b>: show a complete solution, then give a similar problem with part of the solution, then one with none. <b>Pairing, then reversing</b>: you drive while they watch and ask; then they drive while you watch and ask. <b>Questions before answers</b>: when they bring a problem, ask what they've tried and what they think is happening before saying what you think. The answer they reach themselves is the one they'll remember, and the question shows them how you think, which is what they most need to learn.</p>
+      <p>Code review is the mentoring most engineers already do, and it's easy to do it badly. Explain why, not just what: "this query runs once per order, so a page of 100 orders makes 101 queries" teaches; "use select_related" doesn't. Separate what must change from suggestions and nitpicks, and say which is which. And comment on what's good, specifically, because people repeat what's noticed.</p>
+
+      <h4>Feedback that helps</h4>
+      <p>Feedback is useful when it's specific, timely, about behaviour rather than personality, and private if it's critical. The <b>situation–behaviour–impact</b> model, from the Center for Creative Leadership, gives it a shape: describe the situation, the specific behaviour, and its impact. "In yesterday's incident, you posted updates in the channel every ten minutes, and support could answer customers without asking us" is feedback someone can repeat. "Great job in the incident" is a pleasantry. The same shape works for criticism, and keeps it about something the person can change.</p>
+
+      <h4>Sponsorship</h4>
+      <p>Advice helps people grow; opportunities make them grow faster. Give your mentee the stretch work: the design document for the next project, the lead on a small incident review, the talk at the team meeting. Back them while they do it, and let them get the credit, in public. Recommend them for things when they're not in the room, by name. And give away the work you'd enjoy doing yourself, because the interesting work is exactly what someone growing needs. The sign that mentoring has worked isn't that they ask you fewer questions; it's that they start answering other people's.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Taking "I know it" at face value,</b> instead of asking for an explanation.</li>
+          <li><b>Teaching above the frontier,</b> in terms of ideas the learner doesn't have yet.</li>
+          <li><b>Answering every question at once,</b> so the learner never builds their own judgement.</li>
+          <li><b>Feedback too vague to act on,</b> praise or criticism without a specific behaviour.</li>
+          <li><b>Mentoring without sponsoring,</b> advice in private and no opportunities in public.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.1</span><span class="ex-title">A diagnostic question</span></div>
+          <p>Write one question that would reveal whether someone's knowledge of indexes is solid or fragile, and say what a fragile answer sounds like.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>"We have an index on <code>(customer_id, created_at)</code>. Which of these two queries can use it well, and why: one filtering on <code>customer_id</code>, one filtering on <code>created_at</code>?" A solid answer explains that the index is a B-tree sorted by <code>customer_id</code> first, so the first query can descend straight to one customer's entries, while the second has no efficient way in, because rows for a given date are scattered across every customer. A fragile answer gets the right result by rule, "the leftmost column must be in the filter", but can't explain it, or gets it wrong, "both, because both columns are indexed". The question works because it can't be answered from a remembered rule alone; it needs the structure underneath, which is exactly what the map said might be missing.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.2</span><span class="ex-title">Feedback with a shape</span></div>
+          <p>Rewrite these two pieces of feedback using situation, behaviour and impact: "Your design doc was really good" and "You need to communicate better".</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>"In your search design document last week, you priced the managed service and tested trigram indexes before proposing the new index. When the director asked why not the cheaper option, the answer was already in the document, and the review took twenty minutes instead of a second meeting." And: "In the refunds project, the bank's sandbox was blocked for six days before the team heard about it, at the stand-up on Thursday. We lost a week we could have used for the fallback. Next time something blocks you for more than a day, could you post it in the channel that day?" Both name a situation and a behaviour the person can repeat or change, and say why it mattered. The second also ends with a specific request, which turns criticism into something the person can act on tomorrow.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 12.3</span><span class="ex-title">Six weeks to crash recovery</span></div>
+          <p>Using the example's path, plan six weeks of mentoring, an hour a week, to get the mentee to explain crash recovery.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Week 1: files and fsync. Have them write a small program that writes a file, kills itself before and after <code>fsync</code>, and checks what survived; ask them to explain the results. Week 2: pages and the buffer pool. Read the relevant chapter of <i>Database Internals</i> together, then ask them to explain why a database reads 8 KB when you ask for one row. Week 3: the write-ahead log. Give them the rule, log before data, and ask them to argue why it's necessary, before showing the answer. Week 4: crash recovery. Walk through a crash with a half-written page and a log, and have them replay the log by hand. Week 5: reverse roles. They explain crash recovery to you, or better, to another junior engineer, while you only ask questions. Week 6: revisit the fragile concepts that now have foundations, replication on top of the log, and ask them to explain why a replica that applies the log in order converges. Each week starts with a question, ends with them explaining, and moves only when the step is secure.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Do you diagnose what someone knows by asking them to explain, not to recall?</li>
+            <li>Can you find their frontier, and teach in an order that never skips a foundation?</li>
+            <li>Do you ask questions before giving answers?</li>
+            <li>Is your feedback specific: a situation, a behaviour and its impact?</li>
+            <li>Do you sponsor as well as mentor: stretch work, public credit, recommendations?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Essay</span><div><a href="https://larahogan.me/blog/what-sponsorship-looks-like/">What does sponsorship look like?</a> <span class="by">Lara Hogan</span></div></li>
+            <li><span class="rkind paid">Book</span><div><a href="https://www.oreilly.com/library/view/the-managers-path/9781491973882/">The Manager's Path</a> <span class="by">Camille Fournier &middot; its first chapter, on being mentored and mentoring</span></div></li>
+            <li><span class="rkind free">Guide</span><div><a href="https://google.github.io/eng-practices/review/">Code review developer guide</a> <span class="by">Google's engineering practices</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

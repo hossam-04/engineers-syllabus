@@ -1,0 +1,98 @@
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script>
+(function () {
+  var LS = "engguild.v1.";
+  function read(k) { try { return window.localStorage.getItem(LS + k); } catch (e) { return null; } }
+  function write(k, v) { try { window.localStorage.setItem(LS + k, v); } catch (e) { /* storage unavailable */ } }
+
+  try { if (window.hljs) { window.hljs.highlightAll(); } } catch (e) { /* plain code is fine */ }
+
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".done-toggle input[data-id]"));
+  var fill = document.getElementById("barfill");
+  var pct = document.getElementById("pct");
+  function refresh() {
+    var n = 0;
+    boxes.forEach(function (b) {
+      var id = b.getAttribute("data-id");
+      var ch = document.getElementById(id);
+      var link = document.querySelector('#railnav a[href="#' + id + '"]');
+      if (b.checked) n++;
+      if (ch) ch.classList.toggle("is-read", b.checked);
+      if (link) link.classList.toggle("read", b.checked);
+    });
+    if (pct) pct.textContent = n + " / " + boxes.length;
+    if (fill) fill.style.width = (boxes.length ? (n / boxes.length) * 100 : 0) + "%";
+  }
+  boxes.forEach(function (b) {
+    if (read(b.getAttribute("data-id")) === "1") b.checked = true;
+    b.addEventListener("change", function () {
+      write(b.getAttribute("data-id"), b.checked ? "1" : "0");
+      refresh();
+    });
+  });
+  refresh();
+
+  // Reset asks for a second click inside the page, because the viewer blocks dialog boxes.
+  var reset = document.getElementById("resetbtn");
+  if (reset) {
+    var resetLabel = reset.textContent, resetTimer = null;
+    var disarmReset = function () {
+      clearTimeout(resetTimer); resetTimer = null;
+      reset.textContent = resetLabel; reset.classList.remove("armed");
+    };
+    reset.addEventListener("click", function () {
+      if (!resetTimer) {
+        reset.textContent = "Click again to clear";
+        reset.classList.add("armed");
+        resetTimer = setTimeout(disarmReset, 4000);
+        return;
+      }
+      disarmReset();
+      boxes.forEach(function (b) { b.checked = false; write(b.getAttribute("data-id"), "0"); });
+      refresh();
+    });
+  }
+
+  var root = document.documentElement;
+  var stored = read("theme");
+  if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+  var tb = document.getElementById("themebtn");
+  if (tb) tb.addEventListener("click", function () {
+    var now = root.getAttribute("data-theme");
+    var dark = now ? now === "dark"
+      : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    write("theme", next);
+  });
+
+  var toc = document.querySelector(".toc");
+  if (toc && window.matchMedia) {
+    var narrow = window.matchMedia("(max-width: 1080px)");
+    var syncToc = function () {
+      if (narrow.matches) toc.removeAttribute("open"); else toc.setAttribute("open", "");
+    };
+    syncToc();
+    if (narrow.addEventListener) narrow.addEventListener("change", syncToc);
+    else if (narrow.addListener) narrow.addListener(syncToc);
+  }
+
+  var links = Array.prototype.slice.call(document.querySelectorAll("#railnav a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = targets.indexOf(e.target);
+        if (i < 0) return;
+        links.forEach(function (l) { l.classList.remove("on"); });
+        links[i].classList.add("on");
+      });
+    }, { rootMargin: "-8% 0px -80% 0px" });
+    targets.forEach(function (t) { if (t) io.observe(t); });
+  }
+})();
+</script>

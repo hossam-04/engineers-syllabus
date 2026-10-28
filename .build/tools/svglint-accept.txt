@@ -1,0 +1,20 @@
+# Flags judged by eye to be fine. One per line: volume file | svg number | exact message | reason
+mathematics-handbook.html | 5 | '1' does not fit its box (320, 184, 334, 198) with padding (label spans 324..330) | a 1-by-1 square in the Euclid diagram; the digit fits, the square is small by design
+mathematics-handbook.html | 5 | '1' does not fit its box (320, 198, 334, 212) with padding (label spans 324..330) | a 1-by-1 square in the Euclid diagram; the digit fits, the square is small by design
+architecture-handbook.html | 2 | '0' does not fit its box (30, 40, 41, 76) with padding (label spans 32..39) | the one-bit sign field is drawn one bit wide; the digit fits inside it
+architecture-handbook.html | 12 | 'bubble' does not fit its box (332, 74, 378, 100) with padding (label spans 334..376) | a pipeline-diagram cell; the word fits with 2px each side, matching its neighbours
+networking-handbook.html | 1 | '→ app, inner' overlaps or touches 'link' | two stacked lines of one legend, 14px apart; they render cleanly
+networking-handbook.html | 1 | 'Only the two endpoints run the full stack; the network in between reads just enough to forward. This is the end-to-end principle.' leaves the 800x340 viewBox: (20, 316, 858, 329) | serif note, measured in the browser with getBBox: it fits
+networking-handbook.html | 2 | 'origin = scheme + host + port (the security boundary)' leaves the 800x210 viewBox: (-45, 28, 375, 40) | serif label with an inline style, measured in the browser with getBBox: it fits
+compilers-handbook.html | 1 | 'BACK END: HOW IT RUNS' leaves the 760x270 viewBox: (580, 17, 763, 28) | measured in the browser with getBBox: it fits
+security-engineering-handbook.html | 1 | '1' does not fit its box (222, 20, 807, 340) with padding (label spans 218..226) | numbered badge drawn on the account boundary on purpose
+security-engineering-handbook.html | 1 | '2' does not fit its box (222, 20, 807, 340) with padding (label spans 218..226) | numbered badge drawn on the account boundary on purpose
+security-engineering-handbook.html | 1 | '3' does not fit its box (222, 20, 807, 340) with padding (label spans 218..226) | numbered badge drawn on the account boundary on purpose
+ai-engineering-handbook.html | 1 | 'banana · quantum  (dropped)' does not fit its box (560, 112, 770, 142) with padding (label spans 572..777) | measured in the browser with getBBox: it ends at 751, inside the box
+ai-engineering-handbook.html | 7 | 'run at scale' does not fit its box (690, 70, 780, 114) with padding (label spans 689..781) | measured in the browser with getBBox: 694..776, inside the box
+ai-engineering-handbook.html | 7 | 'Judge from a different model family than the candidate, to avoid self-preference; ensemble across families for launch calls.' leaves the 800x250 viewBox: (20, 165, 826, 178) | serif note, measured in the browser with getBBox: it ends at 713
+ai-engineering-handbook.html | 8 | 'significant regression' does not fit its box (530, 18, 700, 58) with padding (label spans 532..698) | measured in the browser with getBBox: 539..691, inside the box
+ai-engineering-handbook.html | 8 | 'scores become baseline' does not fit its box (530, 68, 700, 108) with padding (label spans 532..698) | measured in the browser with getBBox: 539..691, inside the box
+ai-engineering-handbook.html | 9 | 'Most traffic takes the cheap path; only the hard slice pays for the big model.' straddles the edge of box (520, 28, 670, 72) | serif note, measured in the browser with getBBox: it ends at 447, clear of the box at 520
+ai-engineering-handbook.html | 9 | 'Sound only if the small model passes your eval on the slice it keeps (chapter 13).' overlaps or touches '$3 / $15 per M' | serif note, measured in the browser with getBBox: it ends at 472, clear of the label at 547
+ai-engineering-handbook.html | 9 | 'Sound only if the small model passes your eval on the slice it keeps (chapter 13).' straddles the edge of box (520, 150, 670, 196) | serif note, measured in the browser with getBBox: it ends at 472, clear of the box at 520

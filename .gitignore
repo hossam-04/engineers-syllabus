@@ -1,0 +1,26 @@
+# Everything here can be rebuilt from the tracked sources.
+.DS_Store
+__pycache__/
+
+# offline editions: .build/editions/build_all.sh
+/editions/
+# syllabus-site/editions/ is published: the handbook pages link to its PDFs
+.build/editions/render
+
+# volume builds: .build/tools/make.py (chapter .html files are assembled from the .tpl beside them)
+.build/*/preview/
+.build/*/[0-9][0-9]_*.html
+!.build/*/00_head.html
+
+# site staging builds and check output: .build/site-builder/build_site.py, site_check.py
+.build/sweep/site-v*/
+.build/sweep/chk*/
+
+# dated snapshots from before this repository existed
+.build/backup-*/
+
+# working files kept locally, not published: review sweeps, session recovery notes, artifact ids
+.build/sweep/
+.build/site-recover/
+.build/standalone.json
+.build/shared-syllabus.html

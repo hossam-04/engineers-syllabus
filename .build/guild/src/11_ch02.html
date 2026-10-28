@@ -1,0 +1,271 @@
+    <section class="chapter prose" id="ch02" data-ch="02">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 02</span><label class="done-toggle"><input type="checkbox" data-id="ch02"><span class="box"></span>Read</label></div>
+        <h3>Reading a paper</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">The papers behind your area are its primary sources: the ideas as their inventors stated them, with the reasoning, the alternatives they rejected and the measurements they had. They're short, and most engineers never read them. Read each one in passes, with a question in mind. Then build its central idea small enough to run, because until you've built it you've only read about it.</p>
+      </header>
+
+      <h4>Why go to the source</h4>
+      <p>Everything you've learned about distributed systems passed through several hands before it reached you: the paper, the talk about the paper, the blog post about the talk, the vendor's documentation, the colleague's summary. Each retelling keeps the conclusion and drops the reasoning. The paper still has it. It says what problem the authors faced, which designs they considered, why they chose this one, what they measured, and, often in a sentence nobody quotes, what it doesn't handle well.</p>
+      <p>That last part is why primary sources build taste. Dynamo's authors say plainly that their design suits applications that can tolerate conflicting versions. MapReduce's authors say its model fits computations that can be expressed as map and reduce, and leave the rest unsaid. Read the paper and you know the system's boundaries as its designers saw them, which no summary preserves. And most of the classics are twelve to fifteen pages long. A paper a month is a modest habit, and in five years it's a foundation few engineers have.</p>
+
+      <h4>Read in three passes</h4>
+      <p>Srinivasan Keshav's short note <i>How to Read a Paper</i> describes the method most researchers use, and it works just as well for engineers. Never read a paper once from start to end. Read it three times, each pass deeper, and stop after any pass if the paper isn't worth more.</p>
+      <ul>
+        <li><b>First pass, ten minutes.</b> Title, abstract and introduction; the section headings; the conclusion; a glance at the references. Afterwards, answer Keshav's five Cs: the <b>category</b> of paper (a system, a measurement, an analysis), its <b>context</b> (what it builds on), whether its assumptions look <b>correct</b>, its main <b>contributions</b>, and its <b>clarity</b>. Most papers stop here.</li>
+        <li><b>Second pass, an hour.</b> Read the whole paper but skip proofs and fine detail. Study the figures and the evaluation: what workload, on what hardware, compared with what? Note what you don't understand, and the references you'd need.</li>
+        <li><b>Third pass, several hours.</b> Reconstruct the paper: make the same assumptions and rebuild the design yourself, then compare. This is where you find the hidden assumptions and the weak spots, and it's the pass that makes the ideas yours.</li>
+      </ul>
+      <p>Go in with a question, as you would with a debugger. "How does GFS handle a chunkserver dying mid-write?" focuses a second pass far better than "learn about GFS". And read the evaluation sceptically. Every paper measures the workloads its design is good at. The interesting question is always which workloads it didn't measure, and why.</p>
+
+      <h4>Building the core small</h4>
+      <p>For an engineer, the best third pass is to build the paper's central idea, small enough to run in a page of code. Not the system, which took a team years, but the mechanism the paper is about. Building forces every vague sentence into a decision. "The master re-executes failed tasks" becomes the question of what state a failed task leaves behind, and whether running it twice could double-count anything. The places where you get stuck are the places where you didn't understand the paper, even though you thought you did.</p>
+      <p>MapReduce, the 2004 paper by Jeffrey Dean and Sanjay Ghemawat, is the classic case. Its idea fits in a sentence: express a computation as a <b>map</b> function, applied to each piece of input independently, and a <b>reduce</b> function, applied to all the values for each key, and let the system handle distributing the work, moving the data and surviving failures. The figure shows the flow, and the example builds it: a word count over eight input splits, with three of the paper's refinements.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MapReduce's data flow. Eight input splits on the left feed map tasks. Each map task partitions its output by key into three parts, one per reducer, optionally combining repeated keys first. The shuffle moves each partition to its reducer. Three reducers each produce part of the output. One map task is marked as failed and re-run on another worker.">
+          <defs><marker id="f02-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f02-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <text class="dg-title" x="24" y="22">INPUT SPLITS</text>
+          <text class="dg-title" x="170" y="22">MAP TASKS</text>
+          <text class="dg-title" x="370" y="22">SHUFFLE</text>
+          <text class="dg-title" x="480" y="22">REDUCERS</text>
+          <rect class="dg-box" x="24" y="40" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="55" text-anchor="middle">split 0</text>
+          <rect class="dg-box" x="170" y="40" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="55" text-anchor="middle">map 0</text>
+          <line class="dg-edge" x1="120" y1="51" x2="168" y2="51" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="51" x2="368" y2="51" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="70" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="85" text-anchor="middle">split 1</text>
+          <rect class="dg-box" x="170" y="70" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="85" text-anchor="middle">map 1</text>
+          <line class="dg-edge" x1="120" y1="81" x2="168" y2="81" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="81" x2="368" y2="81" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="100" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="115" text-anchor="middle">split 2</text>
+          <rect class="dg-box" x="170" y="100" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="115" text-anchor="middle">map 2</text>
+          <line class="dg-edge" x1="120" y1="111" x2="168" y2="111" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="111" x2="368" y2="111" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="130" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="145" text-anchor="middle">split 3</text>
+          <rect class="dg-doubt" x="170" y="130" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="145" text-anchor="middle">map 3 died: re-run</text>
+          <line class="dg-edge" x1="120" y1="141" x2="168" y2="141" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="141" x2="368" y2="141" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="160" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="175" text-anchor="middle">split 4</text>
+          <rect class="dg-box" x="170" y="160" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="175" text-anchor="middle">map 4</text>
+          <line class="dg-edge" x1="120" y1="171" x2="168" y2="171" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="171" x2="368" y2="171" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="190" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="205" text-anchor="middle">split 5</text>
+          <rect class="dg-box" x="170" y="190" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="205" text-anchor="middle">map 5</text>
+          <line class="dg-edge" x1="120" y1="201" x2="168" y2="201" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="201" x2="368" y2="201" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="220" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="235" text-anchor="middle">split 6</text>
+          <rect class="dg-box" x="170" y="220" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="235" text-anchor="middle">map 6</text>
+          <line class="dg-edge" x1="120" y1="231" x2="168" y2="231" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="231" x2="368" y2="231" marker-end="url(#f02-n)"></line>
+          <rect class="dg-box" x="24" y="250" width="96" height="22"></rect>
+          <text class="dg-small" x="72" y="265" text-anchor="middle">split 7</text>
+          <rect class="dg-box" x="170" y="250" width="150" height="22"></rect>
+          <text class="dg-small" x="245" y="265" text-anchor="middle">map 7</text>
+          <line class="dg-edge" x1="120" y1="261" x2="168" y2="261" marker-end="url(#f02-n)"></line>
+          <line class="dg-edge" x1="320" y1="261" x2="368" y2="261" marker-end="url(#f02-n)"></line>
+          <rect class="dg-iface" x="370" y="40" width="70" height="232"></rect>
+          <text class="dg-small" x="405" y="150" text-anchor="middle">by key</text>
+          <text class="dg-small" x="405" y="166" text-anchor="middle">hash</text>
+          <line class="dg-edge" x1="440" y1="78" x2="478" y2="78" marker-end="url(#f02-n)"></line>
+          <rect class="dg-hot" x="480" y="60" width="120" height="36"></rect>
+          <text class="dg-label dg-hot-text" x="540" y="83" text-anchor="middle">reduce 0</text>
+          <line class="dg-edge" x1="600" y1="78" x2="638" y2="78" marker-end="url(#f02-n)"></line>
+          <text class="dg-small" x="644" y="82">output 0</text>
+          <line class="dg-edge" x1="440" y1="152" x2="478" y2="152" marker-end="url(#f02-n)"></line>
+          <rect class="dg-hot" x="480" y="134" width="120" height="36"></rect>
+          <text class="dg-label dg-hot-text" x="540" y="157" text-anchor="middle">reduce 1</text>
+          <line class="dg-edge" x1="600" y1="152" x2="638" y2="152" marker-end="url(#f02-n)"></line>
+          <text class="dg-small" x="644" y="156">output 1</text>
+          <line class="dg-edge" x1="440" y1="226" x2="478" y2="226" marker-end="url(#f02-n)"></line>
+          <rect class="dg-hot" x="480" y="208" width="120" height="36"></rect>
+          <text class="dg-label dg-hot-text" x="540" y="231" text-anchor="middle">reduce 2</text>
+          <line class="dg-edge" x1="600" y1="226" x2="638" y2="226" marker-end="url(#f02-n)"></line>
+          <text class="dg-small" x="644" y="230">output 2</text>
+          <text class="dg-small" x="24" y="296">each map writes one partition per reducer; a combiner adds up repeats first</text>
+        </svg>
+        <figcaption>Map tasks work on splits independently and write one partition per reducer; the shuffle brings each key's values together; reducers produce the output. Because map is a pure function of its split, a failed task can simply run again.</figcaption>
+      </figure>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">mapreduce.py &middot; the paper's model in sixty lines: a word count with a combiner, a failed task re-run, and backup tasks for stragglers</span></figcaption><pre><code class="language-python">"""Reading the MapReduce paper by building its core: map, shuffle, reduce, a combiner,
+re-execution after a failure, and backup tasks for stragglers."""
+import random
+import re
+from collections import defaultdict
+
+DOCS = [  # eight "input splits", one per map task
+    "the log is the database the rest is cache",
+    "a cache is a log you are allowed to forget",
+    "the database keeps the log and the log keeps the truth",
+    "replicas apply the log in order and agree",
+    "the truth is in the log not in the cache",
+    "forget the cache and replay the log",
+    "order is the hard part of the log",
+    "agree on the order and the rest follows",
+]
+
+
+def map_fn(doc):                      # user code: emit (word, 1) for every word
+    for word in re.findall(r"[a-z]+", doc):
+        yield word, 1
+
+
+def reduce_fn(word, counts):          # user code: add up one word's counts
+    return sum(counts)
+
+
+def run_job(docs, reducers=3, combiner=False, fail_task=None):
+    """One MapReduce job. Each map task writes one partition per reducer, as the paper's do."""
+    partitions = [defaultdict(list) for _ in range(reducers)]
+    pairs_sent = 0
+    for task, doc in enumerate(docs):
+        attempts = 2 if task == fail_task else 1      # the master re-runs a task whose worker died
+        for attempt in range(attempts):
+            local = [defaultdict(list) for _ in range(reducers)]
+            for word, n in map_fn(doc):
+                local[sum(map(ord, word)) % reducers][word].append(n)     # partition by hash of the key
+            if task == fail_task and attempt == 0:
+                continue          # the worker died: its local output is lost, nothing was sent
+            for r, part in enumerate(local):
+                for word, ns in part.items():
+                    if combiner:
+                        ns = [reduce_fn(word, ns)]        # pre-aggregate on the map side
+                    partitions[r][word].extend(ns)
+                    pairs_sent += len(ns)
+    result = {}
+    for part in partitions:                                # each reducer sees its keys in sorted order
+        for word in sorted(part):
+            result[word] = reduce_fn(word, part[word])
+    return result, pairs_sent
+
+
+plain, sent_plain = run_job(DOCS)
+combined, sent_combined = run_job(DOCS, combiner=True)
+rerun, _ = run_job(DOCS, fail_task=3)
+top = sorted(plain.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+print("top words:", ", ".join(f"{w} {n}" for w, n in top))
+print(f"pairs shuffled to reducers: {sent_plain} without a combiner, {sent_combined} with one "
+      f"({1 - sent_combined / sent_plain:.0%} less)")
+print("same answer with the combiner:", combined == plain)
+print("same answer after map task 3's worker died and the task was re-run:", rerun == plain)
+
+# Stragglers: the job finishes when its slowest task does. The paper's fix is a backup copy of
+# each task still running near the end; whichever copy finishes first wins.
+rng = random.Random(7)
+def job_time(tasks=200, machines=50, backups=False):
+    times = []
+    for _ in range(tasks):
+        t = rng.uniform(1.0, 1.4)
+        if rng.random() < 0.03:                  # a few machines are slow: a bad disk, a noisy neighbour
+            t *= rng.uniform(5, 10)
+        if backups and t > 2.0:                  # still running at the end: a backup copy starts there,
+            t = min(t, 2.0 + rng.uniform(1.0, 1.4))   # and it usually lands on a healthy machine
+        times.append(t)
+    waves = [times[i:i + machines] for i in range(0, tasks, machines)]
+    return sum(max(w) for w in waves)            # each wave of tasks waits for its slowest member
+runs = 1000
+without = sorted(job_time() for _ in range(runs))
+with_b = sorted(job_time(backups=True) for _ in range(runs))
+med = lambda xs: xs[len(xs) // 2]
+print(f"\n200 tasks on 50 machines, 3% of tasks on a slow machine, {runs} simulated jobs:")
+print(f"  median job time without backup tasks: {med(without):5.1f}")
+print(f"  median job time with backup tasks:    {med(with_b):5.1f}  "
+      f"({1 - med(with_b) / med(without):.0%} faster)")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">top words: the 17, log 8, is 5, and 4, cache 4
+pairs shuffled to reducers: 71 without a combiner, 56 with one (21% less)
+same answer with the combiner: True
+same answer after map task 3's worker died and the task was re-run: True
+
+200 tasks on 50 machines, 3% of tasks on a slow machine, 1000 simulated jobs:
+  median job time without backup tasks:  32.1
+  median job time with backup tasks:     11.2  (65% faster)</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>A combiner cuts the shuffle, by how much depends on the data.</b> Running the reduce function on each map task's own output before sending it reduced the pairs shuffled from 71 to 56, 21% fewer. The saving is modest here because each split is one short sentence, so few words repeat within a split. On real inputs, where a 64 MB split contains "the" thousands of times, the paper's combiner cuts traffic by orders of magnitude. The example also shows the condition the paper relies on: the combiner gave the same answer only because addition doesn't care how you group it. Try it with an average instead of a sum, and exercise 2.2 shows what breaks.</p>
+      <p><b>Re-execution is safe because map is pure.</b> Map task 3's worker died, its local output vanished, the task ran again elsewhere, and the result was identical. This is the paper's deepest design decision, easy to miss on a first read: by asking users for functions with no side effects, the system can retry anything without coordination. A map function that wrote to a database, or read the clock, would make retries visible and the whole fault-tolerance story would collapse.</p>
+      <p><b>Backup tasks attack the tail.</b> A job finishes when its slowest task does, and a few slow machines, a bad disk, a noisy neighbour, can hold up hundreds of healthy ones. The paper's fix is to start a second copy of each task still running near the end and take whichever finishes first. In the simulation, the median job finished 65% sooner. Its constants are invented, so read that for its direction; the paper itself reports that one sort job took 44% longer with backup tasks switched off. The same idea reappears a decade later in Dean and Barroso's <i>The Tail at Scale</i> as hedged requests, which is one reason to read papers in sequence.</p>
+
+      <h4>Reading the critics too</h4>
+      <p>A paper is an argument, and arguments have opponents. In 2008, David DeWitt and Michael Stonebraker published "MapReduce: A major step backwards", arguing that it ignored forty years of database research: no schemas, no indexes, brute-force scans. Some of the criticism aged badly and some aged well; within a few years, SQL layers such as Hive appeared on top of Hadoop, and later systems such as Spark kept the fault-tolerance idea while dropping the rigid two-stage model. Reading the paper, its critics and what came after tells you more about the design space than any of them alone. When you finish a paper, look for who argued with it.</p>
+
+      <h4>Making it a habit</h4>
+      <p>Habits survive where intentions don't. Three that work: a <b>reading list</b> of five papers in your area, ordered so each builds on the last; a <b>one-page summary</b> for each, written after the second pass, with the problem, the key idea, the evidence and your doubts; and <b>company</b>. A reading group of three colleagues meeting every fortnight to discuss one paper will carry you through papers you'd abandon alone, and the discussion surfaces what you missed. Papers We Love, a community with chapters in many cities, keeps a curated repository of papers by topic and is a good place to start. Chapter 3 suggests a first reading list for distributed data systems.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Reading a paper once, front to back,</b> and getting lost in section 3.</li>
+          <li><b>Reading the summary instead,</b> and losing the reasoning and the stated limits.</li>
+          <li><b>Trusting the evaluation,</b> without asking which workloads it left out.</li>
+          <li><b>Stopping at understanding,</b> and never building the core to test it.</li>
+          <li><b>Reading alone, without writing anything down,</b> so a month later little remains.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 2.1</span><span class="ex-title">A first pass</span></div>
+          <p>Do a ten-minute first pass of <i>The Google File System</i> (2003) and answer the five Cs in one line each.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">Category:      a systems paper: the design of a production storage system, with measurements.
+Context:       distributed file systems such as AFS and NFS, rethought for Google's workloads.
+Correctness:   assumes failures are normal, files are huge, writes are mostly appends and
+               reads mostly streaming; plausible for batch data processing, not for databases.
+Contributions: a single master holding metadata, 64 MB chunks replicated three times,
+               relaxed consistency with atomic record append, and lessons from running it.
+Clarity:       clear, with a design rationale for each decision and honest about weak points.</code></pre>
+            <p>The "correctness" line is the important one, because it states the assumptions the whole design rests on. Every unusual choice in GFS, the single master, the large chunks, the weak consistency, follows from them. A first pass that captures the assumptions tells you when the paper applies to your problem and when it doesn't, before you've read the details.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 2.2</span><span class="ex-title">A combiner that lies</span></div>
+          <p>Change the example to compute the average length of the words starting with each letter, and use the reduce function as the combiner. Why is the answer wrong, and how would you fix it?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>An average of averages isn't the overall average. If one map task saw two words starting with "t" of lengths 3 and 5, its combiner sends 4; if another saw one word of length 10, it sends 10; the reducer averages 4 and 10 to 7, but the true average of 3, 5 and 10 is 6. Addition is associative and commutative, so partial sums combine correctly; averaging isn't. The fix is to combine something that does compose: have map emit (length, 1) pairs, have the combiner and reducer add both parts, giving (total length, count), and divide only at the very end. The paper's condition, that the combining function must be commutative and associative, is exactly this.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 2.3</span><span class="ex-title">A map that isn't pure</span></div>
+          <p>A map function samples 10% of its input at random to make the job faster. What goes wrong when the system re-runs a failed task or a backup task, and what would you do instead?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Each run of the task picks a different random 10%. If a map task fails after some of its output was read, or a backup copy and the original both finish, the reducers can see output from two different samples, so the totals are neither one sample nor the other, and the job's result changes from run to run. The paper's guarantee, that the output equals what a single sequential run would produce, holds only for deterministic functions. The fix is to make the sampling deterministic: decide whether to keep each record by hashing its key or position with a fixed seed, so every run of the task keeps exactly the same records. The general lesson applies far beyond MapReduce: anything that a system might retry must give the same result each time, which is the same property chapter 10 of <i>The Engineer's Fleet</i> asks of message consumers.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you do a first pass in ten minutes and answer the five Cs?</li>
+            <li>Do you read the evaluation asking which workloads were left out?</li>
+            <li>Have you built the central idea of at least one paper small enough to run?</li>
+            <li>Can you explain why MapReduce's fault tolerance depends on pure functions?</li>
+            <li>Do you have a reading list in your area, and a summary for each paper read?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Note</span><div><a href="https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf">How to Read a Paper</a> <span class="by">S. Keshav</span></div></li>
+            <li><span class="rkind free">Paper</span><div><a href="https://research.google/pubs/mapreduce-simplified-data-processing-on-large-clusters/">MapReduce: Simplified Data Processing on Large Clusters</a> <span class="by">Dean &amp; Ghemawat, 2004</span></div></li>
+            <li><span class="rkind free">Community</span><div><a href="https://paperswelove.org/">Papers We Love</a> <span class="by">a curated repository of papers, and local chapters</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

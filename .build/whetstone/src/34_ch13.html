@@ -1,0 +1,237 @@
+    <section class="chapter prose" id="ch13" data-ch="13">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 13</span><label class="done-toggle"><input type="checkbox" data-id="ch13"><span class="box"></span>Read</label></div>
+        <h3>Remotes, forks and pull requests</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">A <b>remote</b> is another copy of the repository, usually on a server. <code>git fetch</code> copies the commits you don't have and moves your record of the remote's branches. <code>git push</code> sends your commits and asks the other side to move one of its branches, which it agrees to only if nothing would be lost. GitHub builds a way of working on top of that: forks, pull requests, review and issues. This chapter simulates GitHub with plain repositories in a folder, and follows one contribution from the first commit to the merge.</p>
+      </header>
+
+      <h4>Remotes, fetch and push</h4>
+      <p>When you clone a repository, Git records where it came from as a remote called <code>origin</code>, and <code>git remote -v</code> lists your remotes and their addresses. For each branch on a remote, Git keeps a <b>remote-tracking branch</b>, such as <code>origin/main</code>: a ref recording where that branch was the last time you talked to the server. <code>git fetch</code> downloads any commits you're missing and updates those refs; it never touches your own branches. So <code>origin/main</code> is a snapshot, possibly hours old, and comparisons with it are only as fresh as your last fetch. <code>git pull</code> is a fetch followed by a merge of the remote branch into yours, or a rebase onto it if you've configured that.</p>
+      <p><code>git push origin feature</code> sends your commits and asks the remote to move its <code>feature</code> to match yours. The remote refuses unless the move is a fast-forward, meaning your branch already contains everything it has. Otherwise, commits someone else pushed would be lost. When the push is refused, fetch, combine their work with yours, and push again. <code>git push -u origin feature</code> also sets <code>origin/feature</code> as your branch's <b>upstream</b>, after which plain <code>git push</code> and <code>git pull</code> know where to go, and <code>git status</code> says how many commits you're ahead or behind.</p>
+
+      <h4>Forks and pull requests</h4>
+      <p>On GitHub, you usually can't push to a project you don't maintain. So you <b>fork</b> it, which makes your own copy of the repository on GitHub's servers, clone your fork, and push branches there. A <b>pull request</b> asks the project's maintainers to merge one of your fork's branches into their repository. Around it, GitHub runs the conversation. Reviewers comment on lines, ask for changes or approve; automated checks run the tests; and every new commit you push to the branch updates the pull request. When it's ready, a maintainer merges it with one of chapter 11's three buttons. Inside a team with write access, people skip the fork and push branches to the main repository directly, but the pull request, the review and the checks are the same. <b>Issues</b> are GitHub's bug reports and discussions. A pull request whose description says <code>Fixes #12</code> closes issue 12 when it's merged.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Four repositories. On GitHub, upstream.git, the project, and fork.git, Ada's copy of it made by the Fork button. On their laptops, Grace's clone of upstream, and Ada's clone of her fork, which has two remotes: origin, her fork, and upstream, the project. The flow is numbered: 1, Ada clones her fork; 2, she pushes her branch fix-typo to her fork; 3, she opens a pull request from fork fix-typo to upstream main; 4, she fetches upstream to bring her branch up to date and force-pushes it with a lease; 5, Grace fetches the branch from the fork, merges it and pushes to upstream; 6, Ada pulls upstream's main and pushes it to her fork, so all copies agree.">
+          <defs><marker id="f13-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f13-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <text class="dg-title" x="40" y="22">ON GITHUB</text>
+          <text class="dg-title" x="40" y="186">ON LAPTOPS</text>
+          <rect class="dg-box" x="40" y="34" width="240" height="54"></rect>
+          <text class="dg-label" x="52" y="56">upstream.git</text>
+          <text class="dg-small" x="52" y="76">the project; Grace can push</text>
+          <rect class="dg-box" x="480" y="34" width="240" height="54"></rect>
+          <text class="dg-label" x="492" y="56">fork.git</text>
+          <text class="dg-small" x="492" y="76">Ada's copy; Ada can push</text>
+          <rect class="dg-box" x="40" y="198" width="240" height="54"></rect>
+          <text class="dg-label" x="52" y="220">grace</text>
+          <text class="dg-small" x="52" y="240">a clone of upstream</text>
+          <rect class="dg-box" x="480" y="198" width="240" height="54"></rect>
+          <text class="dg-label" x="492" y="220">ada</text>
+          <text class="dg-small" x="492" y="240">remotes: origin, upstream</text>
+          <line class="dg-msg-hot" x1="478" y1="50" x2="282" y2="50" marker-end="url(#f13-h)"></line>
+          <text class="dg-msg-label hot" x="380" y="42" text-anchor="middle">3 pull request</text>
+          <line class="dg-msg-async" x1="282" y1="76" x2="478" y2="76" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="380" y="70" text-anchor="middle">Fork button</text>
+          <line class="dg-msg" x1="580" y1="196" x2="580" y2="90" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="572" y="150" text-anchor="end">2 push</text>
+          <line class="dg-msg" x1="640" y1="90" x2="640" y2="196" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="648" y="150">1 clone</text>
+          <line class="dg-msg" x1="150" y1="196" x2="150" y2="90" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="142" y="150" text-anchor="end">5 push the merge</text>
+          <line class="dg-msg" x1="220" y1="90" x2="220" y2="196" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="228" y="150">clone</text>
+          <line class="dg-msg" x1="282" y1="90" x2="478" y2="202" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="472" y="228" text-anchor="end">4, 6 Ada fetches upstream</text>
+          <line class="dg-msg" x1="478" y1="90" x2="282" y2="202" marker-end="url(#f13-n)"></line>
+          <text class="dg-msg-label" x="288" y="246">5 Grace fetches the branch</text>
+          <text class="dg-note" x="40" y="286">Ada pushes only to her fork; the pull request asks Grace to merge into the project.</text>
+        </svg>
+        <figcaption>A contribution is a round trip: your branch goes to your fork, the pull request asks the project to take it, and the merged result comes back to you from upstream.</figcaption>
+      </figure>
+      <p>The example plays both parts. Bare repositories in a temporary folder stand in for GitHub: <code>upstream.git</code> is the project, and <code>fork.git</code> Ada's copy of it, made the way the Fork button does, with a server-side clone. Grace maintains the project; Ada contributes a small fix. Each person has their own name and email, and the clock is fixed, so the commit ids are reproducible.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">remotes.py &middot; a project, a fork and two clones on disk: a branch pushed to the fork, a push refused, a rebase onto upstream and a push with a lease, the pull request merged, and the fork brought up to date</span></figcaption><pre><code class="language-python">import os, pathlib, subprocess, tempfile
+
+# Bare repositories in a temporary folder stand in for GitHub: "upstream" is the project, "fork" is
+# the contributor's copy of it. Grace maintains the project; Ada contributes.
+BASE = {"PATH": os.environ["PATH"], "HOME": "/home/learner", "LC_ALL": "C",
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+PEOPLE = {"grace": ("Grace Hopper", "grace@example.org"), "ada": ("Ada Lovelace", "ada@example.org")}
+clock = [1772355600]
+
+def git(who, *args, cwd, check=True):
+    clock[0] += 60
+    name, email = PEOPLE[who]
+    env = dict(BASE, GIT_AUTHOR_NAME=name, GIT_AUTHOR_EMAIL=email, GIT_COMMITTER_NAME=name,
+               GIT_COMMITTER_EMAIL=email, GIT_AUTHOR_DATE=f"@{clock[0]} +0000",
+               GIT_COMMITTER_DATE=f"@{clock[0]} +0000")
+    r = subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, text=True)
+    if check and r.returncode: raise SystemExit(r.stderr)
+    return r.stdout.rstrip() if check else r
+
+def change(who, repo, name, text, message):
+    (repo / name).write_text(text)
+    git(who, "add", name, cwd=repo); git(who, "commit", "-q", "-m", message, cwd=repo)
+
+def graph(who, repo, *revs):
+    hide = "--decorate-refs-exclude=refs/remotes/*/HEAD"    # newer gits add these; older ones don't
+    for line in git(who, "log", "--graph", "--format=%h %an: %s%d", hide, *revs, cwd=repo).splitlines():
+        print(f"      {line}".rstrip())
+
+with tempfile.TemporaryDirectory() as tmp:
+    gh = pathlib.Path(tmp).resolve()
+    print("1. Grace creates the project; Ada forks it on GitHub and clones her fork")
+    git("grace", "init", "-q", "--bare", "-b", "main", "upstream.git", cwd=gh)
+    git("grace", "clone", "-q", "upstream.git", "grace", cwd=gh)
+    grace, ada = gh / "grace", gh / "ada"
+    git("grace", "switch", "-q", "-c", "main", cwd=grace)
+    change("grace", grace, "README.md", "# Recipes\nA small recipe site.\n", "Start the project")
+    git("grace", "push", "-q", "origin", "main", cwd=grace)
+    git("ada", "clone", "-q", "--bare", "upstream.git", "fork.git", cwd=gh)      # what the Fork button does
+    git("ada", "clone", "-q", "fork.git", "ada", cwd=gh)
+    git("ada", "remote", "add", "upstream", str(gh / "upstream.git"), cwd=ada)
+    for line in git("ada", "remote", "-v", cwd=ada).splitlines():
+        name, rest = line.split("\t"); url, kind = rest.rsplit(" ", 1)      # paths may contain spaces
+        print(f"   Ada's remote {name:8} is {pathlib.Path(url).name} {kind}")
+
+    print("2. Ada works on a branch and pushes it to her fork; that's what a pull request is opened from")
+    git("ada", "switch", "-q", "-c", "fix-typo", cwd=ada)
+    change("ada", ada, "README.md", "# Recipes\nA small site for recipes.\n", "Fix the README's wording")
+    git("ada", "push", "-q", "-u", "origin", "fix-typo", cwd=ada)
+    print(f"   {git('ada', 'status', '-sb', cwd=ada).splitlines()[0]}")
+
+    print("3. Meanwhile Grace pushes to the project; a push that would lose her commit is refused")
+    change("grace", grace, "CONTRIBUTING.md", "Open a pull request.\n", "Add contributing notes")
+    git("grace", "push", "-q", "origin", "main", cwd=grace)
+    git("ada", "switch", "-q", "main", cwd=ada)
+    change("ada", ada, "notes.txt", "todo\n", "A commit made on main by mistake")
+    r = git("ada", "push", "--porcelain", "upstream", "main", cwd=ada, check=False)
+    print(f"   git push upstream main: status {r.returncode}, "
+          f"{[l for l in r.stdout.splitlines() if l.startswith('!')][0].split(chr(9))[-1]}")
+    git("ada", "reset", "-q", "--hard", "origin/main", cwd=ada)
+
+    print("4. Ada brings her branch up to date: fetch upstream, rebase onto it, force-push with a lease")
+    git("ada", "fetch", "-q", "upstream", cwd=ada)
+    git("ada", "switch", "-q", "fix-typo", cwd=ada); git("ada", "rebase", "-q", "upstream/main", cwd=ada)
+    git("ada", "push", "-q", "--force-with-lease", "origin", "fix-typo", cwd=ada)
+    graph("ada", ada, "fix-typo")
+
+    print("5. Grace reviews and merges the pull request: a merge commit on the project's main")
+    git("grace", "fetch", "-q", str(gh / "fork.git"), "fix-typo", cwd=grace)
+    git("grace", "merge", "-q", "--no-ff", "-m", "Merge pull request #1 from ada/fix-typo", "FETCH_HEAD",
+        cwd=grace)
+    git("grace", "push", "-q", "origin", "main", cwd=grace)
+    graph("grace", grace, "main")
+
+    print("6. Ada syncs: update her main from upstream, push it to her fork, delete the merged branch")
+    git("ada", "switch", "-q", "main", cwd=ada)
+    git("ada", "pull", "-q", "--ff-only", "upstream", "main", cwd=ada)
+    git("ada", "push", "-q", "origin", "main", ":fix-typo", cwd=ada)     # ":name" deletes a remote branch
+    git("ada", "branch", "-q", "-D", "fix-typo", cwd=ada)
+    same = {git("ada", "rev-parse", r, cwd=gh / repo) for repo, r in
+            (("upstream.git", "main"), ("fork.git", "main"), ("ada", "main"), ("grace", "main"))}
+    refs = git("ada", "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes", cwd=ada).split()
+    branches = [r.split("/", 2)[2] for r in refs if not r.endswith("/HEAD")]
+    print(f"   all four copies of main are the same commit: {len(same) == 1}")
+    print(f"   Ada's branches and remote-tracking branches: {', '.join(branches)}")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">1. Grace creates the project; Ada forks it on GitHub and clones her fork
+   Ada's remote origin   is fork.git (fetch)
+   Ada's remote origin   is fork.git (push)
+   Ada's remote upstream is upstream.git (fetch)
+   Ada's remote upstream is upstream.git (push)
+2. Ada works on a branch and pushes it to her fork; that's what a pull request is opened from
+   ## fix-typo...origin/fix-typo
+3. Meanwhile Grace pushes to the project; a push that would lose her commit is refused
+   git push upstream main: status 1, [rejected] (fetch first)
+4. Ada brings her branch up to date: fetch upstream, rebase onto it, force-push with a lease
+      * caddb90 Ada Lovelace: Fix the README's wording (HEAD -&gt; fix-typo, origin/fix-typo)
+      * 5202fa0 Grace Hopper: Add contributing notes (upstream/main)
+      * 35e30f9 Grace Hopper: Start the project (origin/main, main)
+5. Grace reviews and merges the pull request: a merge commit on the project's main
+      *   b997fe3 Grace Hopper: Merge pull request #1 from ada/fix-typo (HEAD -&gt; main, origin/main)
+      |\
+      | * caddb90 Ada Lovelace: Fix the README's wording
+      |/
+      * 5202fa0 Grace Hopper: Add contributing notes
+      * 35e30f9 Grace Hopper: Start the project
+6. Ada syncs: update her main from upstream, push it to her fork, delete the merged branch
+   all four copies of main are the same commit: True
+   Ada's branches and remote-tracking branches: main, origin/main, upstream/main</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Two remotes, two roles.</b> Ada's clone has <code>origin</code>, her fork, where she can push, and <code>upstream</code>, the project, which she reads from. After <code>push -u</code>, <code>git status -sb</code> showed <code>fix-typo...origin/fix-typo</code>: the branch and its upstream, with nothing ahead or behind.</p>
+      <p><b>Pushes that would lose work are refused.</b> While Ada worked, Grace pushed a commit to the project. Ada then tried to push a stray commit on <code>main</code> straight to <code>upstream</code>, and was refused with <code>[rejected] (fetch first)</code>: the remote had a commit she'd never seen, and accepting her push would have discarded it. The example uses <code>--porcelain</code> to print that refusal in a stable, machine-readable form. Ada threw the stray commit away with <code>reset --hard origin/main</code>. To bring her branch up to date, she fetched <code>upstream</code> and rebased <code>fix-typo</code> onto <code>upstream/main</code>. Rebasing rewrote her one commit, so the push to her fork needed <code>--force-with-lease</code>, as exercise 13.2 explains.</p>
+      <p><b>The merge and the sync.</b> Grace fetched the branch from Ada's fork, merged it with <code>--no-ff</code>, which always makes a merge commit, and used the message GitHub writes, <code>Merge pull request #1 from ada/fix-typo</code>. Then Ada updated her own <code>main</code> with <code>pull --ff-only</code>, pushed it to her fork, and deleted the merged branch there with the refspec <code>:fix-typo</code>, the same as <code>git push origin --delete fix-typo</code>. All four copies of <code>main</code> ended on the same commit.</p>
+
+      <h4>A good pull request</h4>
+      <p>Pull requests are read by busy people, so make them easy to review. Keep each one <b>small and about one thing</b>: a reviewer can check two hundred lines carefully, and two thousand only superficially. Write a description that says what changed and why, how you tested it, and what you're unsure about, with a screenshot for anything visible and a link to the issue it fixes. Open it as a <b>draft</b> when you want early feedback. When reviews come, answer every comment, either with a change or with a reason, and push fixes as new commits so reviewers can see what changed since they last looked. When you review someone else's, be specific and kind, and say which comments must be addressed and which are suggestions.</p>
+      <p>To talk to GitHub at all, you need to authenticate. Over SSH, make a key with <code>ssh-keygen -t ed25519</code> and add the public half to your GitHub account; chapter 6 explained the permissions the private half needs. Over HTTPS, use a credential manager or a token, never your password. GitHub's command-line tool, <code>gh</code>, does all of this and more: <code>gh auth login</code>, <code>gh repo fork</code>, <code>gh pr create</code> and <code>gh pr checkout</code> turn most of this chapter into single commands.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b><code>git push --force</code></b> over commits someone else added; use <code>--force-with-lease</code>.</li>
+          <li><b>Working on your fork's <code>main</code></b> instead of a branch, so it drifts from the project's.</li>
+          <li><b>One enormous pull request</b> that mixes a refactoring, a feature and a fix.</li>
+          <li><b>Treating <code>origin/main</code> as current</b> without fetching first.</li>
+          <li><b>Pulling with a merge by habit,</b> filling history with "Merge branch 'main'" commits; set <code>pull.ff only</code> or <code>pull.rebase true</code>.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 13.1</span><span class="ex-title">What pull does</span></div>
+          <p>You and a colleague both committed to <code>main</code> since you last pulled. Describe what <code>git pull</code> does with the default settings, with <code>pull.ff only</code>, and with <code>pull.rebase true</code>. Which would you put in your dotfiles?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>All three start by fetching. With no setting, recent versions of Git refuse and ask you to choose. Older versions, and <code>pull.rebase false</code>, merge <code>origin/main</code> into your <code>main</code>, making a merge commit that joins two lines of the same branch; on a busy team, history fills with them. With <code>pull.ff only</code>, the pull succeeds only when it's a fast-forward, and otherwise stops so you can decide. With <code>pull.rebase true</code>, your local commits are replayed on top of the colleague's, giving a straight line, which is safe because those commits haven't been pushed yet. A good default for your dotfiles is <code>pull.ff only</code>, which never does anything surprising, plus <code>git pull --rebase</code> when you know you want it. Many people set <code>pull.rebase true</code> instead, which is also a sound choice.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 13.2</span><span class="ex-title">A force with a lease</span></div>
+          <p>Your pull request's branch is on your fork. A reviewer pushes a small fix-up commit to it, which GitHub allows when maintainers may edit. Not having fetched, you amend your own commit and push with <code>--force</code>. What happens? What would <code>--force-with-lease</code> have done?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p><code>--force</code> replaces the remote branch with yours, whatever it held, so the reviewer's commit vanishes from the branch. Nothing warns either of you. <code>--force-with-lease</code> replaces it only if the remote branch is still where your <code>origin/</code> ref says it was, the last state you saw. Here it had moved, so the push was refused with <code>[rejected] (stale info)</code> and the fix-up survived. Both outcomes were checked with repositories on disk. Then fetch, look at what changed, rebase onto it, and push again. Note the lease is only as good as your remote-tracking ref: if you fetch and push without looking, it's satisfied. Adding <code>--force-if-includes</code> also checks that your branch actually contains what you fetched. Neither is needed for ordinary pushes, only after rewriting history.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 13.3</span><span class="ex-title">The description</span></div>
+          <p>Write the pull request description for Ada's change to the README.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">Reword the README's description of the project
+
+The README described the project as "A small recipe site.", which can be
+read as a site for small recipes. "A small site for recipes" says what we
+mean: the site is small, not the recipes.
+
+Only README.md changes; there's no code or test change.
+
+Fixes #3</code></pre>
+            <p>The title is a summary a maintainer can scan in a list of pull requests. The body says what changed and why, in a sentence each, because even a one-line change needs its reason. It also tells the reviewer what not to look for, here no code or tests, which saves them checking. The last line links the issue, which GitHub will close when the change is merged. For a larger change, add how you tested it, what you're unsure about, and screenshots of anything visible. The same discipline as chapter 12's commit messages, one level up.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you explain what <code>fetch</code>, <code>pull</code> and <code>push</code> each change, and what remote-tracking branches are?</li>
+            <li>Can you explain why a push is refused, and what to do about it?</li>
+            <li>Can you contribute to a project through a fork: branch, push, pull request, update, sync?</li>
+            <li>Can you write a pull request that's easy to review, and respond to a review well?</li>
+            <li>Can you set up SSH keys or a token to push to GitHub?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Book</span><div><a href="https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project">Pro Git: Contributing to a Project on GitHub</a> <span class="by">Scott Chacon &amp; Ben Straub</span></div></li>
+            <li><span class="rkind free">Docs</span><div><a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests">About pull requests</a> <span class="by">GitHub Docs</span></div></li>
+            <li><span class="rkind free">Guide</span><div><a href="https://google.github.io/eng-practices/review/">Code Review Developer Guide</a> <span class="by">Google</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

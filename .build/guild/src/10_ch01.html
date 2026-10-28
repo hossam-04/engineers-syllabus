@@ -1,0 +1,251 @@
+    <div class="part" id="part1">
+      <span class="part-num">Part I</span>
+      <h2>Depth</h2>
+      <p>Four chapters on going deep in one area. First, what expertise is and how to choose where to build it, honestly, with an eye on how fragile the choice is. Then the two best ways into any area: its founding papers, read by building their core ideas small enough to run, and its production code, read with a map and a trace rather than from the first line down. By the end of this part you have an area, a reading list, and a method for each.</p>
+    </div>
+
+    <section class="chapter prose" id="ch01" data-ch="01">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 01</span><label class="done-toggle"><input type="checkbox" data-id="ch01"><span class="box"></span>Read</label></div>
+        <h3>What mastery is</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Expertise isn't one more subject to study. It's three things that grow together: depth in an area you chose, taste built from having been wrong, and the ability to make other engineers better. The first is the one you can plan. Pick the area deliberately, go several levels deeper than your team needs, and expect it to take years rather than months. This chapter is about choosing well, and about knowing how fragile your choice is.</p>
+      </header>
+
+      <h4>Depth, taste and leverage</h4>
+      <p>Every stage before this one taught breadth: enough of each layer to work across all of them. That's the foundation, and it's what makes an engineer reliable. What makes one exceptional is different. When the database is losing writes at three in the morning, or a design review needs someone who has seen this exact failure before, teams don't call the person who knows a little of everything. They call the person who knows one thing all the way down.</p>
+      <p>That depth is the first part of expertise. The second is <b>taste</b>: a sense of which designs will age well and which will hurt, which risks are real and which are noise. Taste isn't mysterious. It's a large store of cases, most of them mistakes, yours and other people's, compressed into fast judgement. The third is <b>leverage</b>: the ability to make that judgement useful to others, through review, design documents, mentoring and writing. An expert whose knowledge stays in their head helps one project at a time. One who can teach it changes how a whole organisation builds.</p>
+      <p>This volume covers all three. Part I is about depth: choosing an area and reading your way into it, through papers and production code. Part II is about working in the open, where taste is built and tested: open source, design documents, trade-offs and public writing. Part III is about leading: estimation, sequencing, communication and mentoring. Part IV is about the long game: the business, measurement, finishing things and a career that compounds.</p>
+
+      <h4>Three levels deeper</h4>
+      <p>The syllabus asks you to go "three levels deeper than your team needs", which needs unpacking. Think of knowing a technology at four levels. At level 1 you can <b>use</b> it: write the queries, call the API, follow the guide. At level 2 you can <b>configure and debug</b> it: tune it, read its logs, explain why it's slow. At level 3 you know its <b>internals and failure modes</b>: how it stores data, what it does under partition or overload, which of its guarantees are weaker than they sound. At level 4 you can <b>change</b> it: fix bugs in its source, contribute features, or build a smaller version yourself and explain every trade-off you made.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A T shape. Across the top, a row of sixteen cells for the sixteen stages of the syllabus: breadth. Below one cell, stage 08 databases, a column goes four levels down: 1 use it, 2 configure and debug it, 3 know its internals and failure modes, 4 change it. A dashed line after level 2 marks what most teams need. Levels 3 and 4, below the line, are where you're the one people call.">
+          <defs><marker id="f01-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f01-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <text class="dg-title" x="24" y="24">BREADTH: THE SIXTEEN STAGES</text>
+          <rect class="dg-box" x="24" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="44" y="54" text-anchor="middle">00</text>
+          <rect class="dg-box" x="68" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="88" y="54" text-anchor="middle">01</text>
+          <rect class="dg-box" x="112" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="132" y="54" text-anchor="middle">02</text>
+          <rect class="dg-box" x="156" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="176" y="54" text-anchor="middle">03</text>
+          <rect class="dg-box" x="200" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="220" y="54" text-anchor="middle">04</text>
+          <rect class="dg-box" x="244" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="264" y="54" text-anchor="middle">05</text>
+          <rect class="dg-box" x="288" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="308" y="54" text-anchor="middle">06</text>
+          <rect class="dg-box" x="332" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="352" y="54" text-anchor="middle">07</text>
+          <rect class="dg-hot" x="376" y="36" width="40" height="28"></rect>
+          <text class="dg-small dg-hot-text" x="396" y="54" text-anchor="middle">08</text>
+          <rect class="dg-box" x="420" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="440" y="54" text-anchor="middle">09</text>
+          <rect class="dg-box" x="464" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="484" y="54" text-anchor="middle">10</text>
+          <rect class="dg-box" x="508" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="528" y="54" text-anchor="middle">11</text>
+          <rect class="dg-box" x="552" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="572" y="54" text-anchor="middle">12</text>
+          <rect class="dg-box" x="596" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="616" y="54" text-anchor="middle">13</text>
+          <rect class="dg-box" x="640" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="660" y="54" text-anchor="middle">14</text>
+          <rect class="dg-box" x="684" y="36" width="40" height="28"></rect>
+          <text class="dg-small" x="704" y="54" text-anchor="middle">15</text>
+          <text class="dg-title" x="24" y="100">DEPTH IN ONE AREA</text>
+          <text class="dg-small" x="24" y="120">stage 08, databases</text>
+          <line class="dg-edge" x1="396" y1="64" x2="396" y2="76"></line>
+          <rect class="dg-box" x="376" y="76" width="40" height="36"></rect>
+          <text class="dg-label" x="396" y="99" text-anchor="middle">1</text>
+          <text class="dg-small" x="430" y="98">use it</text>
+          <rect class="dg-box" x="376" y="120" width="40" height="36"></rect>
+          <text class="dg-label" x="396" y="143" text-anchor="middle">2</text>
+          <text class="dg-small" x="430" y="142">configure and debug it</text>
+          <rect class="dg-hot" x="376" y="180" width="40" height="36"></rect>
+          <text class="dg-label dg-hot-text" x="396" y="203" text-anchor="middle">3</text>
+          <text class="dg-small" x="430" y="202">know its internals and failure modes</text>
+          <rect class="dg-hot" x="376" y="224" width="40" height="36"></rect>
+          <text class="dg-label dg-hot-text" x="396" y="247" text-anchor="middle">4</text>
+          <text class="dg-small" x="430" y="246">change it: fix, contribute, rebuild</text>
+          <line class="dg-life" x1="24" y1="168" x2="736" y2="168"></line>
+          <text class="dg-small" x="24" y="160">what most teams need, above the line</text>
+          <text class="dg-small dg-hot-text" x="736" y="296" text-anchor="end">levels 3 and 4: where you're the one they call</text>
+        </svg>
+        <figcaption>Breadth across every stage, depth in one. Most teams need levels 1 and 2 of everything they use; the expert is the person who has gone past the dashed line in one area.</figcaption>
+      </figure>
+      <p>Most teams need level 1 of most of what they use and level 2 of a few things. "Three levels deeper" means being at level 3 or 4 in something your team relies on, so that you're the person who can answer the questions nobody else can. It doesn't mean ignoring everything else. The T shape, broad across the top and deep in one place, is the usual picture, and the breadth matters: depth in databases is worth far more to someone who also understands the network, the operating system and the product than to someone who doesn't.</p>
+
+      <h4>Choosing where to go deep</h4>
+      <p>The hub's tracks, backend and distributed systems, platform, AI engineering, low-level systems, product and frontend, and security, are broad families. Inside each are areas narrow enough to master: storage engines, consensus and replication, query planning, cryptographic engineering, rendering performance. Choose an area, not a track. Four questions help.</p>
+      <ul>
+        <li><b>Leverage:</b> how often do your team's hardest problems land in this area? Depth that your work uses every week compounds; depth that your work never touches decays.</li>
+        <li><b>Curiosity:</b> would you read about it on a free weekend, for years? Mastery takes a decade of attention, and only genuine interest survives that long.</li>
+        <li><b>Adjacency:</b> how much of what you already know carries over? An area next to your strengths gets you to level 3 sooner, and the early progress keeps you going.</li>
+        <li><b>Demand:</b> how many teams, anywhere, need a deep expert in it? This matters less than people think, because real depth in almost anything is rare, but it matters.</li>
+      </ul>
+      <p>None of these is decisive on its own, and the honest way to combine them is to write them down, weight them, and then ask how much your answer depends on numbers you guessed. The example does exactly that, for a backend engineer on a payments team weighing five areas.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">track.py &middot; five candidate areas scored against four criteria, then tested for how fragile the winner is</span></figcaption><pre><code class="language-python">"""Choosing a track to go deep in: score the candidates, then ask how fragile the answer is."""
+
+# A backend engineer on a payments team, scoring five candidate tracks from 1 to 5.
+CRITERIA = {             # weight: how much this criterion matters to them
+    "leverage": 3,       # how often their team's hard problems land here
+    "curiosity": 3,      # would they read about it on a free weekend, for years?
+    "adjacency": 2,      # how much of what they already know carries over
+    "demand": 1,         # how many teams, anywhere, need a deep expert in it
+}
+TRACKS = {
+    "databases":        {"leverage": 5, "curiosity": 3, "adjacency": 4, "demand": 4},
+    "distributed":      {"leverage": 4, "curiosity": 4, "adjacency": 3, "demand": 4},
+    "security":         {"leverage": 3, "curiosity": 5, "adjacency": 2, "demand": 5},
+    "performance":      {"leverage": 3, "curiosity": 3, "adjacency": 3, "demand": 3},
+    "ml-infrastructure": {"leverage": 1, "curiosity": 4, "adjacency": 1, "demand": 5},
+}
+
+
+def total(track, weights):
+    return sum(weights[c] * TRACKS[track][c] for c in weights)
+
+
+def ranking(weights):
+    return sorted(TRACKS, key=lambda t: (-total(t, weights), t))
+
+
+weights = dict(CRITERIA)
+order = ranking(weights)
+print("track               " + "".join(f"{c:>11}" for c in CRITERIA) + "      total")
+for t in order:
+    print(f"{t:20}" + "".join(f"{TRACKS[t][c]:>11}" for c in CRITERIA) + f"{total(t, weights):>11}")
+winner, runner_up = order[0], order[1]
+lead = total(winner, weights) - total(runner_up, weights)
+print(f"\nwinner: {winner}, {lead} points ahead of {runner_up}")
+
+# How far can each weight move, with the others held, before the winner changes?
+print("\nweight range that keeps the same winner (tried from 0 to 6 in steps of 0.5):")
+for c in CRITERIA:
+    keep = [w / 2 for w in range(0, 13) if ranking({**weights, c: w / 2})[0] == winner]
+    flips = sorted({ranking({**weights, c: w / 2})[0] for w in range(0, 13)} - {winner})
+    note = "never flips" if not flips else "otherwise " + ", ".join(flips) + " wins"
+    print(f"  {c:10} now {weights[c]}:  {min(keep):g} to {max(keep):g}   ({note})")
+
+# What would have to be true for the runner-up to win? One score at a time.
+def winner_if(track, criterion, score):
+    saved, TRACKS[track][criterion] = TRACKS[track][criterion], score
+    try:
+        return ranking(weights)[0]
+    finally:
+        TRACKS[track][criterion] = saved
+
+
+print(f"\nwhat would have to be true for {runner_up} to win, one score at a time:")
+print(f"  {'criterion':10} {winner + ' falls to':>18} {runner_up + ' rises to':>20}")
+for c in CRITERIA:
+    now_w, now_r = TRACKS[winner][c], TRACKS[runner_up][c]
+    fall = next((s for s in range(now_w - 1, 0, -1) if winner_if(winner, c, s) == runner_up), None)
+    rise = next((s for s in range(now_r + 1, 6) if winner_if(runner_up, c, s) == runner_up), None)
+    show = lambda now, s: f"{now} -> {s}" if s else "no score does it"
+    print(f"  {c:10} {show(now_w, fall):>18} {show(now_r, rise):>20}")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">track                  leverage  curiosity  adjacency     demand      total
+databases                     5          3          4          4         36
+distributed                   4          4          3          4         34
+security                      3          5          2          5         33
+performance                   3          3          3          3         27
+ml-infrastructure             1          4          1          5         22
+
+winner: databases, 2 points ahead of distributed
+
+weight range that keeps the same winner (tried from 0 to 6 in steps of 0.5):
+  leverage   now 3:  1.5 to 6   (otherwise security wins)
+  curiosity  now 3:  0 to 4.5   (otherwise security wins)
+  adjacency  now 2:  0.5 to 6   (otherwise security wins)
+  demand     now 1:  0 to 4   (otherwise security wins)
+
+what would have to be true for distributed to win, one score at a time:
+  criterion  databases falls to distributed rises to
+  leverage               5 -&gt; 4               4 -&gt; 5
+  curiosity              3 -&gt; 2               4 -&gt; 5
+  adjacency              4 -&gt; 2               3 -&gt; 5
+  demand                 4 -&gt; 1     no score does it</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>The weights matter less than you'd expect.</b> Databases wins, two points ahead of distributed systems, and it stays the winner over wide ranges of every weight. Leverage could fall from 3 to 1.5, or curiosity rise from 3 to 4.5, before security overtook it. Arguing about whether curiosity deserves a weight of 3 or 4 is mostly wasted breath.</p>
+      <p><b>The scores matter more.</b> A single point, databases' leverage at 4 instead of 5, or its curiosity at 2 instead of 3, hands the win to distributed systems. That's the useful output. It tells you the decision is a near tie between two areas, decided by two judgements you could check. Is the team's hardest work really in the database? Spend a week reading database internals and see whether your curiosity score holds up. A decision matrix is worth less for its answer than for showing you which question to go and answer.</p>
+      <p>And notice what didn't come close: machine-learning infrastructure, with the highest demand of all, came last, because nothing in this engineer's work or experience touches it. Demand without leverage or adjacency makes for a slow, lonely start.</p>
+
+      <h4>How long it takes</h4>
+      <p>Peter Norvig's essay <i>Teach Yourself Programming in Ten Years</i> borrows a finding from research on expertise in chess, music and sport: world-class performance takes about ten years of deliberate practice, and there's no known shortcut. Engineering is no different. That sounds discouraging until you notice what it implies: if you start now and keep going, you'll have it, and most people never start. A useful level 3 in one area takes perhaps two years of steady effort alongside a job, and level 4 several more.</p>
+      <p>The effort needs a shape, or it dissolves into reading whatever crosses your feed. Chapter 16 of <i>The Engineer's Whetstone</i> covers deliberate practice; here, the concrete version is a standing list of the next three things you'll read or build in your area, renewed whenever one is done. The rest of Part I is about two of the best sources: the papers that founded your area, and the production code that implements it.</p>
+
+      <h4>Taste comes from being wrong</h4>
+      <p>Taste grows from cases, and the most instructive cases are your own mistakes, but only if you notice them. Memory is generous to its owner: a year later, you'll remember having been fairly sure the migration would be risky, whatever you actually said. The cure is a <b>decision journal</b>. Before a decision that matters, write a few lines: what you decided, what you expected to happen, how confident you were, and what would prove you wrong. Months later, read it back. The surprises are the lessons, and they're the raw material of taste.</p>
+      <p>Other people's mistakes count too, and they're cheaper. Postmortems, published incident reports, design documents that describe a rejected alternative and why: read them in your area as you'd read case law. Over time you'll find you can predict the failure before reading how it ended. That's what taste is.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Specialising before you have breadth,</b> so the depth has nothing to connect to.</li>
+          <li><b>Choosing by demand alone,</b> an area that's popular but that your work never touches.</li>
+          <li><b>Staying at level 2 everywhere,</b> because each new tool feels like progress.</li>
+          <li><b>Treating a decision matrix's answer as the decision,</b> rather than as a pointer to what to check.</li>
+          <li><b>Remembering your judgement as better than it was,</b> because nothing was written down at the time.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 1.1</span><span class="ex-title">Score your own areas</span></div>
+          <p>Change the example's areas, scores and weights to your own. Which area wins, and what's the smallest single change that would make the runner-up win? What would you do in the next month to find out whether that change is true?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Your numbers are yours, but the shape of a good answer is the same. Suppose storage engines beat stream processing by three points, and the smallest flip is your curiosity about storage engines dropping by one. Then the next month's task is a test of that score: read the first four chapters of <i>Database Internals</i> and one paper, LSM trees or a B-tree variant, and notice whether you look forward to it. If the flip were leverage instead, the test would be different: list the last ten hard problems your team hit and count how many were really storage problems. Either way, the exercise turns a vague career question into a small experiment with an answer. If no single change flips the result, the decision isn't close, and you can stop deliberating and start.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 1.2</span><span class="ex-title">Describe level 3</span></div>
+          <p>Pick a technology your team uses every day. Write down three things someone at level 3 would know about it that someone at level 2 wouldn't.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>For PostgreSQL, for example. At level 2 you can read <code>EXPLAIN ANALYZE</code> and add an index. At level 3 you know, first, that an <code>UPDATE</code> writes a whole new row version and leaves the old one for vacuum, so a table updated constantly bloats, and a long-running transaction anywhere stops vacuum from reclaiming it. Second, that the planner's row estimates come from sampled statistics with an independence assumption, so correlated columns produce wild misestimates that no index fixes. Third, that <code>synchronous_commit</code>, <code>fsync</code> and replication settings decide what a "committed" transaction survives, and that the defaults trade some of that for speed. Each of these is a failure mode, not a feature, which is the mark of level 3: you know how it breaks. If your three items read like documentation of features, push further.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 1.3</span><span class="ex-title">A decision journal entry</span></div>
+          <p>Write a decision journal entry for a technical decision you're facing this month, in no more than eight lines.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">2026-10-23  Decision: add a read replica for reporting, rather than a separate warehouse.
+Why: reporting queries are 40% of primary CPU; a replica takes a week, a warehouse a quarter.
+Expect: primary CPU down to about 55% at peak within two weeks of the switch.
+Confidence: 70%.
+I'm wrong if: replica lag makes the finance team's end-of-day report unusable,
+              or CPU stays above 70% because the real cost was something else.
+Alternatives rejected: query tuning only (tried, saved 10%); a warehouse (too slow to deliver).
+Review on: 2026-12-01.</code></pre>
+            <p>The entry is short enough that you'll actually write it, and specific enough to be checked: a number, a confidence, a date, and the evidence that would prove it wrong. The "I'm wrong if" line is the most valuable, because it's the one memory rewrites. When you review it in December, record what happened in one line beneath it. After a year of entries, read them all in one sitting: your recurring errors, perhaps always underestimating migration time, or overrating new tools, become obvious, and that's the start of taste.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you name the area you're going deep in, and say why it beat the alternatives?</li>
+            <li>Can you describe what level 3 and level 4 mean for it, concretely?</li>
+            <li>Do you know which of your judgements your choice depends on, and how you'd test them?</li>
+            <li>Do you have a standing list of the next three things to read or build?</li>
+            <li>Do you keep a decision journal, and review it?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Guides</span><div><a href="https://staffeng.com/guides/">Staff Engineer: guides</a> <span class="by">Will Larson</span></div></li>
+            <li><span class="rkind free">Essay</span><div><a href="https://norvig.com/21-days.html">Teach Yourself Programming in Ten Years</a> <span class="by">Peter Norvig</span></div></li>
+            <li><span class="rkind free">Talk</span><div><a href="https://www.cs.virginia.edu/~robins/YouAndYourResearch.html">You and Your Research</a> <span class="by">Richard Hamming, 1986</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

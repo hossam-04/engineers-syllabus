@@ -1,0 +1,201 @@
+    <section class="chapter prose" id="ch08" data-ch="08">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 08</span><label class="done-toggle"><input type="checkbox" data-id="ch08"><span class="box"></span>Read</label></div>
+        <h3>Writing in public</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">A body of written work compounds more than any certificate: every post that explains something well keeps working, for readers you'll never meet, for years. Write about what you learned the hard way, in your area, regularly. And write so it gets read: lead with the point, prefer concrete facts to adjectives, cut the hedges and the throat-clearing, and say who did what. Most of those habits can be checked mechanically, and the example checks them.</p>
+      </header>
+
+      <h4>Why write where others can read it</h4>
+      <p>Writing in public does four things at once. It <b>clarifies</b>: an explanation you've had to write down, for readers who can't interrupt, is one you actually understand, and the gaps show while you write. It <b>compounds</b>: a good post on why your migration locked a table answers the same question for hundreds of engineers who search for it later, without any further effort from you. It <b>builds a reputation</b> in your area that no job title gives: when people in your field know your name from your writing, opportunities find you. And it <b>helps people</b>, which is reason enough.</p>
+      <p>The syllabus asks for "a written archive others cite". That's a high bar on purpose. It doesn't mean a viral post. It means years of steady, useful writing in one area, until other people link to it when they explain the subject. That's achievable for anyone who writes something worthwhile every month or so and keeps going.</p>
+
+      <h4>What to write</h4>
+      <p>The best material is whatever cost you the most to learn. The incident that took a day to diagnose, the migration that went wrong, the library behaviour that wasn't documented, the paper you finally understood by building it: each is a post that saves someone else the same day. Explanations of your area, written at the level of a capable engineer who doesn't know it yet, are always needed. Notes on what you read, the one-page summaries chapter 2 suggested, are publishable with a little polish. And small posts count. Simon Willison's habit of publishing short "today I learned" notes, hundreds of them, built one of the most useful archives in the field. A post doesn't need to be long; it needs to be true, specific and findable.</p>
+      <p>Check what you can share. Anything about your employer's systems needs their permission, and many companies have a review process for engineering posts. Incidents can usually be described without customer data or confidential numbers, and the lesson rarely depends on them.</p>
+
+      <h4>Writing that gets read</h4>
+      <p>Readers decide in a sentence or two whether to keep going. Put the most important thing first, the way a news story does: what happened, or what the reader will learn. Use specific facts instead of adjectives: "locked the orders table for eleven minutes" rather than "caused some issues". Keep sentences short enough to read in one breath. Say who did what: "we ran the migration", not "the migration was run", because the passive voice hides the actor, and in technical writing the actor is usually the point. Cut the hedges, "I think", "perhaps", "quite", "basically", which make a writer sound unsure without making them more accurate. And cut the throat-clearing, "In this post I want to talk about", which spends the reader's patience before saying anything.</p>
+      <p>These are habits, so they can be checked. The example measures a draft opening of a blog post about a migration that went wrong, and its rewrite: sentence length, a readability score, and the hedges, throat-clearing and passive constructions in each.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">prose.py &middot; the mechanical habits that make technical writing hard to read, measured on a draft opening and its rewrite</span></figcaption><pre><code class="language-python">"""A prose checker for writing in public: the mechanical habits that make technical writing hard to
+read, measured on the opening of a blog post before and after editing."""
+import re
+import statistics
+
+BEFORE = """In this post I want to talk a little bit about something that I think is quite important,
+which is the way that database migrations are handled by many teams. It is important to note that
+mistakes were made by us in the past, and it could perhaps be argued that some of them were really
+avoidable. Basically, the migration was run during the day and the table was locked by it for
+eleven minutes, which was obviously not ideal for our users."""
+
+AFTER = """A migration locked our orders table for eleven minutes on a Tuesday afternoon. Nobody could
+check out. The fix took one line, and the lesson took longer: on a large table, adding a column with
+a default rewrote every row while holding the lock. Here is what we changed, and the three rules we
+now follow for every migration."""
+
+HEDGES = (r"\b(i think|perhaps|maybe|might|could|somewhat|quite|very|really|just|basically"
+          r"|obviously|a little bit)\b")
+OPENERS = r"\b(in this post|it is important to note|i want to talk|needless to say|at the end of the day)\b"
+PASSIVE = r"\b(?:is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(\w+ed|made|run|done|held|taken|written)\b"
+
+
+def syllables(word):
+    groups = re.findall(r"[aeiouy]+", word.lower())
+    n = len(groups) - (word.lower().endswith("e") and len(groups) > 1)
+    return max(1, n)
+
+
+def check(text):
+    text = " ".join(text.split())
+    sentences = [s for s in re.split(r"(?<=[.!?])\s+", text) if s]
+    words = re.findall(r"[A-Za-z']+", text)
+    lengths = [len(re.findall(r"[A-Za-z']+", s)) for s in sentences]
+    flesch = 206.835 - 1.015 * len(words) / len(sentences) - 84.6 * sum(map(syllables, words)) / len(words)
+    return {
+        "sentences": len(sentences),
+        "words per sentence": round(statistics.mean(lengths), 1),
+        "longest sentence": max(lengths),
+        "reading ease": round(flesch),
+        "hedges": [m.group(0) for m in re.finditer(HEDGES, text, re.I)],
+        "throat-clearing": [m.group(0) for m in re.finditer(OPENERS, text, re.I)],
+        "passive": [m.group(0) for m in re.finditer(PASSIVE, text, re.I)],
+        "first sentence": sentences[0],
+    }
+
+
+before, after = check(BEFORE), check(AFTER)
+print(f"{'':22}{'before':>10}{'after':>10}")
+for key in ("sentences", "words per sentence", "longest sentence", "reading ease"):
+    print(f"{key:22}{before[key]:>10}{after[key]:>10}")
+for key in ("hedges", "throat-clearing", "passive"):
+    print(f"{key:22}{len(before[key]):>10}{len(after[key]):>10}")
+print("\nflagged in the first draft:")
+for key in ("throat-clearing", "hedges", "passive"):
+    print(f"  {key}: " + "; ".join(before[key]))
+print("\nwhat each version's first sentence promises the reader:")
+print("  before:", before["first sentence"][:88] + " ...")
+print("  after: ", after["first sentence"])</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">                          before     after
+sentences                      3         4
+words per sentence          27.7      14.8
+longest sentence              30        27
+reading ease                  58        66
+hedges                         8         1
+throat-clearing                3         0
+passive                        5         0
+
+flagged in the first draft:
+  throat-clearing: In this post; I want to talk; It is important to note
+  hedges: a little bit; I think; quite; could; perhaps; really; Basically; obviously
+  passive: are handled; were made; be argued; was run; was locked
+
+what each version's first sentence promises the reader:
+  before: In this post I want to talk a little bit about something that I think is quite important ...
+  after:  A migration locked our orders table for eleven minutes on a Tuesday afternoon.</code></pre></figure>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pairs of bars comparing the draft and the rewrite, from the example. Words per sentence: 27.7 in the draft, 14.8 in the rewrite. Hedges: 8 and 1. Passive constructions: 5 and 0. Throat-clearing phrases: 3 and 0. Reading ease: 58 and 66, higher being easier.">
+          <defs><marker id="f08-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f08-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <rect class="dg-bar" x="270" y="14" width="14" height="12"></rect>
+          <text class="dg-small" x="290" y="24">draft</text>
+          <rect class="dg-bar-hot" x="360" y="14" width="14" height="12"></rect>
+          <text class="dg-small" x="380" y="24">rewrite</text>
+          <text class="dg-small" x="256" y="61" text-anchor="end">words per sentence</text>
+          <rect class="dg-bar" x="270" y="44" width="350.867" height="11"></rect>
+          <text class="dg-tick" x="628.867" y="54">27.7</text>
+          <rect class="dg-bar-hot" x="270" y="57" width="187.467" height="11"></rect>
+          <text class="dg-tick" x="465.467" y="67">14.8</text>
+          <text class="dg-small" x="256" y="99" text-anchor="end">hedges</text>
+          <rect class="dg-bar" x="270" y="82" width="304" height="11"></rect>
+          <text class="dg-tick" x="582" y="92">8</text>
+          <rect class="dg-bar-hot" x="270" y="95" width="38" height="11"></rect>
+          <text class="dg-tick" x="316" y="105">1</text>
+          <text class="dg-small" x="256" y="137" text-anchor="end">passive constructions</text>
+          <rect class="dg-bar" x="270" y="120" width="190" height="11"></rect>
+          <text class="dg-tick" x="468" y="130">5</text>
+          <rect class="dg-bar-hot" x="270" y="133" width="2" height="11"></rect>
+          <text class="dg-tick" x="280" y="143">0</text>
+          <text class="dg-small" x="256" y="175" text-anchor="end">throat-clearing</text>
+          <rect class="dg-bar" x="270" y="158" width="114" height="11"></rect>
+          <text class="dg-tick" x="392" y="168">3</text>
+          <rect class="dg-bar-hot" x="270" y="171" width="2" height="11"></rect>
+          <text class="dg-tick" x="280" y="181">0</text>
+          <text class="dg-small" x="256" y="213" text-anchor="end">reading ease (higher is easier)</text>
+          <rect class="dg-bar" x="270" y="196" width="220.4" height="11"></rect>
+          <text class="dg-tick" x="498.4" y="206">58</text>
+          <rect class="dg-bar-hot" x="270" y="209" width="250.8" height="11"></rect>
+          <text class="dg-tick" x="528.8" y="219">66</text>
+        </svg>
+        <figcaption>The same story, told twice. The rewrite halves the sentence length and loses almost every hedge and passive, and its first sentence says what happened.</figcaption>
+      </figure>
+
+      <h4>What the example shows</h4>
+      <p><b>The draft spends its opening on nothing.</b> Its first sentence, "In this post I want to talk a little bit about something that I think is quite important", contains three hedges and a throat-clearing phrase, and tells the reader nothing. Five passive constructions, "mistakes were made by us", "the table was locked by it", keep the events at arm's length. Its sentences average 28 words.</p>
+      <p><b>The rewrite starts with the event.</b> "A migration locked our orders table for eleven minutes on a Tuesday afternoon." The reader knows what happened, how bad it was and when, in one sentence, and the next, "Nobody could check out", says why it mattered. Sentences average 15 words, the reading-ease score rises from 58 to 66, and the passives are gone. The one "hedge" left is a false alarm: "nobody could check out" uses "could" literally. Like the design-document reviewer in chapter 6, this checker finds candidates, and a human decides.</p>
+      <p>The readability formula, Rudolf Flesch's reading ease from 1948, is crude. It counts only sentence and word length, and its syllable counting here is a heuristic. Use it to compare drafts of the same text, never as a target in itself.</p>
+
+      <h4>Publishing, and keeping going</h4>
+      <p>Publish where you own the archive. A blog on your own domain, even a simple static one, keeps working when platforms change their rules or disappear, and every link to it builds on the same address. Cross-post to community sites if you like, but keep the canonical copy at home. A company engineering blog is a fine second outlet, with a review process that protects you as well as them.</p>
+      <p>Consistency beats brilliance. One useful post a month, for three years, is thirty-six posts in your area, which is more than most experts have written. Talks multiply the effect: a post that's been well received is most of a conference talk, and a talk is most of a post. Find one reader who'll tell you honestly where a draft loses them, and edit before publishing: most first drafts improve by losing a third of their words, as <i>The Engineer's Craft</i> argues for internal documents too.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Waiting until you're an expert to write,</b> when explaining what you just learned is the most useful writing there is.</li>
+          <li><b>Opening with throat-clearing,</b> so readers leave before the point.</li>
+          <li><b>Adjectives instead of facts,</b> "significant", "robust", "slow".</li>
+          <li><b>Publishing only on a platform you don't control,</b> so the archive can vanish.</li>
+          <li><b>Writing once, brilliantly, then never again,</b> when the value is in the archive.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 8.1</span><span class="ex-title">Rewrite a paragraph</span></div>
+          <p>Rewrite this opening so it says what happened in the first sentence: "Recently, it was decided that our caching layer should be looked at, as there had been some concerns raised about performance, which were thought to be quite significant."</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>"Our product pages got 40% slower in March, and the cache was the reason: a deploy had cut its hit rate from 94% to 61%. Here's how we found it, and the alert we added so it can't happen quietly again." The original had four passives, "it was decided", "be looked at", "concerns raised", "were thought", and no facts. The rewrite names the event, gives the numbers, and promises the reader what they'll learn. Notice that writing it required facts the original didn't contain, how much slower, why, what changed. That's typical: vague prose often hides that the writer hasn't yet found out the specifics, and rewriting it is how you discover what you still need to know.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 8.2</span><span class="ex-title">Titles that promise something</span></div>
+          <p>Improve these titles: "Some thoughts on databases", "Our migration journey" and "Caching: a deep dive".</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">Some thoughts on databases  ->  Why our Postgres table grew to 40 GB when the data was 2
+Our migration journey       ->  The migration that locked checkout for eleven minutes
+Caching: a deep dive        ->  How one deploy cut our cache hit rate from 94% to 61%</code></pre>
+            <p>Each new title makes a specific promise, contains a fact, and tells a reader whether the post is for them. They're also what people search for: someone whose table is mysteriously large will find the first, and nobody searches for "some thoughts". A useful test is whether the title could only belong to your post. "Caching: a deep dive" could head ten thousand articles; the rewrite heads one.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 8.3</span><span class="ex-title">A year of writing</span></div>
+          <p>Plan twelve posts for the next year in your chosen area, with a sentence each.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Draw from four sources, three posts each. <b>Hard lessons:</b> the incident you diagnosed this quarter; the migration that taught you about locks; the performance problem that turned out to be somewhere else. <b>Explanations:</b> how your database's query planner estimates rows; what fsync really guarantees; why your area's most common advice is sometimes wrong. <b>Reading notes:</b> one paper a quarter from your list, summarised with what you built to understand it. <b>Tools:</b> the small script that saved you hours, the checklist you use in reviews, the dashboard query everyone copies. Put them on a calendar, one in the first week of each month, and write the easiest first so the habit starts. If one month slips, publish two short posts the next rather than skipping; the habit is the thing being built, and at the end of the year the twelve posts are the start of an archive.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Do you have somewhere you own to publish, and something on it?</li>
+            <li>Does your first sentence say what happened or what the reader will learn?</li>
+            <li>Do you replace adjectives with facts, and cut hedges and throat-clearing?</li>
+            <li>Do you have a reader who'll tell you where a draft loses them?</li>
+            <li>Do you publish on a regular rhythm, in your area?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Course</span><div><a href="https://developers.google.com/tech-writing">Technical Writing</a> <span class="by">Google for Developers</span></div></li>
+            <li><span class="rkind free">Essay</span><div><a href="https://simonwillison.net/2022/Nov/6/what-to-blog-about/">What to blog about</a> <span class="by">Simon Willison</span></div></li>
+            <li><span class="rkind paid">Book</span><div><a href="https://www.harpercollins.com/products/on-writing-well-william-zinsser">On Writing Well</a> <span class="by">William Zinsser</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

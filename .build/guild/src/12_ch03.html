@@ -1,0 +1,189 @@
+    <section class="chapter prose" id="ch03" data-ch="03">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 03</span><label class="done-toggle"><input type="checkbox" data-id="ch03"><span class="box"></span>Read</label></div>
+        <h3>The canon</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">A handful of papers, published over about ten years, founded the distributed data systems most of the industry now runs on. Read them in order and they become a conversation: each one answers a problem the last one left open. This chapter gives a reading order with the one lesson each paper teaches, then reads the most surprising of them, Spanner, closely enough to build its central trick: making timestamps agree with real time by waiting out the clocks' uncertainty.</p>
+      </header>
+
+      <h4>A conversation in seven papers</h4>
+      <p>The syllabus names six papers: <i>The Google File System</i>, MapReduce, Bigtable, Dynamo, Spanner and Raft. Read in publication order, with Chubby added, they tell a story about one question: how do you build a dependable system out of thousands of machines that fail all the time?</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Year</th><th>Paper</th><th>The lesson that transfers</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">2003</td><td>The Google File System</td><td>Treat failure as the normal case, and design for your real workload, not a general one.</td></tr>
+            <tr><td class="mono">2004</td><td>MapReduce</td><td>A restricted programming model buys automatic distribution and fault tolerance.</td></tr>
+            <tr><td class="mono">2006</td><td>Bigtable</td><td>A sorted, versioned map, built on a file system and a lock service, can serve both batch and online work.</td></tr>
+            <tr><td class="mono">2006</td><td>Chubby</td><td>Put consensus in one small, well-tested service, and let everything else lean on it.</td></tr>
+            <tr><td class="mono">2007</td><td>Dynamo</td><td>When availability matters more than agreement, accept conflicting versions and reconcile them.</td></tr>
+            <tr><td class="mono">2012</td><td>Spanner</td><td>With bounded clock uncertainty, a global database can have real-time ordering, at the price of waiting.</td></tr>
+            <tr><td class="mono">2014</td><td>Raft</td><td>Consensus can be designed to be understood, and understandability is a correctness property.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Two lines of descent run through the table. Google's papers keep strong coordination and spend engineering on making it cheap: a single master in GFS, a lock service under Bigtable, Paxos inside Spanner. Amazon's Dynamo goes the other way: no master, writes accepted anywhere, conflicts resolved afterwards, because a shopping cart that's sometimes inconsistent beats one that's sometimes unavailable. <i>The Engineer's Fleet</i> covers the theory behind that choice. The papers show it being made, by people with real constraints, and that's the part that builds judgement.</p>
+      <p>Read the first pass of all seven in a weekend, then one a month in depth. For each, find the sentence where the authors state the assumption everything else depends on. GFS assumes large files written by appending. Dynamo assumes applications can merge conflicting versions. Spanner assumes clocks whose error is known and small. When a system built on one of these designs misbehaves, it's very often because that assumption stopped being true.</p>
+
+      <h4>Spanner's problem</h4>
+      <p>Spanner, from James Corbett and colleagues at Google in 2012, is a database spread across data centres on several continents that still gives transactions a property called <b>external consistency</b>: if one transaction commits before another starts, in real time, the first gets the smaller timestamp. That sounds obvious, and it's very hard, because the two transactions may run on machines thousands of kilometres apart whose clocks disagree.</p>
+      <p>Why it matters: suppose an administrator revokes Bob's access to a folder, and a moment later, a colleague uploads a salary file to it. The revoke committed first, in real time. If the machines' clocks disagree, the upload can still get the earlier timestamp. Then a read of the database "as of" some moment between the two timestamps, the kind of consistent snapshot every backup, report and replica uses, sees the salary file in the folder and Bob still allowed to read it. No single machine did anything wrong; the timestamps simply lied about the order.</p>
+
+      <h4>TrueTime and commit wait</h4>
+      <p>Spanner's answer has two parts. The first is <b>TrueTime</b>, a clock API that doesn't return a time but an interval: <code>TT.now()</code> returns <code>[earliest, latest]</code>, guaranteed to contain the true time. Google keeps the interval narrow with GPS receivers and atomic clocks in every data centre; the paper reports an uncertainty, called epsilon, that typically varied between about 1 and 7 milliseconds.</p>
+      <p>The second part is a rule. When a transaction commits, Spanner takes its timestamp from the top of the interval, <code>latest</code>, a time no earlier than now, and then waits, before letting anyone see the commit, until <code>TT.now().earliest</code> has passed that timestamp. After the wait, the timestamp is certainly in the past everywhere. Any transaction that starts afterwards, on any machine, will read a clock whose interval lies entirely after it, and so get a larger timestamp. The figure shows one commit, and the example tests the rule against the alternative of stamping commits with the local clock.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A timeline of true time. Transaction T1 asks to commit at true time t1. Node A's TrueTime interval at that moment spans t1 minus epsilon to t1 plus epsilon, and T1's timestamp s is the interval's latest end. Commit wait lasts until node A's earliest bound passes s, about two epsilon later, and only then is T1 visible. T2 starts after that, on node B, and whatever B's clock error, its timestamp is greater than s.">
+          <defs><marker id="f03-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f03-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <line class="dg-axis" x1="40" y1="220" x2="730" y2="220" marker-end="url(#f03-n)"></line>
+          <text class="dg-small" x="730" y="240" text-anchor="end">true time</text>
+          <text class="dg-title" x="40" y="36">NODE A: T1 COMMITS</text>
+          <rect class="dg-span" x="110" y="52" width="120" height="18"></rect>
+          <text class="dg-small" x="102" y="66" text-anchor="end">TT.now()</text>
+          <line class="dg-life" x1="170" y1="44" x2="170" y2="220"></line>
+          <text class="dg-small" x="170" y="238" text-anchor="middle">t1</text>
+          <line class="dg-life" x1="230" y1="44" x2="230" y2="220"></line>
+          <text class="dg-small dg-hot-text" x="230" y="238" text-anchor="middle">s = latest</text>
+          <rect class="dg-span-hot" x="170" y="92" width="120" height="18"></rect>
+          <text class="dg-small" x="300" y="106">commit wait, about 2 epsilon</text>
+          <rect class="dg-span" x="230" y="132" width="120" height="18"></rect>
+          <text class="dg-small" x="360" y="146">now earliest &gt; s: T1 becomes visible</text>
+          <line class="dg-life" x1="290" y1="112" x2="290" y2="220"></line>
+          <text class="dg-title" x="340" y="176">NODE B: T2 STARTS LATER</text>
+          <rect class="dg-ok-box" x="340" y="186" width="120" height="18"></rect>
+          <text class="dg-small" x="470" y="200">so its timestamp is greater than s</text>
+        </svg>
+        <figcaption>Take the timestamp from the top of the uncertainty interval, then wait until the bottom of the interval has passed it. The wait, about twice epsilon, is the price of timestamps that agree with real time.</figcaption>
+      </figure>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">truetime.py &middot; ten thousand causally ordered pairs of transactions on nodes with skewed clocks, stamped by local clocks and then with commit wait</span></figcaption><pre><code class="language-python">"""Spanner's commit wait, from the paper's rules: why waiting out the clock uncertainty makes
+timestamps agree with real time, and what it costs."""
+import random
+
+EPS = 0.007          # TrueTime's uncertainty: every clock is within 7 ms of true time
+
+
+class Node:
+    def __init__(self, offset):
+        self.offset = offset                       # how far this node's clock is from true time
+    def clock(self, t):
+        return t + self.offset
+    def tt_now(self, t):                           # TrueTime: an interval sure to contain true time
+        c = self.clock(t)
+        return c - EPS, c + EPS
+
+
+def commit(node, t, wait):
+    """Commit at true time t. Returns (timestamp, true time the commit becomes visible)."""
+    earliest, latest = node.tt_now(t)
+    if not wait:
+        return node.clock(t), t                    # stamp with the local clock, visible at once
+    ts = latest                                    # a timestamp no earlier than true time
+    while node.tt_now(t)[0] <= ts:                 # commit wait: until ts is surely in the past
+        t += 0.0001
+    return ts, t
+
+
+def trial(rng, wait):
+    a, b = Node(rng.uniform(-EPS, EPS)), Node(rng.uniform(-EPS, EPS))
+    t1 = rng.uniform(0, 100)
+    ts1, visible = commit(a, t1, wait)             # T1 on node a: revoke Bob's access to /payroll
+    t2 = visible + rng.uniform(0, 0.005)           # T2 starts after T1 is visible, on node b
+    ts2, done = commit(b, t2, wait)                # T2: upload salaries.csv to /payroll
+    return ts2 <= ts1, visible - t1, (ts1, ts2)
+
+
+for wait in (False, True):
+    rng = random.Random(15)
+    results = [trial(rng, wait) for _ in range(10_000)]
+    bad = sum(r[0] for r in results)
+    added = sum(r[1] for r in results) / len(results)
+    label = "with commit wait   " if wait else "local clock stamps "
+    print(f"{label}: {bad:5} of 10,000 causal pairs got timestamps"
+          f" in the wrong order; commit latency added {added * 1000:.1f} ms")
+    if bad:
+        ts1, ts2 = next(r[2] for r in results if r[0])
+        snap = (ts1 + ts2) / 2
+        print(f"   e.g. revoke stamped {ts1:.4f}, upload stamped {ts2:.4f}: a snapshot read at {snap:.4f}"
+              f"\n   sees salaries.csv in /payroll and Bob still allowed to read it")
+
+print(f"\nthe wait is 2 x epsilon: {2 * EPS * 1000:.0f} ms at epsilon = {EPS * 1000:.0f} ms. "
+      "Better clocks make every commit faster:")
+for eps_ms in (7, 4, 1):
+    print(f"  epsilon {eps_ms} ms -> commit wait {2 * eps_ms} ms")</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">local clock stamps :  3446 of 10,000 causal pairs got timestamps in the wrong order; commit latency added 0.0 ms
+   e.g. revoke stamped 73.6057, upload stamped 73.5931: a snapshot read at 73.5994
+   sees salaries.csv in /payroll and Bob still allowed to read it
+with commit wait   :     0 of 10,000 causal pairs got timestamps in the wrong order; commit latency added 14.0 ms
+
+the wait is 2 x epsilon: 14 ms at epsilon = 7 ms. Better clocks make every commit faster:
+  epsilon 7 ms -&gt; commit wait 14 ms
+  epsilon 4 ms -&gt; commit wait 8 ms
+  epsilon 1 ms -&gt; commit wait 2 ms</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Local clocks get the order wrong a third of the time.</b> With clocks up to 7 ms off in either direction, and the second transaction starting within 5 ms of the first becoming visible, 3,446 of 10,000 causally ordered pairs received timestamps in the wrong order. The example prints one: the revoke stamped later than the upload, so a snapshot between them shows the salary file with Bob still allowed in. Real gaps between transactions are usually longer than 5 ms, so real error rates are lower, but any rate above zero breaks the guarantee.</p>
+      <p><b>Commit wait gets it right every time, for a fixed price.</b> With the wait, none of the 10,000 pairs was misordered, and every commit took 14 ms longer, exactly twice epsilon. In the real system, much of that wait overlaps with the Paxos round that replicates the commit, so it costs less than it seems, but the trade is fundamental: certainty about order is bought with time, in proportion to how uncertain the clocks are.</p>
+      <p><b>Better clocks make every write faster.</b> At 1 ms of uncertainty the wait falls to 2 ms. That's why Google put atomic clocks in its data centres, and why the idea has spread. Amazon's Time Sync Service and its open-source ClockBound daemon now give ordinary cloud machines a clock with a stated error bound. Other databases make a different trade. CockroachDB, without special clocks, assumes a maximum offset and, instead of waiting at commit, restarts a read that encounters a value whose timestamp falls inside its uncertainty window. Reading Spanner closely is what lets you see that these are variations on one idea.</p>
+
+      <h4>Reading the canon today</h4>
+      <p>None of these systems is used today exactly as published, and that's not the point. Hardware changed, Bigtable's successors look different, and Raft has largely replaced the Paxos implementations of the earlier papers. What lasts is the method each paper shows: name the workload, state the assumptions, pick the weakest guarantee that serves the application, and measure. When you design something, try writing the first page of the paper you'd publish about it: the problem, the assumptions and the key idea. If you can't, the design isn't ready.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Reading the papers out of order,</b> and missing what each one was answering.</li>
+          <li><b>Copying a design without its assumptions,</b> such as GFS's append-only workload for a database.</li>
+          <li><b>Trusting a timestamp from a machine's clock</b> to order events across machines.</li>
+          <li><b>Treating a clock's error as zero,</b> when it's milliseconds and sometimes much more.</li>
+          <li><b>Reading only Google's line, or only Amazon's,</b> and taking one set of trade-offs as the only one.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 3.1</span><span class="ex-title">The assumption under each design</span></div>
+          <p>For Bigtable, Dynamo and Raft, name the assumption the design depends on, and a situation where it stops being true.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p><b>Bigtable</b> assumes a reliable lock service and file system underneath it: it uses Chubby to make sure only one master and one server per tablet are active, and GFS for durability. If Chubby is unavailable for long, Bigtable becomes unavailable too; the paper reports exactly this, as a small fraction of downtime. <b>Dynamo</b> assumes applications can reconcile conflicting versions of an object, merging two shopping carts, say. For a bank balance, where merging two concurrent withdrawals produces money that doesn't exist, the assumption fails and Dynamo's model is the wrong one. <b>Raft</b> assumes a majority of servers can communicate and that messages are eventually delivered. In a partition that leaves no majority, it correctly refuses to make progress, so a cluster of two data centres with an even split can't elect a leader. Each answer names when the design is wrong, which is the point of reading assumptions first.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 3.2</span><span class="ex-title">When the clock lies</span></div>
+          <p>Change the example so one node's clock is 20 ms off while TrueTime still claims 7 ms of uncertainty. What happens, and what does Spanner do to prevent it?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Commit wait stops protecting you. The guarantee depends on the interval really containing true time; with a node 20 ms off, its "latest" can be earlier than true time, so a timestamp taken there can still precede a transaction that commits later somewhere else, and misordered pairs reappear. In the example, give the first node an offset of 0.020, 20 ms fast, and about three quarters of the pairs come out in the wrong order despite the wait. Spanner defends the assumption rather than the algorithm: each machine's time daemon checks itself against several time masters, and a machine whose local clock drifts beyond its bound, or that can't reach enough masters, removes itself from service. The lesson generalises: when an algorithm's correctness rests on an assumption, the system needs a mechanism that detects the assumption failing and stops, not just an algorithm that's correct when it holds.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 3.3</span><span class="ex-title">Two ways to pay for order</span></div>
+          <p>Spanner waits at commit; CockroachDB restarts reads that see an uncertain value. Which workload suffers more under each approach?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Commit wait taxes writes: every read-write transaction pays about twice epsilon, whether or not any reader would have been confused, so a write-heavy workload with small, frequent transactions pays most. Reads are free of it. CockroachDB's uncertainty restarts tax reads instead, and only some of them: a read restarts when it meets a value written within the clock uncertainty window just before its own timestamp, which happens mostly when reads closely chase recent writes to the same keys, such as a hot counter read and written constantly. With a large maximum offset, those restarts become frequent. So Spanner's approach is predictable and suits workloads that can afford a few milliseconds per write; CockroachDB's is cheaper on average without special clocks but less predictable under contention. Both are ways of paying for the same thing, which is ignorance of what time it is.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you place each of the seven papers in order and say what problem it answered?</li>
+            <li>Can you name the central assumption of GFS, Dynamo and Spanner?</li>
+            <li>Can you explain external consistency with an example of what goes wrong without it?</li>
+            <li>Can you explain commit wait, and why it costs about twice epsilon?</li>
+            <li>Have you done a first pass of every paper on the list?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Paper</span><div><a href="https://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf">Spanner: Google's Globally-Distributed Database</a> <span class="by">Corbett et al., 2012</span></div></li>
+            <li><span class="rkind free">Paper</span><div><a href="https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf">Dynamo: Amazon's Highly Available Key-value Store</a> <span class="by">DeCandia et al., 2007</span></div></li>
+            <li><span class="rkind free">Paper</span><div><a href="https://raft.github.io/raft.pdf">In Search of an Understandable Consensus Algorithm</a> <span class="by">Ongaro &amp; Ousterhout, 2014</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

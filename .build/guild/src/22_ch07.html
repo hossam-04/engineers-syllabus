@@ -1,0 +1,213 @@
+    <section class="chapter prose" id="ch07" data-ch="07">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 07</span><label class="done-toggle"><input type="checkbox" data-id="ch07"><span class="box"></span>Read</label></div>
+        <h3>Trade-offs, argued both ways</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Taste in trade-offs means being able to argue both sides honestly, and then knowing which fact would settle the argument. Write the uncertain inputs as ranges, not single guesses, run the arithmetic over many possible futures, and look for the assumption that swings the answer. That assumption, not the conclusion, is what the debate should be about. And spend that care where a decision is hard to reverse; most aren't.</p>
+      </header>
+
+      <h4>Every option costs something</h4>
+      <p>An engineering decision with no downside isn't a decision; it's a chore. The real ones trade something for something: latency for consistency, flexibility for simplicity, money for operational burden, speed now for change later. Juniors argue for the option they like. Seniors can state the best case for each option, including the ones they'd vote against, and say under what conditions each would win. The syllabus calls this "taste in trade-offs, which means being able to argue both sides honestly", and it's a learnable skill with a method.</p>
+      <p>The method starts by noticing that most trade-off arguments are disguised disagreements about facts. Two engineers arguing "managed service or run our own" usually agree on the costs once they're written down. What they disagree about is a number neither has stated: how fast traffic will grow, how much time running the system would take. Make those numbers explicit, as ranges, and the argument changes from opinion to evidence.</p>
+
+      <h4>Ranges, not points</h4>
+      <p>A single estimate, "it'll take a quarter of an engineer to run", hides how unsure you are. A range, "somewhere between 15% and 60% of an engineer", states it, and invites the right question: what would narrow it? Once every uncertain input is a range, the arithmetic is simple: draw one value of each input from its range, compute the cost of each option, and repeat thousands of times. Each repetition is one possible future. The result isn't one number but a distribution: how often each option wins, and by how much.</p>
+      <p>This is called Monte Carlo simulation, and it sounds grander than it is. It's twenty lines of Python and a few honest ranges. Douglas Hubbard's <i>How to Measure Anything</i> argues that the ranges themselves are the valuable part: people asked for a 90% range on a quantity they "can't estimate" usually give a perfectly usable one, and the act of giving it shows which inputs are genuinely uncertain.</p>
+
+      <h4>Find the assumption that decides it</h4>
+      <p>Not every uncertainty matters equally. Some inputs, however unsure, barely move the answer; one or two decide it. To find them, split the simulated futures by each input, the half where it was low and the half where it was high, and see how much the answer changes between the halves. The input with the biggest swing is the one to argue about, and the one worth paying to measure. Hubbard calls this the value of information: measure what could change the decision, not what's easy to measure.</p>
+      <p>The example applies this to a familiar choice: three years of running your own event-streaming cluster against a managed service, with traffic growth, the share of an engineer spent operating it, the number of serious incidents and their cost all given as ranges.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">tradeoff.py &middot; three years of running our own cluster against a managed service, over twenty thousand possible futures, and which assumption decides it</span></figcaption><pre><code class="language-python">"""Arguing a trade-off both ways: three years of running our own event streaming cluster against a
+managed service, with the uncertain inputs as ranges instead of single guesses. The question isn't
+only which is cheaper, but which assumption decides it."""
+import random
+import statistics
+
+ENGINEER_MONTH = 16_000            # loaded cost of one engineer for a month
+rng = random.Random(42)
+
+
+def sample():
+    """One possible future: every uncertain input drawn from its range."""
+    return {
+        "growth": rng.uniform(1.0, 3.0),            # traffic multiplier per year
+        "ops_fte": rng.uniform(0.15, 0.6),          # share of an engineer spent running it ourselves
+        "incidents": rng.uniform(1, 6),             # serious incidents a year if we run it
+        "incident_cost": rng.lognormvariate(9.9, 0.6),   # median about $20,000 each
+    }
+
+
+def three_years(f):
+    traffic = [f["growth"] ** (m / 12) for m in range(36)]            # 1.0 = today's traffic
+    own = (2 * ENGINEER_MONTH                                           # setting it up
+           + sum(1_800 + 900 * t for t in traffic)                      # machines and storage
+           + 36 * f["ops_fte"] * ENGINEER_MONTH                         # running it
+           + 3 * f["incidents"] * f["incident_cost"])
+    managed = (0.5 * ENGINEER_MONTH                                     # migrating to it
+               + sum(2_600 + 2_400 * t for t in traffic)                # priced by throughput
+               + 36 * 0.05 * ENGINEER_MONTH                             # a little of someone's time
+               + 3 * 1 * f["incident_cost"])                            # the provider's outages hit us too
+    return own, managed
+
+
+futures = [sample() for _ in range(20_000)]
+costs = [three_years(f) for f in futures]
+pct = lambda xs, p: sorted(xs)[int(p * (len(xs) - 1))]
+for i, name in enumerate(("run our own", "managed")):
+    xs = [c[i] for c in costs]
+    k = lambda p: f"${pct(xs, p) / 1e3:,.0f}k"
+    print(f"{name:12} 3-year cost: median {k(.5)}  (80% between {k(.1)} "
+          f"and {k(.9)})")
+managed_wins = [c[1] < c[0] for c in costs]
+print(f"managed is cheaper in {sum(managed_wins) / len(costs):.0%} of 20,000 simulated futures")
+
+# Which assumption decides it? Split the futures on each input, and see how far the answer swings.
+print("\nhow much each assumption moves the answer (share of futures where managed is cheaper):")
+swings = []
+for key in futures[0]:
+    cut = statistics.median(f[key] for f in futures)
+    low = [w for f, w in zip(futures, managed_wins) if f[key] <= cut]
+    high = [w for f, w in zip(futures, managed_wins) if f[key] > cut]
+    lo, hi = sum(low) / len(low), sum(high) / len(high)
+    swings.append((abs(hi - lo), key, lo, hi))
+for swing, key, lo, hi in sorted(swings, reverse=True):
+    print(f"  {key:14} low half {lo:4.0%}  high half {hi:4.0%}   swing {swing * 100:3.0f} points")
+
+# The two that matter most, as a table: what would have to be true for running our own to win?
+print("\nwhich is cheaper, by traffic growth and time spent running it (other inputs at their medians):")
+print(f"  {'':19}" + "".join(f"{f'{x} FTE':>10}" for x in (0.2, 0.3, 0.4, 0.5)))
+for growth in (1.0, 1.5, 2.0, 2.5, 3.0):
+    row = []
+    for fte in (0.2, 0.3, 0.4, 0.5):
+        future = {"growth": growth, "ops_fte": fte, "incidents": 3.5, "incident_cost": 20_000}
+        own, managed = three_years(future)
+        row.append("managed" if managed < own else "own")
+    print(f"  {f'traffic x{growth:.1f}/year':19}" + "".join(f"{r:>10}" for r in row))</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">run our own  3-year cost: median $638k  (80% between $445k and $955k)
+managed      3-year cost: median $488k  (80% between $306k and $765k)
+managed is cheaper in 79% of 20,000 simulated futures
+
+how much each assumption moves the answer (share of futures where managed is cheaper):
+  growth         low half  96%  high half  62%   swing  34 points
+  incidents      low half  68%  high half  90%   swing  22 points
+  ops_fte        low half  69%  high half  90%   swing  21 points
+  incident_cost  low half  71%  high half  87%   swing  16 points
+
+which is cheaper, by traffic growth and time spent running it (other inputs at their medians):
+                        0.2 FTE   0.3 FTE   0.4 FTE   0.5 FTE
+  traffic x1.0/year     managed   managed   managed   managed
+  traffic x1.5/year     managed   managed   managed   managed
+  traffic x2.0/year     managed   managed   managed   managed
+  traffic x2.5/year         own   managed   managed   managed
+  traffic x3.0/year         own       own       own       own</code></pre></figure>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A tornado chart from the example. For each assumption, a bar spans the share of futures where managed is cheaper, from the half of futures where the assumption was low to the half where it was high. Traffic growth: 96% when low, 62% when high, a swing of 34 points. Incidents: 68% to 90%, 22 points. Operating time: 69% to 90%, 21 points. Incident cost: 71% to 87%, 16 points. Overall, managed is cheaper in 79% of futures.">
+          <defs><marker id="f07-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f07-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <text class="dg-title" x="24" y="22">SHARE OF FUTURES WHERE MANAGED IS CHEAPER</text>
+          <line class="dg-axis" x1="230" y1="200" x2="710" y2="200"></line>
+          <line class="dg-grid" x1="230" y1="40" x2="230" y2="200"></line>
+          <text class="dg-tick" x="230" y="216" text-anchor="middle">0%</text>
+          <line class="dg-grid" x1="350" y1="40" x2="350" y2="200"></line>
+          <text class="dg-tick" x="350" y="216" text-anchor="middle">25%</text>
+          <line class="dg-grid" x1="470" y1="40" x2="470" y2="200"></line>
+          <text class="dg-tick" x="470" y="216" text-anchor="middle">50%</text>
+          <line class="dg-grid" x1="590" y1="40" x2="590" y2="200"></line>
+          <text class="dg-tick" x="590" y="216" text-anchor="middle">75%</text>
+          <line class="dg-grid" x1="710" y1="40" x2="710" y2="200"></line>
+          <text class="dg-tick" x="710" y="216" text-anchor="middle">100%</text>
+          <text class="dg-small" x="218" y="64" text-anchor="end">traffic growth</text>
+          <rect class="dg-bar-hot" x="527.6" y="48" width="163.2" height="22"></rect>
+          <text class="dg-tick" x="521.6" y="63" text-anchor="end">62%</text>
+          <text class="dg-tick" x="696.8" y="63">96%</text>
+          <text class="dg-small" x="218" y="100" text-anchor="end">incidents a year</text>
+          <rect class="dg-bar" x="556.4" y="84" width="105.6" height="22"></rect>
+          <text class="dg-tick" x="550.4" y="99" text-anchor="end">68%</text>
+          <text class="dg-tick" x="668" y="99">90%</text>
+          <text class="dg-small" x="218" y="136" text-anchor="end">time to run it</text>
+          <rect class="dg-bar" x="561.2" y="120" width="100.8" height="22"></rect>
+          <text class="dg-tick" x="555.2" y="135" text-anchor="end">69%</text>
+          <text class="dg-tick" x="668" y="135">90%</text>
+          <text class="dg-small" x="218" y="172" text-anchor="end">cost of an incident</text>
+          <rect class="dg-bar" x="570.8" y="156" width="76.8" height="22"></rect>
+          <text class="dg-tick" x="564.8" y="171" text-anchor="end">71%</text>
+          <text class="dg-tick" x="653.6" y="171">87%</text>
+          <line class="dg-life" x1="609.2" y1="40" x2="609.2" y2="200"></line>
+          <text class="dg-small" x="609.2" y="240" text-anchor="middle">79% overall</text>
+        </svg>
+        <figcaption>A tornado chart: the widest bar is the assumption that moves the answer most. Here it's traffic growth, so that's the forecast to scrutinise before deciding.</figcaption>
+      </figure>
+
+      <h4>What the example shows</h4>
+      <p><b>The answer is "managed, probably".</b> The managed service is cheaper in 79% of the simulated futures, with a median three-year cost of $488,000 against $638,000. That's a useful answer, and a more honest one than a single number, because it admits a one-in-five chance of being wrong.</p>
+      <p><b>Growth decides it.</b> When traffic growth was in the low half of its range, managed won 96% of the time; in the high half, only 62%. No other input swung the answer by more than 22 points. The table then shows the boundary: running your own wins only if traffic grows two and a half times a year or more and operating it takes little time, or at three times a year. So the right conversation isn't "managed or our own?" in the abstract. It's "how confident are we that traffic will more than double every year for three years?" That's a question the product and finance teams can help answer, which turns an engineering argument into a shared one.</p>
+      <p><b>The model is simple on purpose.</b> It leaves out lock-in, the cost of migrating away later, and the learning that running your own brings. Leaving things out is fine if you say so, and the omissions are a good place for the other side's case to start.</p>
+
+      <h4>Arguing the other side</h4>
+      <p>Two techniques make it practical. The first is to <b>steelman</b>: write the strongest case for the option you're against, as its best advocate would, before arguing against it. If you can't write a paragraph your opponent would sign, you don't yet understand the trade-off. The second is the <b>pre-mortem</b>, from the psychologist Gary Klein: imagine it's a year later and your chosen option has failed badly, then write down why. People who struggle to criticise a plan they've just agreed to find it easy to explain a failure that has "already happened", and the reasons they give are the risks to plan for.</p>
+
+      <h4>One-way and two-way doors</h4>
+      <p>In his 2015 letter to shareholders, Jeff Bezos distinguished two kinds of decision. Some are one-way doors: hard or impossible to reverse, such as choosing a database for a system that will hold years of data, or publishing an API others will build on. These deserve slow, careful analysis. Most decisions are two-way doors: if you're wrong, you walk back through. Treating every decision as a one-way door is how organisations become slow. Part of taste is knowing which kind you face. The managed-service choice is closer to a two-way door than it looks, if you keep your code behind an interface and your data exportable, and making a decision more reversible is often cheaper than analysing it more carefully.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Arguing conclusions</b> when the disagreement is really about an unstated number.</li>
+          <li><b>Single-point estimates</b> that hide how uncertain each input is.</li>
+          <li><b>Measuring what's easy</b> instead of the assumption that decides the answer.</li>
+          <li><b>Straw-manning the other option,</b> so the comparison proves nothing.</li>
+          <li><b>Treating every decision as irreversible,</b> and analysing two-way doors for weeks.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.1</span><span class="ex-title">If growth were known</span></div>
+          <p>Product says traffic will grow between 1.0 and 1.5 times a year. Change the growth range in the example. What happens to the answer and to the swings, and what does that tell you about the decision?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-plaintext">run our own  3-year cost: median $562k  (80% between $388k and $876k)
+managed      3-year cost: median $317k  (80% between $269k and $389k)
+managed is cheaper in 99% of 20,000 simulated futures
+(every assumption now swings the answer by 1 point or less)</code></pre>
+            <p>With growth pinned to the slow end, the managed service wins in 99% of futures, and no other assumption matters: operating time and incidents, which looked important before, now swing the answer by a point. Narrowing the one input that decided the question settled it. That's the value of information in practice: one conversation with product, about one number, was worth more than any further engineering analysis. If they'd said 2.5 to 3.5 times a year instead, managed would win in only a third of futures, and running your own would become the default. Either way, the forecast, not the technology, made the decision.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.2</span><span class="ex-title">Steelman the loser</span></div>
+          <p>Write the strongest one-paragraph case for running your own cluster, as someone who believes in it would.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>"Event streaming is becoming the backbone of our platform, and we'll depend on it for a decade. The managed service's price scales with throughput, so our bill grows with our success, and our traffic doubled last year. Running it ourselves costs more now and less later, and the crossover comes sooner than the model's median suggests if growth continues. It also builds expertise we'll need anyway: when something goes wrong in the managed service at 3 a.m., we're waiting on someone else's support queue, unable to see inside it. And the model leaves out lock-in: the longer we use a provider's proprietary features, the more expensive leaving becomes. We should pay the learning cost while we're small." A good steelman uses the model's own blind spots, growth, lock-in and control, rather than ignoring the model. Writing it shows exactly which assumptions the managed option depends on, and those become the questions to check before committing.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.3</span><span class="ex-title">A pre-mortem</span></div>
+          <p>It's two years later, and the move to the managed service is widely seen as a mistake. Write the three most likely reasons, and what you'd do now about each.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>First, the bill grew faster than the model said, because traffic tripled after a new product launch. Now: set a cost alert at twice the projected monthly bill, and agree in advance the traffic level at which we'd re-run the analysis. Second, we built on the provider's proprietary connectors, and leaving would take a quarter. Now: put a thin interface between our services and the stream, use only the open protocol, and test an export once a year. Third, a provider outage took us down for a day, and we couldn't do anything but wait. Now: decide which consumers must keep working during an outage, buffer their input locally, and read the provider's incident history before signing. Each reason became a cheap precaution taken today, which is what a pre-mortem is for. None of them argues for not choosing the managed service; they make the choice safer and more reversible.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Do you write uncertain inputs as ranges, and say how sure you are?</li>
+            <li>Can you find which assumption swings a decision, and focus the argument there?</li>
+            <li>Can you steelman the option you're against?</li>
+            <li>Do you run pre-mortems on important decisions?</li>
+            <li>Do you tell one-way doors from two-way doors, and make decisions more reversible when you can?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind paid">Book</span><div><a href="https://www.howtomeasureanything.com/">How to Measure Anything</a> <span class="by">Douglas Hubbard</span></div></li>
+            <li><span class="rkind free">Essay</span><div><a href="https://hbr.org/2007/09/performing-a-project-premortem">Performing a Project Premortem</a> <span class="by">Gary Klein, Harvard Business Review</span></div></li>
+            <li><span class="rkind free">Letter</span><div><a href="https://s2.q4cdn.com/299287126/files/doc_financials/annual/2015-Letter-to-Shareholders.PDF">2015 Letter to Shareholders</a> <span class="by">Jeff Bezos</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

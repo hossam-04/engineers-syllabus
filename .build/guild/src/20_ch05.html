@@ -1,0 +1,250 @@
+    <div class="part" id="part2">
+      <span class="part-num">Part II</span>
+      <h2>Working in the open</h2>
+      <p>Four chapters on the work where taste is built and tested in front of other people. Open source, where trust is earned one reviewable patch at a time. Design documents, which must survive sceptical senior engineers. Trade-offs, argued honestly from both sides with the uncertain numbers in view. And writing in public, which compounds more than any certificate. Each is a skill that improves only with an audience, and each chapter shows the mechanical checks that catch the most common failures before the audience does.</p>
+    </div>
+
+    <section class="chapter prose" id="ch05" data-ch="05">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 05</span><label class="done-toggle"><input type="checkbox" data-id="ch05"><span class="box"></span>Read</label></div>
+        <h3>Open source, from patch to reviewer</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Contributing to open source is less about code than about attention: a maintainer has little of it, and every patch spends some. The contributors who become trusted are the ones whose patches cost the least to accept: small, tested, explained, and in the project's style. This chapter looks at a project from the maintainer's side, runs the checks a careful maintainer runs on two incoming patches, and maps the path from first patch to reviewer.</p>
+      </header>
+
+      <h4>A ladder of trust</h4>
+      <p>Every open-source project has a rough ladder, whether or not it's written down. <b>Users</b> run the software. <b>Reporters</b> file issues good enough to act on. <b>Contributors</b> send patches. <b>Regulars</b> send patches often enough that maintainers recognise their names. <b>Reviewers</b> are trusted to judge other people's patches, and <b>maintainers</b> decide what the project is. Each step up is granted, not claimed, and it's granted for one reason: the person has reliably made the maintainers' work easier.</p>
+      <p>The syllabus asks you to "contribute to open source until you are trusted with review, not just patches". That's a statement about the top of the ladder, and it takes months, sometimes years, in one project. It's worth it because review is where the deepest learning happens: you see every proposed change to a system you care about, and the maintainers' comments on your reviews teach you their taste. It's the apprenticeship the guild in this volume's title refers to.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Six rungs of a ladder, from bottom to top: user, who runs it; reporter, who files reproducible issues; contributor, who sends small tested patches; regular, whose name maintainers recognise; reviewer, trusted to judge others' patches; maintainer, who decides what the project is. An arrow beside the ladder reads: each step is granted for making the maintainers' work easier.">
+          <defs><marker id="f05-n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--ink-soft)"></path></marker><marker id="f05-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 10 5 L 0 9 z" fill="var(--marine)"></path></marker></defs>
+          <line class="dg-edge" x1="40" y1="226" x2="40" y2="30" marker-end="url(#f05-h)"></line>
+          <rect class="dg-box" x="60" y="196" width="150" height="26"></rect>
+          <text class="dg-label" x="135" y="214" text-anchor="middle">user</text>
+          <text class="dg-small" x="226" y="213">runs it</text>
+          <rect class="dg-box" x="60" y="162" width="150" height="26"></rect>
+          <text class="dg-label" x="135" y="180" text-anchor="middle">reporter</text>
+          <text class="dg-small" x="226" y="179">files issues someone can reproduce</text>
+          <rect class="dg-box" x="60" y="128" width="150" height="26"></rect>
+          <text class="dg-label" x="135" y="146" text-anchor="middle">contributor</text>
+          <text class="dg-small" x="226" y="145">sends small, tested, explained patches</text>
+          <rect class="dg-box" x="60" y="94" width="150" height="26"></rect>
+          <text class="dg-label" x="135" y="112" text-anchor="middle">regular</text>
+          <text class="dg-small" x="226" y="111">a name the maintainers recognise</text>
+          <rect class="dg-hot" x="60" y="60" width="150" height="26"></rect>
+          <text class="dg-label dg-hot-text" x="135" y="78" text-anchor="middle">reviewer</text>
+          <text class="dg-small" x="226" y="77">trusted to judge other people's patches</text>
+          <rect class="dg-hot" x="60" y="26" width="150" height="26"></rect>
+          <text class="dg-label dg-hot-text" x="135" y="44" text-anchor="middle">maintainer</text>
+          <text class="dg-small" x="226" y="43">decides what the project is</text>
+          <text class="dg-small dg-hot-text" x="736" y="238" text-anchor="end">each step is granted for making the maintainers' work easier</text>
+        </svg>
+        <figcaption>Each rung is granted by the people above it, for one thing: making their work easier. The patches you send are how they judge it.</figcaption>
+      </figure>
+
+      <h4>Choosing a project</h4>
+      <p>Contribute to something you use, so the bugs you find are real and your motivation survives the slow parts. Before your first patch, check that the project is alive and welcoming. Are pull requests answered within weeks, not months? Is there a <code>CONTRIBUTING</code> file, a code of conduct, a label such as "good first issue"? Read a few recent reviews: are the maintainers patient with newcomers, or curt? A large, famous project is not necessarily the best place to start. A mid-sized one where your patch will be read by a human this week teaches more.</p>
+      <p>Start below the code. Reproduce someone else's bug report and add the missing details. Answer a question in the issue tracker. Improve a confusing paragraph of the documentation. These cost maintainers almost nothing to accept, and they teach you how the project works and who decides what.</p>
+
+      <h4>The maintainer's view</h4>
+      <p>Most open-source projects are maintained by a few people, often in their spare time, with far more incoming work than time. A patch, however well meant, is a request for their attention: to read it, understand it, check it, and then maintain the result for years. The patches that get merged quickly are the ones that make that easy. Before reading a single line of the diff, a careful maintainer asks a series of quick questions, and the example automates them: does it apply to the current main branch, do the tests pass, does it add a test, does it keep the public interface, is it small enough to review, and does its message explain why? Some projects also require a sign-off line, the Developer Certificate of Origin, in which the author certifies they have the right to submit the code.</p>
+      <p>The example sets up a small project, a <code>slugify</code> function with an open issue: accented letters are dropped, so "Café Société" becomes <code>caf-soci-t</code>. Two contributors send patches, created with <code>git format-patch</code> and applied in a fresh clone with <code>git am</code>, which is how many projects, Git and the Linux kernel among them, take patches by email.</p>
+      <figure class="code"><figcaption><span class="tag">Example</span><span class="file">review.py &middot; a small project, an open issue, two patches, and the eight checks a maintainer runs before reading either diff</span></figcaption><pre><code class="language-python">"""The maintainer's side of open source: two patches arrive for a small project, and each gets the
+checks a careful maintainer runs before reading a single line of the diff."""
+import ast, os, pathlib, re, subprocess, sys, tempfile
+
+BASE = {"PATH": os.environ["PATH"], "HOME": "/home/maintainer", "LC_ALL": "C",
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+PEOPLE = {"mira": ("Mira Okafor", "mira@example.org"), "theo": ("Theo Lind", "theo@example.org"),
+          "sam": ("Sam Reyes", "sam@example.org")}
+clock = [1780000000]
+
+def git(who, *args, cwd):
+    clock[0] += 60
+    name, email = PEOPLE[who]
+    env = dict(BASE, GIT_AUTHOR_NAME=name, GIT_AUTHOR_EMAIL=email, GIT_COMMITTER_NAME=name,
+               GIT_COMMITTER_EMAIL=email, GIT_AUTHOR_DATE=f"@{clock[0]} +0000",
+               GIT_COMMITTER_DATE=f"@{clock[0]} +0000")
+    r = subprocess.run(["git", *args], cwd=cwd, env=env, capture_output=True, text=True)
+    return r
+
+SLUG = '''import re
+
+
+def slugify(title):
+    """'Hello, World!' -> 'hello-world'"""
+    return "-".join(re.findall(r"[a-z0-9]+", title.lower()))
+'''
+TESTS = '''from slug import slugify
+
+assert slugify("Hello, World!") == "hello-world"
+assert slugify("  many   spaces ") == "many-spaces"
+'''
+
+def commit(who, repo, files, message):
+    for name, text in files.items():
+        (repo / name).write_text(text)
+    git(who, "add", *files, cwd=repo)
+    git(who, "commit", "-q", "-m", message, cwd=repo)
+
+def public_names(source):
+    return {n.name for n in ast.parse(source).body
+            if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and not n.name.startswith("_")}
+
+def review(gh, patch):
+    """Apply the patch to a fresh clone of main and report on it."""
+    work = gh / ("review-" + patch.stem)
+    git("mira", "clone", "-q", str(gh / "upstream.git"), str(work), cwd=gh)
+    before = public_names((work / "slug.py").read_text())
+    applied = git("mira", "am", "-q", "--3way", str(patch), cwd=work).returncode == 0
+    if not applied:
+        return [("applies cleanly", False, "conflicts with main")]
+    message = git("mira", "log", "-1", "--format=%B", cwd=work).stdout.strip()
+    subject, _, body = message.partition("\n")
+    stat = git("mira", "diff", "--numstat", "HEAD~1", cwd=work).stdout.split("\n")
+    files = {}
+    for line in filter(None, stat):                  # "added<TAB>removed<TAB>path"
+        added, removed, path = line.split("\t")
+        files[path] = (int(added), int(removed))
+    tests = subprocess.run([sys.executable, "test_slug.py"], cwd=work, capture_output=True, text=True)
+    lost = before - public_names((work / "slug.py").read_text())
+    first = subject.split()[0].lower()
+    return [
+        ("applies cleanly", True, ""),
+        ("tests pass", tests.returncode == 0,
+         re.sub(r" \(/.*\)$", "", tests.stderr.strip().splitlines()[-1]) if tests.returncode else ""),
+        ("adds or changes a test", "test_slug.py" in files, ""),
+        ("keeps the public API", not lost, f"removes {', '.join(sorted(lost))}" if lost else ""),
+        ("small enough to review", sum(a + d for a, d in files.values()) <= 40,
+         f"{sum(a for a, _ in files.values())} lines added, {sum(d for _, d in files.values())} removed"),
+        ("subject: short, imperative, no full stop", len(subject) <= 50 and not subject.endswith(".")
+         and not re.search(r"(ed|ing|es)$", first), repr(subject)),
+        ("body says why", len(body.split()) >= 12, f"{len(body.split())} words"),
+        ("signed off (DCO)", "Signed-off-by: " in message, ""),
+    ]
+
+with tempfile.TemporaryDirectory() as tmp:
+    gh = pathlib.Path(tmp).resolve()
+    git("mira", "init", "-q", "--bare", "-b", "main", "upstream.git", cwd=gh)
+    git("mira", "clone", "-q", "upstream.git", "mira", cwd=gh)
+    git("mira", "switch", "-q", "-c", "main", cwd=gh / "mira")
+    commit("mira", gh / "mira", {"slug.py": SLUG, "test_slug.py": TESTS}, "Add slugify")
+    git("mira", "push", "-q", "origin", "main", cwd=gh / "mira")
+
+    # Issue 12: "Café Société" becomes "caf-soci-t". Two people send patches.
+    for who in ("theo", "sam"):
+        git(who, "clone", "-q", "upstream.git", who, cwd=gh)
+    commit("theo", gh / "theo", {
+        "slug.py": SLUG.replace("import re\n", "import re\nimport unicodedata\n").replace(
+            '    return "-".join(re.findall(r"[a-z0-9]+", title.lower()))',
+            '    folded = unicodedata.normalize("NFKD", title).encode("ascii", "ignore").decode()\n'
+            '    return "-".join(re.findall(r"[a-z0-9]+", folded.lower()))'),
+        "test_slug.py": TESTS + 'assert slugify("Café Société") == "cafe-societe"   # issue 12\n'},
+        "Fold accents before making a slug\n\nAccented letters were dropped, so \"Café Société\" became "
+        "\"caf-soci-t\" (issue 12). Decompose the title with NFKD and keep the ASCII part, so it "
+        "becomes \"cafe-societe\".\n\nSigned-off-by: Theo Lind <theo@example.org>")
+    commit("sam", gh / "sam", {
+        "slug.py": "import re, unicodedata\n\n"
+                   "def make_slug(t):\n"
+                   "    t = unicodedata.normalize('NFKD', t)\n"
+                   "    t = t.encode('ascii', 'ignore').decode('ascii')\n"
+                   "    t = t.lower().strip()\n"
+                   "    t = re.sub(r'[^a-z0-9]+', '-', t)\n"
+                   "    return t\n"},
+        "fixed the accents bug.")
+    for who in ("theo", "sam"):
+        out = git(who, "format-patch", "-1", "-o", str(gh / "inbox"), cwd=gh / who).stdout.strip()
+        patch = pathlib.Path(out)
+        print(f"{PEOPLE[who][0]}'s patch, {patch.name}:")
+        for check, ok, note in review(gh, patch):
+            print(f"  {'ok  ' if ok else 'FAIL'} {check:42} {note}".rstrip())</code></pre><div class="out-h">Output</div><pre class="out"><code class="language-plaintext">Theo Lind's patch, 0001-Fold-accents-before-making-a-slug.patch:
+  ok   applies cleanly
+  ok   tests pass
+  ok   adds or changes a test
+  ok   keeps the public API
+  ok   small enough to review                     4 lines added, 1 removed
+  ok   subject: short, imperative, no full stop   'Fold accents before making a slug'
+  ok   body says why                              29 words
+  ok   signed off (DCO)
+Sam Reyes's patch, 0001-fixed-the-accents-bug.patch:
+  ok   applies cleanly
+  FAIL tests pass                                 ImportError: cannot import name 'slugify' from 'slug'
+  FAIL adds or changes a test
+  FAIL keeps the public API                       removes slugify
+  ok   small enough to review                     7 lines added, 5 removed
+  FAIL subject: short, imperative, no full stop   'fixed the accents bug.'
+  FAIL body says why                              0 words
+  FAIL signed off (DCO)</code></pre></figure>
+
+      <h4>What the example shows</h4>
+      <p><b>Theo's patch costs almost nothing to accept.</b> Five changed lines, a regression test that names the issue, a subject in the imperative mood under fifty characters, a body that says what was wrong and why the fix works, and a sign-off. A maintainer can read it in a minute, see the test, and merge.</p>
+      <p><b>Sam's patch might even work, and it doesn't matter.</b> It also handles accents. But it renames <code>slugify</code> to <code>make_slug</code>, which breaks every existing caller, so the existing tests fail on import. It adds no test, so nothing proves it fixes the issue. Its message, "fixed the accents bug.", says nothing a maintainer needs, and it has no sign-off. Each of these is fixable, and a kind maintainer will say so, but each round trip costs days. Contributors who send patches like Theo's get merged in hours and noticed; contributors who send patches like Sam's get asked for changes, and often drift away.</p>
+      <p>None of the checks looked at whether the code was good. They are the cheap, mechanical checks, and that's the point: by passing them, you spend the maintainer's attention only on the part that needs a human, the design.</p>
+
+      <h4>From patches to review</h4>
+      <p>The step from regular contributor to reviewer comes from doing reviewer's work before you're asked. Read other people's pull requests and leave useful comments: a failing case you tried, a question about a design choice, a pointer to a related issue. Triage new issues: reproduce them, label them, find the duplicates. Answer questions from users. Be consistent over months; maintainers notice who shows up every week. When your review comments start matching what the maintainers would have said, they'll start asking you to review, and eventually give you the permission to approve.</p>
+      <p>A good review, there as at work, is specific, kind and prioritised. Say what must change before merging and what's merely a suggestion; Conventional Comments' labels, such as <i>issue</i>, <i>suggestion</i> and <i>nitpick</i>, make the difference explicit. Explain why, so the contributor learns something. And review the design before the details: a perfect variable name in the wrong approach is wasted effort for everyone.</p>
+
+      <h4>Being a good citizen</h4>
+      <p>Maintainer burnout is the commonest way open-source projects die. Every issue that says "this is broken, fix it" without a reproduction, every complaint about the pace of a volunteer project, every unreviewable thousand-line patch, adds to it. Be the opposite. Say thank you. Close your own stale pull requests. If your company depends on a project, say so, and ask whether it can sponsor the maintainers or give engineers time to help. A project where several companies' engineers share the maintenance survives the departure of any one person; a project with a single exhausted maintainer, however popular, does not.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>A first contribution that's a large feature,</b> unannounced, in a project you don't know yet.</li>
+          <li><b>Mixing a fix with reformatting or renaming,</b> so the real change is buried in the diff.</li>
+          <li><b>No test,</b> so nothing proves the fix, and nothing stops the bug returning.</li>
+          <li><b>A message that says what, not why,</b> or nothing at all.</li>
+          <li><b>Treating maintainers as a support desk,</b> when most are volunteers with little time.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 5.1</span><span class="ex-title">Rescue Sam's patch</span></div>
+          <p>Rewrite Sam's commit so that it passes all eight checks, keeping Sam's approach to the fix.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Keep the name <code>slugify</code>, so existing callers and tests work, and make the change only inside it. Sam's version also behaves differently from the original on leading and trailing punctuation, "--hi--" becomes <code>-hi-</code>, so add <code>.strip("-")</code> to keep the old behaviour. Add the regression test from the issue, <code>assert slugify("Café Société") == "cafe-societe"</code>. Then write a message: a subject such as "Fold accents before making a slug", a body that says accented letters were dropped and that NFKD decomposition keeps their ASCII base letters, a reference to issue 12, and a <code>Signed-off-by</code> line, added with <code>git commit -s</code>. If Sam genuinely wanted a new name, that's a separate proposal: open an issue first, and if it's accepted, add <code>make_slug</code> alongside <code>slugify</code> and deprecate the old name over a release or two, rather than breaking every caller in a bug fix.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 5.2</span><span class="ex-title">Triage</span></div>
+          <p>Three new issues arrive: "doesn't work", with no details; "slugify('ß') returns empty string"; and "please add support for Chinese titles". How would you respond to each, as a helpful triager?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>For "doesn't work", ask kindly for what's needed to act: the version, the exact input, the output they got and the output they expected, and label it as needing information; close it after a few weeks if nothing comes. For "ß", reproduce it first: NFKD doesn't decompose "ß" into ASCII, so it's dropped and the slug is empty. Confirm it in a comment with the one-line reproduction, label it as a bug, and note the design question it raises: should "ß" become "ss", and what about other letters with no ASCII decomposition? That's exactly the kind of comment that saves a maintainer an hour. For Chinese titles, recognise it as a feature request with a real design question, transliteration or keeping the characters, and label it so; link any related discussion, and leave the decision to the maintainers rather than promising anything. In each case you've moved the issue forward without needing any special permission, which is what triagers do.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 5.3</span><span class="ex-title">Twelve weeks</span></div>
+          <p>Plan twelve weeks, at three hours a week, to go from user to regular contributor in an open-source project you depend on.</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <p>Weeks 1 and 2: read the contributing guide, build the project from source, run its test suite, and read the last twenty merged pull requests and their reviews, noting what the maintainers ask for. Weeks 3 and 4: triage, reproducing three open bug reports and adding what you find. Weeks 5 to 7: your first patch, a small bug you've hit or a "good first issue", with a test and a clear message; respond quickly to the review. Weeks 8 and 9: a second patch in the same area, so you start to know one part of the code well. Weeks 10 to 12: review two other contributors' pull requests in that area, carefully and kindly, and write up a map of the part of the codebase you now know, offering it as documentation. By the end you're a name the maintainers recognise, in one part of the code, which is how the next rung starts.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Have you chosen a project you use, and checked that it's alive and welcoming?</li>
+            <li>Do your patches apply cleanly, pass the tests, add a test and explain why?</li>
+            <li>Do you keep fixes separate from refactors and renames?</li>
+            <li>Do you triage issues and review others' pull requests, not only send your own?</li>
+            <li>Can you write review comments that are specific, kind and prioritised?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Guide</span><div><a href="https://opensource.guide/how-to-contribute/">How to Contribute to Open Source</a> <span class="by">GitHub's Open Source Guides</span></div></li>
+            <li><span class="rkind free">Book</span><div><a href="https://producingoss.com/">Producing Open Source Software</a> <span class="by">Karl Fogel</span></div></li>
+            <li><span class="rkind free">Book</span><div><a href="https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project">Pro Git: Contributing to a Project</a> <span class="by">Chacon &amp; Straub</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>

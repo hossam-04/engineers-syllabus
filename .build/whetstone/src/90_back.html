@@ -1,0 +1,178 @@
+    <section id="deliverable" class="prose">
+      <h2 class="sec">The deliverable</h2>
+      <p>The stage asks for two things, both public and both with a README written for a stranger: a repository of your dotfiles, and one shell script that automates a chore you genuinely repeat. Chapters 8 and 4 build a small working version of each; the lists below say what the full versions need. Both will outlive the stage. You'll install the first on every machine you use, and the second is the start of a habit of automating what bores you.</p>
+
+      <h3 class="sub">1. A public dotfiles repository</h3>
+      <p>Your settings for the tools you use every day, in a repository anyone can read, with a script that installs them. Chapter 8 is the model.</p>
+      <ol class="rules19">
+        <li>Settings for your shell, Git and editor, grown a line at a time, each with a comment saying why it's there.</li>
+        <li>An install script that links every file into place, backs up anything it would replace, never deletes, and is safe to run again, plus an uninstall that reverses it.</li>
+        <li>Per-machine and private settings in local files that the shared ones include, ignored by Git, and no secret anywhere in the history: check with <code>git grep</code> or a scanner before you publish.</li>
+        <li>Tested on a clean account or a fresh container, with anything specific to macOS or Linux behind a check of <code>uname</code>.</li>
+        <li>A README that says what each file configures, gives the one command that installs it, says what that command changes and how to undo it, and lists the systems you've tried it on.</li>
+      </ol>
+
+      <h3 class="sub">2. A script for a chore you repeat</h3>
+      <p>Pick something you really do by hand every week: tidying downloads, backing up a folder, renaming photos, cleaning old branches, starting your day's tools. Chapter 4 is the model.</p>
+      <ol class="rules19">
+        <li>Strict mode, a usage message for <code>-h</code> and for wrong arguments, options parsed with <code>getopts</code>, exit statuses 0, 1 and 2, and every message on stderr.</li>
+        <li>A dry run that shows exactly what would happen; nothing overwritten or deleted without a check; safe to run twice; and a lock and a trap if two runs could ever overlap.</li>
+        <li>Every expansion quoted, no warnings from ShellCheck, and either bash 3.2 compatible or a clear statement of the version it needs.</li>
+        <li>Tests that run it in a temporary folder and check the results, including what happens with bad arguments, a missing folder and names with spaces.</li>
+        <li>Installed as a command through your dotfiles, documented in a README, and if the chore is regular, run on a schedule with <code>cron</code> on Linux or <code>launchd</code> on a Mac.</li>
+      </ol>
+      <p>For both: keep them under Git from the first day, with small commits and messages that explain why, as chapter 12 describes. Make at least one change through a pull request, from a branch, even in your own repository, so chapter 13's workflow is something you've done rather than read about. Then ask someone else to install your dotfiles and run your script from the README alone, and fix whatever confused them.</p>
+    </section>
+
+    <section id="rules" class="prose">
+      <h2 class="sec">The sixteen rules</h2>
+      <p>One per chapter, each linked back to it. Read them before you start a new script or a new repository, and again when a tool surprises you.</p>
+      <ol class="rules19">
+        <li><a href="#ch01">Quote every expansion, and know exactly which list of arguments a line becomes.</a></li>
+        <li><a href="#ch02">Results to stdout, messages to stderr, and check the status of every step, including inside a pipeline.</a></li>
+        <li><a href="#ch03">Ask questions of text with small tools in a pipeline: quote the patterns, and sort before you count.</a></li>
+        <li><a href="#ch04">Strict mode, a dry run, and never overwrite: a script must be safe to run twice.</a></li>
+        <li><a href="#ch05">A name points to an inode, and a symbolic link points to a name.</a></li>
+        <li><a href="#ch06">The folder decides who may delete; never fix a permission error with 777 or <code>sudo</code>.</a></li>
+        <li><a href="#ch07">The environment flows down, never up; ask <code>type -a</code> what a name will run.</a></li>
+        <li><a href="#ch08">Keep your settings in a public repository, linked into place, and your secrets out of it.</a></li>
+        <li><a href="#ch09">A commit is a snapshot named by its contents; changing the past renames everything after it.</a></li>
+        <li><a href="#ch10">Branches are labels and the reflog remembers them; only uncommitted work can really be lost.</a></li>
+        <li><a href="#ch11">Merge shared work; rebase only commits nobody else has.</a></li>
+        <li><a href="#ch12">Make small commits that explain why, and bisect whatever used to work.</a></li>
+        <li><a href="#ch13">Work on branches, push with a lease, and keep pull requests small and explained.</a></li>
+        <li><a href="#ch14">Learn one editor deeply, and rename with a tool that understands the code.</a></li>
+        <li><a href="#ch15">Read the whole message, from the bottom, and ask with a minimal reproduction.</a></li>
+        <li><a href="#ch16">Test yourself, space your reviews, and practise at the edge of your ability.</a></li>
+      </ol>
+    </section>
+
+    <section id="shelf" class="prose">
+      <h2 class="sec">Reading list</h2>
+      <p>The courses, books and documentation behind this volume, and the chapters each one deepens. If you do only one thing, work through The Missing Semester with its exercises. For Git, read Pro Git's first three chapters and its chapter on internals, and play Learn Git Branching until rebasing is boring.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Work</th><th>Author</th><th>Deepens</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://missing.csail.mit.edu/">The Missing Semester of Your CS Education</a></td><td>Athalye, Gjengset &amp; Gonzalez Ortiz, MIT</td><td class="mono">Ch. 1&ndash;4, 7, 14</td></tr>
+            <tr><td><a href="https://git-scm.com/book/en/v2">Pro Git</a></td><td>Scott Chacon &amp; Ben Straub</td><td class="mono">Ch. 9&ndash;13</td></tr>
+            <tr><td><a href="https://learngitbranching.js.org/">Learn Git Branching</a></td><td>Peter Cottle</td><td class="mono">Ch. 10&ndash;11, 16</td></tr>
+            <tr><td><a href="https://linuxcommand.org/tlcl.php">The Linux Command Line</a></td><td>William Shotts</td><td class="mono">Ch. 1&ndash;7</td></tr>
+            <tr><td><a href="https://mywiki.wooledge.org/BashGuide">The Bash Guide and Bash Pitfalls</a></td><td>Greg's Wiki</td><td class="mono">Ch. 1&ndash;4</td></tr>
+            <tr><td><a href="https://www.awk.dev/">The AWK Programming Language, second edition</a></td><td>Aho, Kernighan &amp; Weinberger</td><td class="mono">Ch. 3</td></tr>
+            <tr><td><a href="https://www.shellcheck.net/">ShellCheck</a></td><td>Vidar Holen</td><td class="mono">Ch. 4</td></tr>
+            <tr><td><a href="https://jwiegley.github.io/git-from-the-bottom-up/">Git from the Bottom Up</a></td><td>John Wiegley</td><td class="mono">Ch. 9&ndash;10</td></tr>
+            <tr><td><a href="https://pragprog.com/titles/dnvim2/practical-vim-second-edition/">Practical Vim</a></td><td>Drew Neil</td><td class="mono">Ch. 14</td></tr>
+            <tr><td><a href="https://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</a></td><td>Simon Tatham</td><td class="mono">Ch. 15</td></tr>
+            <tr><td><a href="https://www.debuggingbook.org/">The Debugging Book</a></td><td>Andreas Zeller</td><td class="mono">Ch. 12, 15</td></tr>
+            <tr><td><a href="https://www.hup.harvard.edu/books/9780674729018">Make It Stick</a></td><td>Brown, Roediger &amp; McDaniel</td><td class="mono">Ch. 16</td></tr>
+            <tr><td><a href="https://augmentingcognition.com/ltm.html">Augmenting Long-term Memory</a></td><td>Michael Nielsen</td><td class="mono">Ch. 16</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="colophon">
+      <p>Compiled October 2026 as the companion to stage 00, Tools, the shell, and how to learn, of The Engineer's Syllabus, alongside <i>The Engineer's Primer</i>, <i>Workbench</i>, <i>Compass</i>, <i>Mill</i>, <i>Loom</i>, <i>Exchange</i>, <i>Press</i>, <i>Ledger</i>, <i>Craft</i>, <i>Shipyard</i>, <i>Fleet</i>, <i>Watch</i>, <i>Citadel</i> and <i>Foundry</i>. It follows the order of topics in the stage, and draws on the works in the reading list and on the original sources for its named results. These are Ebbinghaus (1885) on forgetting; Leitner (1972) on boxes of flashcards; McIlroy (1986) on the six-command pipeline; Ericsson, Krampe and Tesch-R&ouml;mer (1993) on deliberate practice; Zeller and Hildebrandt (2002) on delta debugging; Cepeda and colleagues (2006) on spacing; Roediger and Karpicke (2006) on retrieval; Rohrer and Taylor (2007) on interleaving; and <a href="https://shattered.io/">Stevens and colleagues (2017)</a> on the first SHA-1 collision. Tools are described as of late 2026.</p>
+      <p>Every example was executed before publication with Python 3.14 on macOS 26, whose shell tools are bash 3.2, BSD's versions of the text tools, and Git 2.50. They're written for Python 3.12 or later and to print the same output on Linux with the GNU tools: they sort whatever the filesystem would order arbitrarily, avoid output whose spacing differs between systems, give every commit a fixed author and time, ignore your own Git settings, and use only features shared by bash 3.2 and bash 5. They were not run on Linux for this edition, so a difference there is a bug worth reporting. Each was also run a second time in a deliberately hostile environment, with a different time zone and temporary folder, a home folder with its own Git and shell settings, and <code>BASH_ENV</code> and <code>CDPATH</code> set, and printed exactly the same. Tested here: how bash turns a line into arguments; redirections, pipes, exit statuses and <code>set -e</code>; questions answered from a web server's log; a tidying script with a dry run, a lock and a trap; hard links, symbolic links and a deleted file still open; permission bits tried one at a time; <code>PATH</code>, exported variables and bash's startup files; a dotfiles repository installed twice; Git's objects built by hand; refs, a detached <code>HEAD</code> and the reflog; a clean merge, a conflict and a rebase; a bug found by <code>bisect</code>, <code>log -S</code> and <code>blame</code>; a contribution through a fork; a fuzzy finder and a scope-aware rename; a traceback read and an input shrunk by delta debugging; and a model of forgetting.</p>
+      <p>Your chapter marks are stored in this browser only. Nothing is sent anywhere.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script>
+(function () {
+  var LS = "engwhetstone.v1.";
+  function read(k) { try { return window.localStorage.getItem(LS + k); } catch (e) { return null; } }
+  function write(k, v) { try { window.localStorage.setItem(LS + k, v); } catch (e) { /* storage unavailable */ } }
+
+  try { if (window.hljs) { window.hljs.highlightAll(); } } catch (e) { /* plain code is fine */ }
+
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".done-toggle input[data-id]"));
+  var fill = document.getElementById("barfill");
+  var pct = document.getElementById("pct");
+  function refresh() {
+    var n = 0;
+    boxes.forEach(function (b) {
+      var id = b.getAttribute("data-id");
+      var ch = document.getElementById(id);
+      var link = document.querySelector('#railnav a[href="#' + id + '"]');
+      if (b.checked) n++;
+      if (ch) ch.classList.toggle("is-read", b.checked);
+      if (link) link.classList.toggle("read", b.checked);
+    });
+    if (pct) pct.textContent = n + " / " + boxes.length;
+    if (fill) fill.style.width = (boxes.length ? (n / boxes.length) * 100 : 0) + "%";
+  }
+  boxes.forEach(function (b) {
+    if (read(b.getAttribute("data-id")) === "1") b.checked = true;
+    b.addEventListener("change", function () {
+      write(b.getAttribute("data-id"), b.checked ? "1" : "0");
+      refresh();
+    });
+  });
+  refresh();
+
+  // Reset asks for a second click inside the page, because the viewer blocks dialog boxes.
+  var reset = document.getElementById("resetbtn");
+  if (reset) {
+    var resetLabel = reset.textContent, resetTimer = null;
+    var disarmReset = function () {
+      clearTimeout(resetTimer); resetTimer = null;
+      reset.textContent = resetLabel; reset.classList.remove("armed");
+    };
+    reset.addEventListener("click", function () {
+      if (!resetTimer) {
+        reset.textContent = "Click again to clear";
+        reset.classList.add("armed");
+        resetTimer = setTimeout(disarmReset, 4000);
+        return;
+      }
+      disarmReset();
+      boxes.forEach(function (b) { b.checked = false; write(b.getAttribute("data-id"), "0"); });
+      refresh();
+    });
+  }
+
+  var root = document.documentElement;
+  var stored = read("theme");
+  if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+  var tb = document.getElementById("themebtn");
+  if (tb) tb.addEventListener("click", function () {
+    var now = root.getAttribute("data-theme");
+    var dark = now ? now === "dark"
+      : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    write("theme", next);
+  });
+
+  var toc = document.querySelector(".toc");
+  if (toc && window.matchMedia) {
+    var narrow = window.matchMedia("(max-width: 1080px)");
+    var syncToc = function () {
+      if (narrow.matches) toc.removeAttribute("open"); else toc.setAttribute("open", "");
+    };
+    syncToc();
+    if (narrow.addEventListener) narrow.addEventListener("change", syncToc);
+    else if (narrow.addListener) narrow.addListener(syncToc);
+  }
+
+  var links = Array.prototype.slice.call(document.querySelectorAll("#railnav a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = targets.indexOf(e.target);
+        if (i < 0) return;
+        links.forEach(function (l) { l.classList.remove("on"); });
+        links[i].classList.add("on");
+      });
+    }, { rootMargin: "-8% 0px -80% 0px" });
+    targets.forEach(function (t) { if (t) io.observe(t); });
+  }
+})();
+</script>

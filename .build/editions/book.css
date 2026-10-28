@@ -1,0 +1,101 @@
+/* The Engineer's Syllabus, e-reader edition. Plain colours (no variables), so it holds up on
+   readers that ignore modern CSS; the reader's own font and size settings take over freely.
+   Body text never gets a colour, so night modes can set it; greys and accents are mid-tones that
+   read on white and on black, and anything with a background sets its own text colour. */
+body { margin: 0 4%; line-height: 1.5; }
+h1, h2, h3, h4, h5 { font-family: sans-serif; line-height: 1.2; page-break-after: avoid; break-after: avoid; }
+h1 { font-size: 2.1em; margin: 0 0 .4em; }
+h2 { font-size: 1.45em; margin: 1.6em 0 .6em; }
+h3 { font-size: 1.3em; margin: .3em 0 .5em; }
+h4 { font-size: 1.08em; margin: 1.5em 0 .45em; }
+h5 { font-size: .8em; letter-spacing: .08em; text-transform: uppercase; color: #7A808A; margin: 1.4em 0 .5em; }
+p { margin: 0 0 .8em; }
+a { color: #4062D8; text-decoration: none; }
+code, pre, .mono { font-family: monospace; }
+code { font-size: .9em; }
+pre { font-size: .74em; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;
+  background: #F4F4EE; color: #1E232B; border-left: 3px solid #D3D3CA; padding: .6em .8em; margin: 0 0 1em; }
+pre code { font-size: 1em; }
+table { border-collapse: collapse; width: 100%; font-size: .85em; margin: .5em 0 1.2em; }
+th, td { text-align: left; vertical-align: top; padding: .35em .6em .35em 0; border-bottom: 1px solid #D3D3CA; }
+th { font-family: sans-serif; font-size: .8em; text-transform: uppercase; letter-spacing: .05em; color: #7A808A; }
+ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
+li { margin: 0 0 .3em; }
+.cover { margin: 0; padding: 0; text-align: center; }
+.cover-img { height: 100%; } .cover-img img { max-width: 100%; max-height: 100%; }
+
+/* title page */
+.title-page .masthead { margin-top: 12%; }
+.eyebrow { display: block; font-family: sans-serif; font-size: .75em; letter-spacing: .12em; text-transform: uppercase; color: #A07B1E; margin-bottom: 1em; }
+.standfirst { font-size: 1.15em; color: #7A808A; }
+.masthead-meta { margin-top: 1.4em; border-top: 1px solid #D3D3CA; padding-top: .6em; }
+.masthead-meta div { display: inline-block; margin: 0 1.6em .6em 0; }
+.masthead-meta .k { display: block; font-family: sans-serif; font-size: .7em; letter-spacing: .1em; text-transform: uppercase; color: #7A808A; }
+.masthead-meta .v { font-family: sans-serif; font-weight: bold; font-size: 1.15em; }
+
+/* parts and chapters */
+.part { margin: 10% 0 2.5em; padding-top: .8em; border-top: 2px solid #A07B1E; }
+.part-num { display: block; font-family: sans-serif; font-size: .8em; letter-spacing: .14em; text-transform: uppercase; color: #A07B1E; }
+.part h2 { margin-top: .3em; font-size: 1.8em; }
+.ch-head { border-bottom: 1px solid #15181E; padding-bottom: .6em; margin-bottom: 1.2em; }
+.ch-num { display: block; font-family: sans-serif; font-size: .78em; letter-spacing: .12em; text-transform: uppercase; color: #A07B1E; }
+.ch-meta { font-family: sans-serif; font-size: .78em; color: #7A808A; margin-bottom: .6em; }
+.ch-meta span { margin-right: 1.2em; }
+.thesis { font-size: 1.08em; color: #7A808A; font-style: italic; }
+h2.sec { font-size: .85em; letter-spacing: .12em; text-transform: uppercase; color: #7A808A; border-bottom: 1px solid #D3D3CA; padding-bottom: .3em; }
+.keyidea, .note, .ship { border-left: 3px solid #4062D8; padding: .6em .9em; margin: 1em 0 1.2em; }
+.ship { border-left-color: #A07B1E; }
+.keyidea .k, .block-h { display: block; font-family: sans-serif; font-size: .72em; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; color: #7A808A; margin: 0 0 .4em; }
+
+/* code examples */
+figure { margin: 1.2em 0 1.4em; }
+figure.code .tag { font-family: sans-serif; font-size: .7em; letter-spacing: .1em; text-transform: uppercase; color: #A07B1E; margin-right: .8em; }
+figure.code .file { font-family: monospace; font-size: .8em; color: #7A808A; }
+.out-h { font-family: sans-serif; font-size: .7em; letter-spacing: .1em; text-transform: uppercase; color: #7A808A; margin: .6em 0 .3em; }
+pre.out { background: #FFFFFF; color: #1E232B; border: 1px solid #D3D3CA; border-left: 3px solid #3F8A5E; }
+figcaption { font-size: .88em; font-style: italic; color: #7A808A; margin-top: .5em; }
+
+/* diagrams: their colours are written on the elements */
+figure.diagram { text-align: center; page-break-inside: avoid; break-inside: avoid; }
+figure.diagram svg { width: 100%; height: auto; max-height: 90vh; background: #FFFFFF; padding: 2%; box-sizing: border-box; }
+figure.diagram figcaption { text-align: left; }
+
+/* exercises and the end of a chapter */
+.traps { border-left: 3px solid #C0503E; padding: .2em 0 .2em .9em; margin: 1.2em 0; }
+.exercise { margin: 1.2em 0 1.6em; }
+.ex-head { font-family: sans-serif; margin-bottom: .4em; }
+.ex-num { font-size: .78em; letter-spacing: .1em; text-transform: uppercase; color: #A07B1E; margin-right: .7em; }
+.ex-title { font-weight: bold; }
+.book-solution { border-left: 3px solid #D3D3CA; padding-left: .9em; margin-top: .6em; }
+.book-solution-label { font-family: sans-serif; font-size: .72em; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; color: #3F8A5E; margin-bottom: .3em; }
+.ch-end { margin-top: 2em; border-top: 1px solid #D3D3CA; padding-top: .4em; }
+ul.res { list-style: none; padding-left: 0; }
+.rkind { font-family: sans-serif; font-size: .68em; letter-spacing: .08em; text-transform: uppercase; color: #7A808A; margin-right: .6em; }
+.rkind.free { color: #4062D8; }
+.by { color: #7A808A; font-size: .9em; }
+.colophon { margin-top: 3em; border-top: 1px solid #D3D3CA; padding-top: .8em; font-size: .85em; color: #7A808A; }
+
+/* the syllabus */
+.stage-head { border-top: 1px solid #15181E; padding-top: .6em; }
+.stage-num { font-family: sans-serif; font-size: .78em; letter-spacing: .1em; color: #A07B1E; margin-right: .8em; }
+.tag { font-family: sans-serif; font-size: .68em; letter-spacing: .1em; text-transform: uppercase; color: #7A808A; border: 1px solid #D3D3CA; padding: 0 .4em; }
+.stage-meta { font-family: sans-serif; font-size: .8em; color: #7A808A; margin-bottom: .8em; }
+.stage-meta span { margin-right: 1.2em; }
+.stage-why { color: #7A808A; }
+ul.topics li.key { font-weight: bold; }
+.prereq { font-size: .85em; color: #7A808A; border-left: 3px solid #4062D8; padding-left: .7em; }
+.milestone { border-top: 2px solid #A07B1E; padding-top: .5em; margin: 10% 0 1.5em; }
+.m-name { font-family: sans-serif; font-weight: bold; font-size: 1.2em; }
+.m-name span { display: block; font-size: .65em; letter-spacing: .12em; text-transform: uppercase; color: #A07B1E; }
+.m-hours { font-family: sans-serif; font-size: .8em; color: #7A808A; margin-bottom: .4em; }
+ul.rules { list-style: none; padding-left: 0; }
+ul.rules li { margin-bottom: .8em; }
+ul.rules .num { color: #A07B1E; font-weight: bold; margin-right: .6em; }
+.verdict { font-family: sans-serif; font-size: .7em; font-weight: bold; letter-spacing: .08em; text-transform: uppercase; }
+.verdict.ok { color: #3F8A5E; } .verdict.warn { color: #8A5F14; } .verdict.gap { color: #C0503E; } .verdict.neu { color: #7A808A; }
+.budget div { margin-bottom: .6em; } .budget .k { display: block; font-size: .75em; text-transform: uppercase; color: #7A808A; }
+.budget .v { font-weight: bold; } .budget .n { display: block; font-size: .85em; color: #7A808A; }
+.legend span { display: inline-block; margin-right: 1.2em; font-size: .85em; }
+.track { margin-bottom: 1.2em; }
+.t-what { font-family: sans-serif; font-size: .75em; text-transform: uppercase; color: #A07B1E; }
+.diagram svg { width: 100%; height: auto; background: #FFFFFF; }

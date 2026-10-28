@@ -1,0 +1,2696 @@
+<title>The Engineer's Syllabus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+/* ---------- tokens: light is the base set ---------- */
+:root {
+  --paper:        #EFEFE9;
+  --surface:      #F8F8F4;
+  --surface-sunk: #E7E7E0;
+  --ink:          #15181E;
+  --ink-mid:      #3E444F;
+  --ink-soft:     #5F656F;
+  --rule:         #D3D3CA;
+  --rule-soft:    #E1E1D9;
+  --marine:       #1B3CC0;
+  --marine-sunk:  #E2E5F7;
+  --brass:        #7A5D10;
+  --brass-sunk:   #EEE7D2;
+  --shadow:       0 1px 0 rgba(21,24,30,.05);
+  --ok:           #34694A;
+  --ok-bg:        #E2ECE5;
+  --warn:         #8A5F14;
+  --warn-bg:      #F1E8D5;
+  --gap:          #9E3728;
+  --gap-bg:       #F5E2DE;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:        #0E1115;
+    --surface:      #161A20;
+    --surface-sunk: #1C2128;
+    --ink:          #E8E8E2;
+    --ink-mid:      #B6BBC4;
+    --ink-soft:     #8C939E;
+    --rule:         #2A2F38;
+    --rule-soft:    #212630;
+    --marine:       #8EA3F7;
+    --marine-sunk:  #1A2140;
+    --brass:        #CBA94F;
+    --brass-sunk:   #2A2416;
+    --shadow:       0 1px 0 rgba(0,0,0,.3);
+    --ok:           #74B78C;
+    --ok-bg:        #16271C;
+    --warn:         #D6AC57;
+    --warn-bg:      #2A2214;
+    --gap:          #E58C7E;
+    --gap-bg:       #2E1A17;
+  }
+}
+:root[data-theme="dark"] {
+  --paper:        #0E1115;
+  --surface:      #161A20;
+  --surface-sunk: #1C2128;
+  --ink:          #E8E8E2;
+  --ink-mid:      #B6BBC4;
+  --ink-soft:     #8C939E;
+  --rule:         #2A2F38;
+  --rule-soft:    #212630;
+  --marine:       #8EA3F7;
+  --marine-sunk:  #1A2140;
+  --brass:        #CBA94F;
+  --brass-sunk:   #2A2416;
+  --shadow:       0 1px 0 rgba(0,0,0,.3);
+  --ok:           #74B78C;
+  --ok-bg:        #16271C;
+  --warn:         #D6AC57;
+  --warn-bg:      #2A2214;
+  --gap:          #E58C7E;
+  --gap-bg:       #2E1A17;
+}
+
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+a {
+  color: var(--marine);
+  text-decoration-color: color-mix(in srgb, var(--marine) 35%, transparent);
+  text-underline-offset: 2px;
+}
+a:hover { text-decoration-color: var(--marine); }
+
+:focus-visible {
+  outline: 2px solid var(--marine);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- shell ---------- */
+.shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 28px 140px;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  column-gap: 64px;
+  align-items: start;
+}
+
+/* ---------- rail ---------- */
+.rail {
+  position: sticky;
+  top: 0;
+  padding: 40px 0 40px;
+  max-height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.rail-head {
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.rail-nav { display: flex; flex-direction: column; gap: 1px; }
+.rail-nav a {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  padding: 4px 6px 4px 0;
+  color: var(--ink-mid);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 8px;
+}
+.rail-nav a:hover { color: var(--ink); border-left-color: var(--marine); background: var(--surface); }
+.rail-nav a.on { color: var(--ink); border-left-color: var(--marine); font-weight: 500; }
+.rail-nav a .n { color: var(--brass); font-variant-numeric: tabular-nums; }
+.rail-nav .sep {
+  margin: 9px 0 5px 8px;
+  color: var(--ink-soft);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 10px;
+  opacity: .75;
+}
+
+.progress-box { display: flex; flex-direction: column; gap: 7px; }
+.progress-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  color: var(--ink-soft); letter-spacing: .08em; text-transform: uppercase; font-size: 10px;
+}
+.progress-row b { color: var(--ink); font-weight: 600; font-size: 12px; letter-spacing: 0; }
+.bar { height: 5px; background: var(--surface-sunk); border-radius: 0; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--marine); transition: width .25s ease; }
+@media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+
+.rail-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.tool-btn {
+  font: inherit; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+  background: transparent; color: var(--ink-soft);
+  border: 1px solid var(--rule); padding: 5px 9px; cursor: pointer;
+}
+.tool-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+/* ---------- masthead ---------- */
+main { padding-top: 40px; min-width: 0; }
+
+.masthead { border-bottom: 2px solid var(--ink); padding-bottom: 26px; margin-bottom: 34px; }
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--brass); display: block; margin-bottom: 16px;
+}
+.masthead h1 {
+  font-size: clamp(40px, 6.4vw, 74px);
+  line-height: .96;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 18px;
+}
+.standfirst {
+  font-size: 20px; line-height: 1.5; color: var(--ink-mid);
+  max-width: 34em;
+}
+.masthead-meta {
+  display: flex; flex-wrap: wrap; gap: 0;
+  margin-top: 26px;
+  border-top: 1px solid var(--rule);
+}
+.masthead-meta div {
+  flex: 1 1 130px; padding: 14px 18px 0 0;
+  font-family: "IBM Plex Mono", monospace;
+}
+.masthead-meta .k {
+  display: block; font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 4px;
+}
+.masthead-meta .v { font-size: 21px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------- generic sections ---------- */
+section { scroll-margin-top: 24px; }
+.prose { max-width: 64ch; }
+.prose p { margin: 0 0 16px; }
+.prose p:last-child { margin-bottom: 0; }
+
+h2.sec {
+  font-size: 13px; font-family: "IBM Plex Mono", monospace; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft);
+  padding-bottom: 9px; border-bottom: 1px solid var(--rule);
+  margin: 72px 0 24px;
+}
+h3.sub {
+  font-size: 25px; margin: 0 0 12px;
+}
+
+/* ---------- rules block ---------- */
+.rules { display: grid; gap: 0; margin: 4px 0 0; border-top: 1px solid var(--rule-soft); }
+.rules li {
+  list-style: none;
+  display: grid; grid-template-columns: 28px minmax(0, 1fr);
+  gap: 14px; padding: 15px 0; border-bottom: 1px solid var(--rule-soft);
+}
+.rules li .num {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600;
+  color: var(--brass); padding-top: 5px;
+}
+.rules li b { font-family: Archivo, sans-serif; font-weight: 600; letter-spacing: -.01em; }
+.rules ol, .rules ul { margin: 0; padding: 0; }
+
+/* ---------- table ---------- */
+.table-wrap { overflow-x: auto; margin: 0; }
+table { border-collapse: collapse; width: 100%; min-width: 540px; font-size: 15px; }
+th, td { text-align: left; padding: 11px 16px 11px 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+th {
+  font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ink-soft);
+  border-bottom: 1px solid var(--rule); white-space: nowrap;
+}
+td.num { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+td strong { font-weight: 600; }
+
+/* ---------- entry-point diagnostic ---------- */
+table.diag { min-width: 640px; }
+table.diag td:first-child {
+  font-family: "IBM Plex Mono", monospace; font-size: 12.5px;
+  white-space: nowrap; padding-right: 26px;
+}
+table.diag td:first-child a { text-decoration: none; color: var(--ink); }
+table.diag td:first-child a:hover { color: var(--marine); }
+table.diag td:first-child .sn { color: var(--brass); font-variant-numeric: tabular-nums; }
+table.diag td:last-child, table.diag th:last-child { text-align: right; padding-right: 0; }
+
+.verdict {
+  display: inline-block;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .11em; text-transform: uppercase;
+  padding: 3px 8px; white-space: nowrap; border: 1px solid currentColor;
+}
+.verdict.ok   { color: var(--ok);   background: var(--ok-bg); }
+.verdict.warn { color: var(--warn); background: var(--warn-bg); }
+.verdict.gap  { color: var(--gap);  background: var(--gap-bg); }
+.verdict.neu  { color: var(--ink-soft); background: var(--surface-sunk); }
+
+.budget {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  margin: 24px 0 28px;
+}
+.budget div { flex: 1 1 148px; padding: 15px 22px 15px 0; font-family: "IBM Plex Mono", monospace; }
+.budget .k {
+  display: block; font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 5px;
+}
+.budget .v { font-size: 20px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.budget .n { display: block; font-size: 11px; color: var(--ink-soft); margin-top: 3px; line-height: 1.45; }
+.budget div.total .v { color: var(--marine); }
+
+.note {
+  background: var(--surface); border-left: 3px solid var(--marine);
+  padding: 16px 18px; font-size: 15.5px; line-height: 1.55; color: var(--ink-mid);
+  max-width: 64ch; margin: 26px 0 0;
+}
+.note b { color: var(--ink); font-weight: 600; font-family: Archivo, sans-serif; letter-spacing: -.01em; }
+.note p { margin: 0; }
+.note p + p { margin-top: 10px; }
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 16px 0 0;
+  font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--ink-soft);
+  align-items: center;
+}
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 9px; height: 9px; display: block; border: 1px solid currentColor; font-style: normal; }
+.legend .l-ok   { color: var(--ok); }
+.legend .l-warn { color: var(--warn); }
+.legend .l-gap  { color: var(--gap); }
+.legend em { color: var(--ink-soft); font-style: normal; }
+
+/* ---------- prereq diagram ---------- */
+.diagram { margin: 8px 0 0; }
+.diagram svg { display: block; width: 100%; height: auto; max-width: 880px; }
+.dg-box { fill: var(--surface); stroke: var(--rule); stroke-width: 1; }
+.dg-box-key { fill: var(--marine-sunk); stroke: var(--marine); stroke-width: 1.25; }
+.dg-label {
+  font-family: "IBM Plex Mono", monospace; font-size: 12.5px; font-weight: 500;
+  fill: var(--ink); letter-spacing: -.01em;
+}
+.dg-tier {
+  font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600;
+  fill: var(--ink-soft); letter-spacing: .13em;
+}
+.dg-edge { stroke: var(--ink-soft); stroke-width: 1.1; fill: none; opacity: .6; }
+
+/* ---------- milestone band ---------- */
+.milestone {
+  margin: 56px 0 0;
+  border-top: 2px solid var(--brass);
+  padding: 14px 0 0;
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: baseline;
+}
+.milestone .m-name {
+  font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -.01em;
+}
+.milestone .m-name span { color: var(--brass); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; display: block; margin-bottom: 3px; font-weight: 600; }
+.milestone .m-hours { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.milestone p { grid-column: 1 / -1; margin: 4px 0 0; color: var(--ink-mid); font-size: 15.5px; max-width: 60ch; }
+
+/* ---------- stage ---------- */
+.stage { margin-top: 54px; scroll-margin-top: 20px; }
+.stage-head { border-top: 1px solid var(--ink); padding-top: 16px; }
+.stage-top {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.stage-num {
+  font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600;
+  color: var(--brass); letter-spacing: .1em; font-variant-numeric: tabular-nums;
+}
+.tag {
+  font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-soft); border: 1px solid var(--rule); padding: 2px 7px;
+}
+.stage h3 { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.08; margin-bottom: 12px; }
+.stage-meta {
+  display: flex; flex-wrap: wrap; gap: 0 26px;
+  font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-soft);
+  margin-bottom: 20px; font-variant-numeric: tabular-nums;
+}
+.stage-meta b { color: var(--ink-mid); font-weight: 500; }
+.stage-why { font-size: 17.5px; color: var(--ink-mid); max-width: 62ch; margin: 0 0 24px; }
+.stage-why em { color: var(--ink); font-style: italic; }
+
+.stage-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; }
+
+.block { margin-bottom: 26px; }
+.block:last-child { margin-bottom: 0; }
+.block-h {
+  font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--ink-soft);
+  margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--rule-soft);
+}
+
+/* topic checklist */
+ul.topics { list-style: none; margin: 0; padding: 0; }
+ul.topics li {
+  position: relative;
+  padding: 4px 0 4px 26px; font-size: 15.5px; line-height: 1.45;
+}
+ul.topics li::before {
+  content: "";
+  position: absolute; left: 0; top: 4px;
+  width: 7px; height: 7px; margin-top: 9px; margin-left: 4px;
+  background: var(--rule); display: block;
+}
+ul.topics li.key::before { background: var(--marine); }
+ul.topics li b { font-weight: 600; }
+
+/* resources */
+ul.res { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+ul.res li {
+  display: grid; grid-template-columns: 62px minmax(0, 1fr);
+  gap: 12px; padding: 8px 0; border-bottom: 1px dotted var(--rule);
+  font-size: 15px; line-height: 1.42; align-items: baseline;
+}
+ul.res li:last-child { border-bottom: none; }
+.rkind {
+  font-family: "IBM Plex Mono", monospace; font-size: 9.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft);
+  padding-top: 3px;
+}
+.rkind.free { color: var(--marine); }
+.res .by { color: var(--ink-soft); font-size: 13.5px; }
+
+/* ship-this panel */
+.ship {
+  background: var(--surface); border-left: 3px solid var(--brass);
+  padding: 16px 18px; font-size: 15.5px; line-height: 1.5;
+}
+.ship .block-h { border-bottom: none; padding-bottom: 0; margin-bottom: 6px; color: var(--brass); }
+.ship p { margin: 0; color: var(--ink-mid); }
+.ship p + p { margin-top: 8px; }
+
+.prereq {
+  font-family: "IBM Plex Mono", monospace; font-size: 11.5px; color: var(--ink-soft);
+  border: 1px solid var(--rule); border-left: 3px solid var(--marine);
+  padding: 9px 12px; margin: 0 0 20px; line-height: 1.5;
+}
+.prereq b { color: var(--ink-mid); font-weight: 500; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; }
+
+/* checkbox */
+.done-toggle {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft);
+  user-select: none; margin-left: auto;
+}
+.done-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.done-toggle .box {
+  width: 14px; height: 14px; border: 1.5px solid var(--rule); display: block; position: relative;
+}
+.done-toggle:hover .box { border-color: var(--marine); }
+.done-toggle input:focus-visible + .box { outline: 2px solid var(--marine); outline-offset: 2px; }
+.done-toggle input:checked + .box { background: var(--marine); border-color: var(--marine); }
+.done-toggle input:checked + .box::after {
+  content: ""; position: absolute; left: 3.5px; top: .5px;
+  width: 4px; height: 8px; border: solid var(--paper);
+  border-width: 0 2px 2px 0; transform: rotate(42deg);
+}
+.stage.is-done .stage-head { opacity: .58; }
+.stage.is-done .done-toggle { color: var(--marine); }
+
+/* tracks */
+.tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); gap: 0 34px; }
+.track { padding: 20px 0; border-top: 1px solid var(--rule); }
+.track h4 { font-size: 18px; margin-bottom: 4px; }
+.track .t-what { font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
+.track p { margin: 0 0 10px; font-size: 15px; color: var(--ink-mid); }
+.track ul { margin: 0; padding-left: 17px; font-size: 14.5px; color: var(--ink-mid); }
+.track li { margin-bottom: 3px; }
+
+/* traps */
+.traps { list-style: none; margin: 0; padding: 0; }
+.traps li { padding: 14px 0; border-bottom: 1px solid var(--rule-soft); display: grid; grid-template-columns: minmax(0,1fr); gap: 3px; }
+.traps li b { font-family: Archivo, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.traps li span { color: var(--ink-mid); font-size: 15.5px; }
+
+/* colophon */
+.colophon {
+  margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--rule);
+  font-family: "IBM Plex Mono", monospace; font-size: 11.5px; line-height: 1.7; color: var(--ink-soft);
+  max-width: 70ch;
+}
+.colophon a { color: var(--ink-mid); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1060px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .rail {
+    position: static; max-height: none; padding: 28px 0 0;
+    border-bottom: 1px solid var(--rule); padding-bottom: 20px;
+  }
+  .rail-nav { display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .rail-nav a { border-left: none; border: 1px solid var(--rule); padding: 4px 9px; grid-template-columns: auto auto; gap: 6px; }
+  .rail-nav a:hover, .rail-nav a.on { border-color: var(--marine); }
+  .rail-nav .sep { display: none; }
+  main { padding-top: 32px; }
+  .stage-grid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .shell { padding: 0 18px 90px; }
+  .masthead-meta div { flex-basis: 50%; }
+  .standfirst { font-size: 18px; }
+}
+
+/* Reset: armed state while it waits for the second click */
+.tool-btn.armed { color: var(--gap); border-color: var(--gap); }
+
+/* ===== companion volumes ===== */
+.vol-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.vol-list li { border-bottom: 1px solid var(--rule); }
+.vol-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 150px; gap: 6px 24px; align-items: start; padding: 18px 10px; color: var(--ink); text-decoration: none; }
+.vol-row:hover { background: var(--surface); }
+.vol-row:hover .vr-title { color: var(--marine); }
+.vr-stage { display: flex; flex-direction: column; gap: 2px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+.vr-stage .k { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.vr-stage b { font-size: 22px; font-weight: 600; line-height: 1.1; color: var(--brass); font-variant-numeric: tabular-nums; }
+.vr-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.vr-kicker { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.vr-title { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: 21px; line-height: 1.2; letter-spacing: -.01em; text-wrap: balance; }
+.vr-blurb { font-size: 16px; line-height: 1.5; color: var(--ink-mid); max-width: 40em; }
+.vr-meta { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.vol-meter { display: flex; flex-direction: column; gap: 6px; padding-top: 4px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.vm-track { display: block; height: 4px; background: var(--surface-sunk); overflow: hidden; }
+.vm-fill { display: block; height: 100%; width: 0; background: var(--marine); }
+.vol-all { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 18px; margin-top: 4px; padding: 16px 10px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px; color: var(--ink-mid); text-decoration: none; }
+.vol-all:hover { color: var(--marine); }
+.vol-all b { font-weight: 600; color: var(--ink); }
+.companion { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 8px 22px; align-items: center; margin: 0 0 24px; max-width: 62ch; padding: 14px 18px; background: var(--surface); border-left: 3px solid var(--marine); color: var(--ink); text-decoration: none; }
+.companion:hover .cp-t { color: var(--marine); }
+.cp-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cp-k { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--marine); }
+.cp-t { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: 19px; line-height: 1.2; }
+.cp-m { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cp-side { display: flex; flex-direction: column; gap: 6px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cp-go { color: var(--ink); font-weight: 600; }
+.tool-btn.armed { color: var(--gap); border-color: var(--gap); }
+a:focus-visible, .tool-btn:focus-visible { outline: 2px solid var(--marine); outline-offset: 2px; }
+@media (max-width: 640px) {
+  .vol-row { grid-template-columns: 48px minmax(0, 1fr); gap: 6px 14px; }
+  .vol-meter { grid-column: 2; }
+  .vr-stage b { font-size: 18px; }
+  .companion { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ===== study tools: search, continue reading, flashcards ===== */
+.lib-dl { display: flex; align-items: baseline; gap: 10px; margin-top: 8px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); }
+.lib-dl span { letter-spacing: .1em; text-transform: uppercase; font-size: 10px; }
+.lib-dl a, table.eds a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+.lib-dl a:hover, table.eds a:hover { color: var(--marine); border-bottom-color: var(--marine); }
+a[data-dl].busy { opacity: .5; cursor: progress; }
+table.eds { min-width: 0; }
+table.eds td:first-child .n { display: inline-block; min-width: 2.4em; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--brass); }
+table.eds .sz { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); margin-left: 6px; }
+table.eds tr.all td { font-weight: 600; border-top: 1px solid var(--rule); }
+.sync-note { margin: 8px 0 0; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .02em; color: var(--ink-soft); }
+.lib-study { display: flex; gap: 6px; align-items: stretch; }
+.lib-search { flex: 1; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0;
+  font: inherit; font-size: 11.5px; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--rule);
+  padding: 6px 9px; cursor: pointer; text-align: left; }
+.lib-search:hover { border-color: var(--marine); color: var(--ink); }
+.lib-search kbd, .sr-keys kbd { font: inherit; font-size: 10px; border: 1px solid var(--rule); padding: 0 5px; color: var(--ink-soft); background: var(--paper); }
+.lib-cards { display: flex; align-items: center; font-size: 11.5px; padding: 6px 9px; border: 1px solid var(--rule);
+  color: var(--ink-soft); text-decoration: none; }
+.lib-cards:hover, .lib-cards[aria-current="page"] { border-color: var(--marine); color: var(--ink); }
+.ch-meta .ch-cards { color: var(--marine); text-decoration: none; border-bottom: 1px solid transparent; }
+.ch-meta .ch-cards:hover { border-bottom-color: var(--marine); }
+
+.sr-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(10, 12, 16, .45); display: flex;
+  justify-content: center; align-items: flex-start; padding: 7vh 16px 16px; }
+.sr-panel { width: 100%; max-width: 720px; max-height: 84vh; display: flex; flex-direction: column;
+  background: var(--paper); border: 1px solid var(--rule); box-shadow: 0 18px 50px rgba(0, 0, 0, .28); }
+.sr-top { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+.sr-input { flex: 1; min-width: 0; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 16px; color: var(--ink); background: transparent;
+  border: 0; outline: 0; padding: 4px 0; }
+.sr-close { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft);
+  background: transparent; border: 1px solid var(--rule); padding: 4px 8px; cursor: pointer; }
+.sr-opts { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; padding: 8px 14px;
+  font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11px; color: var(--ink-soft); border-bottom: 1px solid var(--rule-soft); }
+.sr-opts label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.sr-keys { display: flex; gap: 10px; }
+.sr-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; }
+.sr-item { display: flex; flex-direction: column; gap: 3px; padding: 11px 14px; color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid var(--rule-soft); }
+.sr-item[aria-selected="true"], .sr-item:hover { background: var(--surface); }
+.sr-item[aria-selected="true"] { box-shadow: inset 3px 0 0 var(--marine); }
+.sr-where { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.sr-where b { color: var(--brass); font-weight: 600; }
+.sr-title { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 600; font-size: 16px; line-height: 1.3; }
+.sr-snip { font-size: 14.5px; line-height: 1.5; color: var(--ink-mid); }
+.sr-item mark { background: var(--marine-sunk); color: inherit; padding: 0 1px; }
+.sr-status { padding: 16px 14px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px; color: var(--ink-soft); }
+
+.resume-bar { position: fixed; z-index: 40; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: max-content; max-width: calc(100% - 32px); display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px 10px 16px; background: var(--paper); border: 1px solid var(--rule); border-left: 3px solid var(--marine);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .18); font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12px; color: var(--ink-mid); }
+.resume-bar .rb-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resume-bar .rb-text b { color: var(--ink); font-weight: 600; }
+.resume-bar button { font: inherit; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+  padding: 5px 10px; border: 1px solid var(--rule); background: transparent; color: var(--ink-soft); flex: none; }
+.resume-bar .rb-go { background: var(--marine); border-color: var(--marine); color: var(--paper); }
+
+.resume { margin: 40px 0 0; }
+.resume-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 22px; align-items: center; max-width: 62ch;
+  padding: 16px 18px; background: var(--surface); border-left: 3px solid var(--marine); color: var(--ink); text-decoration: none; }
+.resume-main:hover .rs-t { color: var(--marine); }
+.rs-k { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--marine); }
+.rs-t { font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: 19px; line-height: 1.25; }
+.rs-m { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--ink-soft); }
+.rs-go { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.resume-more { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--ink-soft); }
+.resume-more a { color: var(--ink-mid); text-decoration: none; border-bottom: 1px solid var(--rule); }
+.resume-more a:hover { color: var(--marine); border-bottom-color: var(--marine); }
+@media (max-width: 640px) { .resume-main { grid-template-columns: minmax(0, 1fr); } .sr-keys { display: none; } }
+</style>
+
+
+<script>if(!document.documentElement.lang)document.documentElement.lang="en";try{var t=localStorage.getItem("englibrary.v1.theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<style>.skip-link{position:absolute;left:12px;top:-80px;z-index:200;padding:9px 14px;background:var(--ink);color:var(--paper);font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace;font-size:13px;text-decoration:none}.skip-link:focus{top:12px}.lib-vols a{display:inline-flex;align-items:center;min-height:24px}[data-scroll-focus]:focus-visible{outline:2px solid var(--marine);outline-offset:2px}.track h3{font-size:18px;margin-bottom:4px}.rail-nav .sep{opacity:1}.rail-nav a{min-height:24px;box-sizing:border-box}main:focus{outline:none}</style><a class="skip-link" href="#content">Skip to content</a>
+<div class="shell">
+
+  <aside class="rail">
+    <div class="lib-study">
+      <button class="lib-search" type="button" data-search-open><span>Search the syllabus</span><kbd>/</kbd></button>
+      <a class="lib-cards" href="review.html">Flashcards</a>
+    </div>
+
+    <div class="rail-head">Contents</div>
+
+    <div class="progress-box">
+      <div class="progress-row"><span>Chapters read</span><b id="pct">0 / 299</b></div>
+      <div class="bar"><span id="barfill"></span></div>
+      <div class="progress-row"><span>Stages done</span><b id="pct-stages">0 / 16</b></div>
+      <div class="bar"><span id="barfill-stages"></span></div>
+    </div>
+
+    <nav class="rail-nav" id="railnav">
+      <a href="#volumes"><span class="n">&#167;</span><span>Companion volumes</span></a>
+      <a href="#editions"><span class="n">&#167;</span><span>Offline editions</span></a>
+      <a href="#method"><span class="n">&#167;</span><span>How to use this</span></a>
+      <a href="#order"><span class="n">&#167;</span><span>Prerequisite spine</span></a>
+      <a href="#clock"><span class="n">&#167;</span><span>Time budget</span></a>
+      <a href="#entry"><span class="n">&#167;</span><span>Where to start</span></a>
+      <div class="sep">Volumes</div>
+      <a href="whetstone.html"><span class="n">00</span><span>Whetstone</span></a>
+      <a href="primer.html"><span class="n">01</span><span>Primer</span></a>
+      <a href="workbench.html"><span class="n">02</span><span>Workbench</span></a>
+      <a href="compass.html"><span class="n">03</span><span>Compass</span></a>
+      <a href="mill.html"><span class="n">04</span><span>Mill</span></a>
+      <a href="loom.html"><span class="n">05</span><span>Loom</span></a>
+      <a href="exchange.html"><span class="n">06</span><span>Exchange</span></a>
+      <a href="press.html"><span class="n">07</span><span>Press</span></a>
+      <a href="ledger.html"><span class="n">08</span><span>Ledger</span></a>
+      <a href="craft.html"><span class="n">09</span><span>Craft</span></a>
+      <a href="shipyard.html"><span class="n">10</span><span>Shipyard</span></a>
+      <a href="fleet.html"><span class="n">11</span><span>Fleet</span></a>
+      <a href="watch.html"><span class="n">12</span><span>Watch</span></a>
+      <a href="citadel.html"><span class="n">13</span><span>Citadel</span></a>
+      <a href="foundry.html"><span class="n">14</span><span>Foundry</span></a>
+      <a href="guild.html"><span class="n">15</span><span>Guild</span></a>
+      <a href="all.html"><span class="n">&#167;</span><span>One-page edition</span></a>
+      <div class="sep">Foundation</div>
+      <a href="#s00"><span class="n">00</span><span>Tools</span></a>
+      <a href="#s01"><span class="n">01</span><span>Programming</span></a>
+      <a href="#s02"><span class="n">02</span><span>Algorithms</span></a>
+      <a href="#s03"><span class="n">03</span><span>Mathematics</span></a>
+      <div class="sep">Systems</div>
+      <a href="#s04"><span class="n">04</span><span>Architecture</span></a>
+      <a href="#s05"><span class="n">05</span><span>Operating systems</span></a>
+      <a href="#s06"><span class="n">06</span><span>Networking</span></a>
+      <a href="#s07"><span class="n">07</span><span>Compilers</span></a>
+      <a href="#s08"><span class="n">08</span><span>Databases</span></a>
+      <div class="sep">Practice</div>
+      <a href="#s09"><span class="n">09</span><span>Software craft</span></a>
+      <a href="#s10"><span class="n">10</span><span>Shipping products</span></a>
+      <a href="#s11"><span class="n">11</span><span>Distributed systems</span></a>
+      <a href="#s12"><span class="n">12</span><span>Production &amp; infra</span></a>
+      <a href="#s13"><span class="n">13</span><span>Security</span></a>
+      <a href="#s14"><span class="n">14</span><span>AI engineering</span></a>
+      <a href="#s15"><span class="n">15</span><span>Expert practice</span></a>
+      <div class="sep">Appendix</div>
+      <a href="#tracks"><span class="n">&#167;</span><span>Specialisations</span></a>
+      <a href="#traps"><span class="n">&#167;</span><span>Traps</span></a>
+      <a href="#shelf"><span class="n">&#167;</span><span>The shelf</span></a>
+    </nav>
+
+    <div class="rail-tools">
+      <button class="tool-btn" id="themebtn" type="button">Theme</button>
+      <button class="tool-btn" id="resetbtn" type="button">Reset marks</button>
+    </div>
+  </aside>
+
+  <main id="content" tabindex="-1">
+
+    <header class="masthead">
+      <span class="eyebrow">A self-directed curriculum &middot; revised September 2026</span>
+      <h1>The Engineer's Syllabus</h1>
+      <p class="standfirst">Sixteen stages from your first line of code to the depth that makes you the person a team calls when the system is on fire. Every stage names what to learn, what to read, and what to ship.</p>
+      <div class="masthead-meta">
+        <div><span class="k">Stages</span><span class="v">16</span></div>
+        <div><span class="k">Directed study</span><span class="v">~2,720 h</span></div>
+        <div><span class="k">At 20 h / week</span><span class="v">2.6 yr</span></div>
+        <div><span class="k">Projects shipped</span><span class="v">15</span></div>
+      </div>
+    </header>
+
+    <section id="resume" class="resume" hidden aria-label="Continue reading"></section>
+
+    <!-- ============ COMPANION VOLUMES ============ -->
+    <section id="volumes">
+      <h2 class="sec">The companion volumes</h2>
+      <div class="prose">
+        <p>Every one of the sixteen stages has a companion volume: a book-length study guide with worked examples you can run, exercises with folded solutions, and a checklist and reading list for every chapter. Chapter marks you set in a volume are saved in this browser and counted here.</p>
+      </div>
+      <ol class="vol-list">
+      <li><a class="vol-row" href="whetstone.html" data-vol="whet">
+        <span class="vr-stage"><span class="k">Stage</span><b>00</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Tools, the shell &amp; learning</span>
+          <span class="vr-title">The Engineer's Whetstone</span>
+          <span class="vr-blurb">The tools under every other stage: the shell and its text tools, files and permissions, Git as a data structure, one editor, and how to learn, with every example run against the real tools.</span>
+          <span class="vr-meta">16 chapters &middot; 16 code examples &middot; 48 exercises &middot; 60 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 16 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="primer.html" data-vol="prim">
+        <span class="vr-stage"><span class="k">Stage</span><b>01</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Programming foundations</span>
+          <span class="vr-title">The Engineer's Primer</span>
+          <span class="vr-blurb">Learning to program from the first expression up: functions and recursion, lists and dictionaries, files, tests and the debugger, classes, then a tool, a game and an API client.</span>
+          <span class="vr-meta">20 chapters &middot; 20 code examples &middot; 60 exercises &middot; 300 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="workbench.html" data-vol="work">
+        <span class="vr-stage"><span class="k">Stage</span><b>02</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Data structures &amp; algorithms</span>
+          <span class="vr-title">The Engineer's Workbench</span>
+          <span class="vr-blurb">The structures every language hands you, built from nothing and measured: arrays, hash tables, heaps, trees, sorts and sketches, then the problems with no fast answer.</span>
+          <span class="vr-meta">8 chapters &middot; 8 code examples &middot; 24 exercises &middot; 250 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 8 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="compass.html" data-vol="comp">
+        <span class="vr-stage"><span class="k">Stage</span><b>03</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Mathematics</span>
+          <span class="vr-title">The Engineer's Compass</span>
+          <span class="vr-blurb">The mathematics an engineer actually uses, from logic, proof and counting to probability, linear algebra and statistics, every result proved and then checked by running code.</span>
+          <span class="vr-meta">20 chapters &middot; 20 code examples &middot; 60 exercises &middot; 150 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="mill.html" data-vol="mill">
+        <span class="vr-stage"><span class="k">Stage</span><b>04</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Computer architecture</span>
+          <span class="vr-title">The Engineer's Mill</span>
+          <span class="vr-blurb">A computer built from a single kind of gate up to a CPU that runs real programs, then the caches, pipelines and parallel hardware that decide how fast code runs.</span>
+          <span class="vr-meta">20 chapters &middot; 20 code examples &middot; 60 exercises &middot; 150 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="loom.html" data-vol="loom">
+        <span class="vr-stage"><span class="k">Stage</span><b>05</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Operating systems &amp; concurrency</span>
+          <span class="vr-title">The Engineer's Loom</span>
+          <span class="vr-blurb">How one machine is shared between many programs: processes, scheduling, locks and the bugs they prevent, virtual memory, file systems that survive a crash, and containers.</span>
+          <span class="vr-meta">20 chapters &middot; 20 code examples &middot; 60 exercises &middot; 150 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="exchange.html" data-vol="exch">
+        <span class="vr-stage"><span class="k">Stage</span><b>06</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Networking</span>
+          <span class="vr-title">The Engineer's Exchange</span>
+          <span class="vr-blurb">Networking from the top down, from HTTP and TLS through TCP, IP and DNS to CDNs, load balancing and diagnosis.</span>
+          <span class="vr-meta">20 chapters &middot; 23 code examples &middot; 60 exercises &middot; 120 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="press.html" data-vol="press">
+        <span class="vr-stage"><span class="k">Stage</span><b>07</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Languages &amp; compilers</span>
+          <span class="vr-title">The Engineer's Press</span>
+          <span class="vr-blurb">How a language implementation reads and runs a program: lexers and parsers, type checkers, interpreters and bytecode machines, garbage collection, optimisation and JIT compilation.</span>
+          <span class="vr-meta">20 chapters &middot; 20 code examples &middot; 60 exercises &middot; 120 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="ledger.html" data-vol="ledg">
+        <span class="vr-stage"><span class="k">Stage</span><b>08</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Databases</span>
+          <span class="vr-title">The Engineer's Ledger</span>
+          <span class="vr-blurb">What a database does with your query: pages, B-trees and LSM trees, the planner, transactions and the write-ahead log.</span>
+          <span class="vr-meta">20 chapters &middot; 22 code examples &middot; 60 exercises &middot; 180 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="craft.html" data-vol="craft">
+        <span class="vr-stage"><span class="k">Stage</span><b>09</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Software craft</span>
+          <span class="vr-title">The Engineer's Craft</span>
+          <span class="vr-blurb">Writing code a team can still change safely in two years, through naming, design, tests, review and debugging.</span>
+          <span class="vr-meta">19 chapters &middot; 83 code examples &middot; 53 exercises &middot; 220 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 19 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="shipyard.html" data-vol="ship">
+        <span class="vr-stage"><span class="k">Stage</span><b>10</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Shipping products</span>
+          <span class="vr-title">The Engineer's Shipyard</span>
+          <span class="vr-blurb">Assembling code into a product strangers use and pay for, from the API and sign-in to releases and launch.</span>
+          <span class="vr-meta">20 chapters &middot; 69 code examples &middot; 60 exercises &middot; 240 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="fleet.html" data-vol="fleet">
+        <span class="vr-stage"><span class="k">Stage</span><b>11</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Distributed systems</span>
+          <span class="vr-title">The Engineer's Fleet</span>
+          <span class="vr-blurb">Making many machines behave like one dependable system, and knowing when not to try.</span>
+          <span class="vr-meta">20 chapters &middot; 30 code examples &middot; 60 exercises &middot; 280 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="watch.html" data-vol="watch">
+        <span class="vr-stage"><span class="k">Stage</span><b>12</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Production &amp; infra</span>
+          <span class="vr-title">The Engineer's Watch</span>
+          <span class="vr-blurb">Getting from your laptop to a system that stays up, with packaging, delivery, observability and reliability.</span>
+          <span class="vr-meta">20 chapters &middot; 29 code examples &middot; 60 exercises &middot; 220 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="citadel.html" data-vol="cita">
+        <span class="vr-stage"><span class="k">Stage</span><b>13</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Security</span>
+          <span class="vr-title">The Engineer's Citadel</span>
+          <span class="vr-blurb">Security engineering in depth, across web applications, identity, cryptography and the platform.</span>
+          <span class="vr-meta">20 chapters &middot; 47 code examples &middot; 60 exercises &middot; 120 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="foundry.html" data-vol="found">
+        <span class="vr-stage"><span class="k">Stage</span><b>14</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">AI engineering</span>
+          <span class="vr-title">The Engineer's Foundry</span>
+          <span class="vr-blurb">Casting a language model into a feature you can trust, with retrieval, tools and evaluation at the centre.</span>
+          <span class="vr-meta">20 chapters &middot; 27 code examples &middot; 60 exercises &middot; 160 h</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      <li><a class="vol-row" href="guild.html" data-vol="guild">
+        <span class="vr-stage"><span class="k">Stage</span><b>15</b></span>
+        <span class="vr-main">
+          <span class="vr-kicker">Mastery</span>
+          <span class="vr-title">The Engineer's Guild</span>
+          <span class="vr-blurb">The practices that turn a capable engineer into a senior one: reading papers and code, design documents, estimating, leading, mentoring, the business, and a career that compounds.</span>
+          <span class="vr-meta">16 chapters &middot; 16 code examples &middot; 48 exercises &middot; Continuous</span>
+        </span>
+        <span class="vol-meter"><span class="vm-count">0 / 16 read</span><span class="vm-track"><span class="vm-fill"></span></span></span>
+      </a></li>
+      </ol>
+      <a class="vol-all" href="all.html"><span>Prefer one long page? The syllabus and all sixteen volumes together, about 6.4 MB.</span><b>Open the one-page edition &rarr;</b></a>
+    </section>
+
+    <!-- ============ OFFLINE EDITIONS ============ -->
+    <section id="editions">
+      <h2 class="sec">Offline editions</h2>
+      <div class="prose">
+        <p>The syllabus and every volume as a PDF, to read without a connection or to print. Each is laid out on A4 with a contents page, page numbers and bookmarks, and prints every exercise's solution after the exercise. Your marks and flashcards stay here, on the site.</p>
+      </div>
+      <div class="table-wrap"><table class="eds">
+        <thead><tr><th>Book</th><th>PDF, A4</th></tr></thead>
+        <tbody><tr><td><span class="n">&middot;</span>The Engineer&#x27;s Syllabus</td><td><a href="editions/Syllabus.pdf" download="The Engineer&#x27;s Syllabus.pdf" data-dl="The Engineer&#x27;s Syllabus.pdf">PDF</a> <span class="sz">369 KB</span></td></tr><tr><td><span class="n">00</span>The Engineer&#x27;s Whetstone</td><td><a href="editions/Whetstone.pdf" download="The Engineer&#x27;s Whetstone.pdf" data-dl="The Engineer&#x27;s Whetstone.pdf">PDF</a> <span class="sz">1.2 MB</span></td></tr><tr><td><span class="n">01</span>The Engineer&#x27;s Primer</td><td><a href="editions/Primer.pdf" download="The Engineer&#x27;s Primer.pdf" data-dl="The Engineer&#x27;s Primer.pdf">PDF</a> <span class="sz">1.4 MB</span></td></tr><tr><td><span class="n">02</span>The Engineer&#x27;s Workbench</td><td><a href="editions/Workbench.pdf" download="The Engineer&#x27;s Workbench.pdf" data-dl="The Engineer&#x27;s Workbench.pdf">PDF</a> <span class="sz">637 KB</span></td></tr><tr><td><span class="n">03</span>The Engineer&#x27;s Compass</td><td><a href="editions/Compass.pdf" download="The Engineer&#x27;s Compass.pdf" data-dl="The Engineer&#x27;s Compass.pdf">PDF</a> <span class="sz">1.5 MB</span></td></tr><tr><td><span class="n">04</span>The Engineer&#x27;s Mill</td><td><a href="editions/Mill.pdf" download="The Engineer&#x27;s Mill.pdf" data-dl="The Engineer&#x27;s Mill.pdf">PDF</a> <span class="sz">1.3 MB</span></td></tr><tr><td><span class="n">05</span>The Engineer&#x27;s Loom</td><td><a href="editions/Loom.pdf" download="The Engineer&#x27;s Loom.pdf" data-dl="The Engineer&#x27;s Loom.pdf">PDF</a> <span class="sz">1.2 MB</span></td></tr><tr><td><span class="n">06</span>The Engineer&#x27;s Exchange</td><td><a href="editions/Exchange.pdf" download="The Engineer&#x27;s Exchange.pdf" data-dl="The Engineer&#x27;s Exchange.pdf">PDF</a> <span class="sz">1.1 MB</span></td></tr><tr><td><span class="n">07</span>The Engineer&#x27;s Press</td><td><a href="editions/Press.pdf" download="The Engineer&#x27;s Press.pdf" data-dl="The Engineer&#x27;s Press.pdf">PDF</a> <span class="sz">1.7 MB</span></td></tr><tr><td><span class="n">08</span>The Engineer&#x27;s Ledger</td><td><a href="editions/Ledger.pdf" download="The Engineer&#x27;s Ledger.pdf" data-dl="The Engineer&#x27;s Ledger.pdf">PDF</a> <span class="sz">1.1 MB</span></td></tr><tr><td><span class="n">09</span>The Engineer&#x27;s Craft</td><td><a href="editions/Craft.pdf" download="The Engineer&#x27;s Craft.pdf" data-dl="The Engineer&#x27;s Craft.pdf">PDF</a> <span class="sz">1.0 MB</span></td></tr><tr><td><span class="n">10</span>The Engineer&#x27;s Shipyard</td><td><a href="editions/Shipyard.pdf" download="The Engineer&#x27;s Shipyard.pdf" data-dl="The Engineer&#x27;s Shipyard.pdf">PDF</a> <span class="sz">1.1 MB</span></td></tr><tr><td><span class="n">11</span>The Engineer&#x27;s Fleet</td><td><a href="editions/Fleet.pdf" download="The Engineer&#x27;s Fleet.pdf" data-dl="The Engineer&#x27;s Fleet.pdf">PDF</a> <span class="sz">986 KB</span></td></tr><tr><td><span class="n">12</span>The Engineer&#x27;s Watch</td><td><a href="editions/Watch.pdf" download="The Engineer&#x27;s Watch.pdf" data-dl="The Engineer&#x27;s Watch.pdf">PDF</a> <span class="sz">1.0 MB</span></td></tr><tr><td><span class="n">13</span>The Engineer&#x27;s Citadel</td><td><a href="editions/Citadel.pdf" download="The Engineer&#x27;s Citadel.pdf" data-dl="The Engineer&#x27;s Citadel.pdf">PDF</a> <span class="sz">1.2 MB</span></td></tr><tr><td><span class="n">14</span>The Engineer&#x27;s Foundry</td><td><a href="editions/Foundry.pdf" download="The Engineer&#x27;s Foundry.pdf" data-dl="The Engineer&#x27;s Foundry.pdf">PDF</a> <span class="sz">1.0 MB</span></td></tr><tr><td><span class="n">15</span>The Engineer&#x27;s Guild</td><td><a href="editions/Guild.pdf" download="The Engineer&#x27;s Guild.pdf" data-dl="The Engineer&#x27;s Guild.pdf">PDF</a> <span class="sz">961 KB</span></td></tr></tbody>
+      </table></div>
+    </section>
+
+
+
+    <!-- ============ METHOD ============ -->
+    <section id="method">
+      <h2 class="sec">How to use this</h2>
+      <div class="prose">
+        <p>This is a map, not a schedule. The order is chosen so that each stage rests on something you already understand, which is why it is worth following even when a later stage looks more exciting. Seven rules decide whether you finish it.</p>
+        <p>If you already have a degree or a few years of work behind you, skip ahead to <a href="#entry">where to start</a> and take the diagnostic first.</p>
+      </div>
+
+      <ul class="rules">
+        <li><span class="num mono">01</span><div><b>Build more than you read.</b> Every stage below ends with something you ship. A stage is not finished when you have watched the lectures. It is finished when the project runs and someone other than you has used it.</div></li>
+        <li><span class="num mono">02</span><div><b>Budget 100 to 200 hours per major subject.</b> This is the figure the Teach Yourself Computer Science authors settled on, and it holds up. Anything under that produces recognition without understanding.</div></li>
+        <li><span class="num mono">03</span><div><b>One language, all the way down, before a second.</b> Depth in one language transfers. A shallow acquaintance with six does not. Pick Python or JavaScript and stay there until stage 07.</div></li>
+        <li><span class="num mono">04</span><div><b>Never run more than two stages at once.</b> Mathematics pairs well with algorithms. Craft pairs well with anything. Three concurrent subjects means three abandoned subjects.</div></li>
+        <li><span class="num mono">05</span><div><b>Write about what you learn, in public.</b> A learning log forces you to articulate the thing you half-understand. It is also, in practice, the strongest hiring signal a self-taught engineer can produce.</div></li>
+        <li><span class="num mono">06</span><div><b>Let the assistant write code only after you can read it.</b> Coding agents are leverage on a foundation and a liability without one. The rule that keeps you honest: you must be able to explain every line you ship.</div></li>
+        <li><span class="num mono">07</span><div><b>Consistency beats intensity.</b> Ten focused hours a week for three years outruns forty sporadic hours for six months. Protect the streak, not the session.</div></li>
+      </ul>
+    </section>
+
+    <!-- ============ ORDER ============ -->
+    <section id="order">
+      <h2 class="sec">The prerequisite spine</h2>
+      <div class="prose">
+        <p>Most of the curriculum is reorderable. These dependencies are not. Architecture is what makes operating systems and databases legible instead of memorised, and distributed systems are incoherent until you know what a process and a packet actually are.</p>
+      </div>
+
+      <div class="diagram" role="img" aria-label="Dependency graph. Programming leads to both Data Structures and Computer Architecture. Computer Architecture leads to Operating Systems, Networking, and Databases. All three of those lead to Distributed Systems.">
+        <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0.6 L 9 4.5 L 0 8.4 z" fill="var(--ink-soft)" opacity="0.6"></path>
+            </marker>
+          </defs>
+
+          <text class="dg-tier" x="10" y="20">TIER 1</text>
+          <text class="dg-tier" x="228" y="20">TIER 2</text>
+          <text class="dg-tier" x="466" y="20">TIER 3</text>
+          <text class="dg-tier" x="688" y="20">TIER 4</text>
+
+          <path class="dg-edge" d="M 170 178 C 200 178 196 74 226 74" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 170 178 C 200 178 196 210 226 210" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 402 210 C 434 210 434 136 462 136" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 402 210 C 434 210 434 214 462 214" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 402 210 C 434 210 434 292 462 292" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 622 136 C 654 136 654 208 684 208" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 622 214 C 652 214 654 210 684 210" marker-end="url(#ar)"></path>
+          <path class="dg-edge" d="M 622 292 C 654 292 654 216 684 216" marker-end="url(#ar)"></path>
+
+          <rect class="dg-box-key" x="10" y="156" width="160" height="44"></rect>
+          <text class="dg-label" x="90" y="183" text-anchor="middle">Programming</text>
+
+          <rect class="dg-box" x="226" y="52" width="176" height="44"></rect>
+          <text class="dg-label" x="314" y="79" text-anchor="middle">Algorithms</text>
+
+          <rect class="dg-box-key" x="226" y="188" width="176" height="44"></rect>
+          <text class="dg-label" x="314" y="215" text-anchor="middle">Architecture</text>
+
+          <rect class="dg-box" x="462" y="114" width="160" height="44"></rect>
+          <text class="dg-label" x="542" y="141" text-anchor="middle">Operating sys.</text>
+
+          <rect class="dg-box" x="462" y="192" width="160" height="44"></rect>
+          <text class="dg-label" x="542" y="219" text-anchor="middle">Networking</text>
+
+          <rect class="dg-box" x="462" y="270" width="160" height="44"></rect>
+          <text class="dg-label" x="542" y="297" text-anchor="middle">Databases</text>
+
+          <rect class="dg-box-key" x="684" y="190" width="186" height="44"></rect>
+          <text class="dg-label" x="777" y="217" text-anchor="middle">Distributed sys.</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ CLOCK ============ -->
+    <section id="clock">
+      <h2 class="sec">Time budget</h2>
+      <div class="prose">
+        <p>Hours below are study hours, not calendar time. They assume focused work with a project attached, not lectures playing in a browser tab.</p>
+      </div>
+
+      <div class="table-wrap" style="margin-top:18px">
+        <table>
+          <thead>
+            <tr>
+              <th>Commitment</th>
+              <th>First job (~1,070 h)</th>
+              <th>Solid mid-level (~1,940 h)</th>
+              <th>Senior depth (~2,720 h)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="num"><strong>10 h / week</strong></td><td class="num">2 years</td><td class="num">3 yr 9 mo</td><td class="num">5 yr 3 mo</td></tr>
+            <tr><td class="num"><strong>20 h / week</strong></td><td class="num">1 year</td><td class="num">1 yr 11 mo</td><td class="num">2 yr 7 mo</td></tr>
+            <tr><td class="num"><strong>40 h / week</strong></td><td class="num">6 months</td><td class="num">11 months</td><td class="num">1 yr 4 mo</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose" style="margin-top:18px">
+        <p>One honest caveat. The last column buys you the <em>knowledge</em> of a senior engineer, not the title. Seniority also requires years of shipping alongside other people, absorbing production incidents, and being wrong in public. No reading list shortens that part.</p>
+      </div>
+    </section>
+
+    <!-- ============ ENTRY POINT ============ -->
+    <section id="entry">
+      <h2 class="sec">Where to start if you have a degree</h2>
+      <div class="prose">
+        <p>A computer science degree covers stages 01 through 08 and largely skips 09 through 15. You were taught what a B-tree is. You were probably never made to refactor someone else's code under test, deploy it, or be woken up when it failed. That gap is the whole of the applied half of this document, and it is what hiring screens for now.</p>
+        <p>So the short answer is <em>stage 09</em>, after a one-week sweep of stage 00. But a degree certifies attendance, not retention, and the course you took in second year has decayed. Verify rather than assume. Each test below is one question you can answer honestly in an afternoon, and failing one means that stage is not behind you.</p>
+      </div>
+
+      <div class="table-wrap" style="margin-top:22px">
+        <table class="diag">
+          <thead>
+            <tr><th>Stage</th><th>Can you do this today, unaided?</th><th>Typical graduate</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><a href="#s00"><span class="sn">00</span> Tools</a></td><td>Rebase through a conflict, then explain what it did to the commit graph</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s01"><span class="sn">01</span> Programming</a></td><td>Build a tested command-line tool in an afternoon with no framework</td><td><span class="verdict ok">Solid</span></td></tr>
+            <tr><td><a href="#s02"><span class="sn">02</span> Algorithms</a></td><td>Solve an unseen medium graph problem in thirty minutes with no reference</td><td><span class="verdict warn">Rusty</span></td></tr>
+            <tr><td><a href="#s03"><span class="sn">03</span> Mathematics</a></td><td>Prove an algorithm correct by induction</td><td><span class="verdict ok">Solid</span></td></tr>
+            <tr><td><a href="#s04"><span class="sn">04</span> Architecture</a></td><td>Explain why two loops of identical complexity differ fourfold in speed</td><td><span class="verdict warn">Rusty</span></td></tr>
+            <tr><td><a href="#s05"><span class="sn">05</span> Operating systems</a></td><td>Find and fix a race condition in threaded code you did not write</td><td><span class="verdict warn">Rusty</span></td></tr>
+            <tr><td><a href="#s06"><span class="sn">06</span> Networking</a></td><td>Narrate a request end to end, including the TLS handshake</td><td><span class="verdict warn">Rusty</span></td></tr>
+            <tr><td><a href="#s07"><span class="sn">07</span> Compilers</a></td><td>Write a recursive descent parser from memory</td><td><span class="verdict neu">Varies</span></td></tr>
+            <tr><td><a href="#s08"><span class="sn">08</span> Databases</a></td><td>Read an execution plan and name the index that is missing</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s09"><span class="sn">09</span> Software craft</a></td><td>Refactor a large unfamiliar codebase under test without changing behaviour</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s10"><span class="sn">10</span> Shipping</a></td><td>Name something a stranger depends on that you built and still maintain</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s11"><span class="sn">11</span> Distributed</a></td><td>Design for ten million users and defend your choice of shard key</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s12"><span class="sn">12</span> Production</a></td><td>Point to an incident you were paged for on something you deployed</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s13"><span class="sn">13</span> Security</a></td><td>Describe a real broken access control bug you found yourself</td><td><span class="verdict gap">Gap</span></td></tr>
+            <tr><td><a href="#s14"><span class="sn">14</span> AI engineering</a></td><td>Show a model-backed feature you shipped with an automated eval suite</td><td><span class="verdict gap">Gap</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="legend">
+        <span class="l-ok"><i></i><em>Solid &mdash; skip the stage</em></span>
+        <span class="l-warn"><i></i><em>Rusty &mdash; refresher only, about a fifth of the hours</em></span>
+        <span class="l-gap"><i></i><em>Gap &mdash; the full stage at full hours</em></span>
+      </div>
+
+      <h3 class="sub" style="margin-top:44px">The compressed track</h3>
+      <div class="prose">
+        <p>A stage you once passed takes roughly a fifth of the listed hours to restore. Re-read your notes, build the one project, and move on. Do not re-study from the top. That turns 2,720 hours into something closer to 1,640.</p>
+      </div>
+
+      <div class="budget">
+        <div>
+          <span class="k">Sweep 00 &ndash; 08</span>
+          <span class="v">400 h</span>
+          <span class="n">Refresher pace. Projects only, skip the lectures.</span>
+        </div>
+        <div>
+          <span class="k">Full effort 09, 10, 12</span>
+          <span class="v">680 h</span>
+          <span class="n">Craft, ship a product, then operate it in production.</span>
+        </div>
+        <div>
+          <span class="k">Then 11, 13, 14</span>
+          <span class="v">560 h</span>
+          <span class="n">Distributed systems, security, AI engineering.</span>
+        </div>
+        <div class="total">
+          <span class="k">Graduate total</span>
+          <span class="v">~1,640 h</span>
+          <span class="n">1 yr 7 mo at 20 h per week.</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <p><b>One warning specific to your position.</b> Graduates tend to jump straight to stage 11, because distributed systems feels like the prestigious part and the coursework flattered it. It does not stick before you have operated something real. Kleppmann reads as trivia until you have been woken at three in the morning by a replication lag alert.</p>
+        <p>Stages 09, 10 and 12 are the whole distance between a computer science graduate and an employable engineer. Spend the 680 hours there first, in that order.</p>
+      </div>
+    </section>
+
+    <!-- ============ MILESTONE A ============ -->
+    <div class="milestone">
+      <div class="m-name"><span>Milestone A</span>You can build things</div>
+      <div class="m-hours">stages 00 &ndash; 02, 09, 10</div>
+      <p>Roughly 1,070 hours. You can take a vague idea, decompose it, build it, test it, and put it in front of a user. This is the point where a junior role becomes realistic.</p>
+    </div>
+
+    <!-- ============ 00 ============ -->
+    <section class="stage" id="s00" data-stage="00">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 00</span>
+          <span class="tag">Foundation</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s00" aria-label="Stage 00 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Tools, the shell, and how to learn</h3>
+        <div class="stage-meta"><span><b>4 weeks</b></span><span><b>60 hours</b></span><span>No prerequisites</span></div>
+        <p class="stage-why">Almost nobody teaches this, and it quietly costs beginners hundreds of hours. Before you learn to program, learn to operate the machine you will program on. Every stage after this runs faster because of it.</p>
+        <a class="companion" href="whetstone.html" data-vol="whet"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Whetstone</span><span class="cp-m">16 chapters &middot; 16 code examples &middot; 48 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 16 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">The shell as a language: pipes, redirection, globbing, exit codes, <b>grep</b>, <b>find</b>, <b>sed</b>, <b>awk</b></li>
+              <li>The filesystem model: paths, permissions, symlinks, environment variables, <b>PATH</b></li>
+              <li class="key">Git as a data structure, not a list of commands: commits, trees, refs, branching, rebase, merge conflicts, bisect</li>
+              <li>Collaborating on GitHub: forks, pull requests, review comments, issues</li>
+              <li>One editor to fluency, with its keybindings, search, and multi-file navigation</li>
+              <li>Reading documentation and error messages instead of pasting them somewhere</li>
+              <li>Asking a question well: minimal reproduction, what you tried, what you expected</li>
+              <li>Study technique: spaced repetition for facts, deliberate practice for skills, retrieval over rereading</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://missing.csail.mit.edu/">The Missing Semester of Your CS Education</a> <span class="by">MIT &middot; the single highest-leverage two weeks in this document</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://git-scm.com/book/en/v2">Pro Git</a> <span class="by">Chacon &amp; Straub &middot; read chapters 1&ndash;3 and 7</span></div></li>
+              <li><span class="rkind free">Practice</span><div><a href="https://learngitbranching.js.org/">Learn Git Branching</a> <span class="by">visual, interactive, fixes rebase anxiety</span></div></li>
+              <li><span class="rkind">Book</span><div>Make It Stick <span class="by">Brown, Roediger &amp; McDaniel &middot; how learning actually works</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A public dotfiles repository, plus one shell script that automates a chore you genuinely repeat. Write the README as if a stranger will use it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 01 ============ -->
+    <section class="stage" id="s01" data-stage="01">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 01</span>
+          <span class="tag">Foundation</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s01" aria-label="Stage 01 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Programming foundations</h3>
+        <div class="stage-meta"><span><b>3&ndash;4 months</b></span><span><b>300 hours</b></span><span>After stage 00</span></div>
+        <p class="stage-why">The longest single stage, and the one people rush hardest. The goal is not syntax. It is the ability to hold a problem in your head, break it into parts, and express those parts as code that someone else can read. <em>Do not be the person who never quite understood recursion.</em></p>
+        <a class="companion" href="primer.html" data-vol="prim"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Primer</span><span class="cp-m">20 chapters &middot; 20 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>Values, types, variables, expressions, statements, scope</li>
+              <li>Control flow, iteration, and the loop invariants that make it correct</li>
+              <li class="key">Functions as the unit of abstraction: arguments, return values, purity, side effects</li>
+              <li class="key">Recursion, base cases, the call stack, and why deep recursion blows up</li>
+              <li>Collections: lists, dictionaries, sets, tuples, and the cost of each operation</li>
+              <li>Strings, encodings, and why UTF-8 exists</li>
+              <li>Errors and exceptions: raising, catching, and failing loudly at the right boundary</li>
+              <li>Files, streams, serialisation, JSON and CSV</li>
+              <li>Objects and classes, composition, interfaces, and when not to use inheritance</li>
+              <li class="key">Automated testing from week one, with a real test runner</li>
+              <li class="key">Debugging with a debugger: breakpoints, stepping, inspecting state</li>
+              <li>Modules, packages, dependencies, virtual environments, lockfiles</li>
+              <li>Memory: the stack, the heap, references, mutation, and aliasing bugs</li>
+              <li>Reading unfamiliar code and changing it without breaking it</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://cs50.harvard.edu/x/">CS50x</a> <span class="by">Harvard &middot; start in C. The pointer chapter is the point</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://cs61a.org/">Berkeley CS 61A</a> <span class="by">abstraction, recursion, interpreters &middot; do this or SICP</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://sarabander.github.io/sicp/">Structure and Interpretation of Computer Programs</a> <span class="by">Abelson &amp; Sussman &middot; chapters 1&ndash;3 with exercises</span></div></li>
+              <li><span class="rkind free">Practice</span><div><a href="https://exercism.org/">Exercism</a> <span class="by">~100 small problems with human mentorship</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://www.theodinproject.com/">The Odin Project</a> <span class="by">if the web is your destination, use this as the spine</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Four programs, each in a different shape. A command-line tool with arguments and a help screen. A program that reads messy real-world data and produces a clean report. A small game with state. A script that talks to a public API and caches its results.</p>
+            <p>Each with tests, a README, and no framework doing the thinking for you.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="stage" id="s02" data-stage="02">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 02</span>
+          <span class="tag">Theory</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s02" aria-label="Stage 02 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Data structures and algorithms</h3>
+        <div class="stage-meta"><span><b>3&ndash;4 months</b></span><span><b>250 hours</b></span><span>After stage 01</span></div>
+        <p class="stage-why">This is the vocabulary of the field. Not because interviews ask for it, though they do, but because a problem you can name is a problem you can look up. Implement every structure once, from nothing, before you ever use the library version again.</p>
+        <a class="companion" href="workbench.html" data-vol="work"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Workbench</span><span class="cp-m">8 chapters &middot; 8 code examples &middot; 24 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 8 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Asymptotic analysis: big-O, big-theta, amortised cost, space complexity</li>
+              <li>Arrays, dynamic arrays, and why appending is amortised constant time</li>
+              <li>Linked lists, stacks, queues, deques, circular buffers</li>
+              <li class="key">Hash tables: hashing, collision resolution, load factor, resizing</li>
+              <li>Trees: binary search trees, balancing, heaps, priority queues, tries</li>
+              <li class="key">Graphs: adjacency lists and matrices, BFS, DFS, topological sort, cycle detection</li>
+              <li>Shortest paths: Dijkstra, Bellman&ndash;Ford, A*; minimum spanning trees</li>
+              <li>Union-find with path compression</li>
+              <li>Sorting: merge, quick, heap, insertion, counting and radix; stability; when each wins</li>
+              <li>Binary search and its off-by-one traps, including search over answer space</li>
+              <li class="key">Recursion to divide-and-conquer to dynamic programming: memoisation, tabulation, state design</li>
+              <li>Greedy algorithms and the exchange argument that proves them</li>
+              <li>Backtracking, pruning, constraint problems</li>
+              <li>Two pointers, sliding window, prefix sums, monotonic stacks</li>
+              <li>Bit manipulation and its idioms</li>
+              <li class="key">NP-completeness and reductions: recognising when no efficient answer exists</li>
+              <li>Probabilistic structures: Bloom filters, count-min sketch, HyperLogLog</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind">Book</span><div>The Algorithm Design Manual <span class="by">Skiena &middot; the war stories are the reason to pick this over CLRS</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/">MIT 6.006 Introduction to Algorithms</a> <span class="by">full lectures, notes and problem sets</span></div></li>
+              <li><span class="rkind">Course</span><div><a href="https://www.coursera.org/specializations/algorithms">Stanford Algorithms</a> <span class="by">Tim Roughgarden &middot; four-part specialisation</span></div></li>
+              <li><span class="rkind free">Practice</span><div><a href="https://neetcode.io/practice">NeetCode 150</a> <span class="by">a curated set beats grinding 500 random problems</span></div></li>
+              <li><span class="rkind">Book</span><div>Introduction to Algorithms <span class="by">CLRS &middot; a reference to look things up in, not to read cover to cover</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A library implementing every structure above from scratch, with tests and complexity documented per method. Then solve around 150 curated problems, and for each one you fail, write down which pattern you missed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="stage" id="s03" data-stage="03">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 03</span>
+          <span class="tag">Theory</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s03" aria-label="Stage 03 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Mathematics for computing</h3>
+        <div class="stage-meta"><span><b>2&ndash;3 months</b></span><span><b>150 hours</b></span><span>Run in parallel with stage 02</span></div>
+        <p class="stage-why">Computer science is applied mathematics that got out of hand. You do not need a mathematics degree, but the discrete half is not optional, and proof by induction is the same muscle as recursion. Run this alongside algorithms, not before them.</p>
+        <a class="companion" href="compass.html" data-vol="comp"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Compass</span><span class="cp-m">20 chapters &middot; 20 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Logic and proof: implication, quantifiers, contradiction, and induction</li>
+              <li>Sets, relations, functions, equivalence classes, partial orders</li>
+              <li>Combinatorics: permutations, combinations, pigeonhole, inclusion&ndash;exclusion</li>
+              <li class="key">Discrete probability: conditional probability, Bayes, expectation, variance, linearity of expectation</li>
+              <li>Common distributions and tail bounds; randomised algorithm analysis</li>
+              <li>Graph theory as mathematics: connectivity, colouring, matchings, planarity</li>
+              <li>Number theory: modular arithmetic, GCD, primes, and the road to public-key cryptography</li>
+              <li>Recurrence relations and the master theorem</li>
+              <li class="key">Linear algebra: vectors, matrices, transformations, rank, eigenvectors</li>
+              <li>Calculus to the level of derivatives, gradients, and optimisation</li>
+              <li>Statistics you will actually use: sampling, confidence intervals, A/B tests, Simpson's paradox</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/">MIT 6.042J Mathematics for Computer Science</a> <span class="by">Tom Leighton &middot; lectures plus the free 1,000-page text</span></div></li>
+              <li><span class="rkind free">Video</span><div><a href="https://www.3blue1brown.com/topics/linear-algebra">Essence of Linear Algebra</a> <span class="by">3Blue1Brown &middot; watch before any linear algebra course</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/">MIT 18.06 Linear Algebra</a> <span class="by">Gilbert Strang</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://greenteapress.com/wp/think-stats-2e/">Think Stats</a> <span class="by">Downey &middot; statistics through code rather than notation</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Written solutions to two full 6.042J problem sets, including the proofs. Then a short simulation that demonstrates a counter-intuitive probability result, with the maths written up next to the code.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="stage" id="s04" data-stage="04">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 04</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s04" aria-label="Stage 04 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Computer architecture</h3>
+        <div class="stage-meta"><span><b>2&ndash;3 months</b></span><span><b>150 hours</b></span><span>Gateway to stages 05, 06, 08</span></div>
+        <p class="stage-why">Without a solid mental model of how the machine works, every higher abstraction you learn stays brittle. This is the stage that turns performance from superstition into arithmetic, and it unlocks operating systems and databases behind it.</p>
+        <a class="companion" href="mill.html" data-vol="mill"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Mill</span><span class="cp-m">20 chapters &middot; 20 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>Number representation: binary, hex, two's complement, overflow</li>
+              <li class="key">IEEE 754 floating point, and why 0.1 + 0.2 is not 0.3</li>
+              <li>Boolean logic, gates, multiplexers, adders, the ALU</li>
+              <li>Sequential logic: flip-flops, registers, the clock</li>
+              <li class="key">Instruction set architecture, machine code, and reading assembly</li>
+              <li>The fetch-decode-execute cycle; a datapath and a control unit</li>
+              <li class="key">The memory hierarchy: registers, L1/L2/L3, RAM, disk, and their real latencies</li>
+              <li>Cache lines, locality, associativity, and cache-friendly data layout</li>
+              <li>Pipelining, hazards, branch prediction, speculative execution</li>
+              <li>Instruction-level and data-level parallelism, SIMD</li>
+              <li>How a program becomes a process: compiling, assembling, linking, loading</li>
+              <li>The stack frame, calling conventions, and how buffer overflows happen</li>
+              <li>I/O, interrupts, DMA, the system bus</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://www.nand2tetris.org/">Nand2Tetris, parts I and II</a> <span class="by">build a working computer from a NAND gate upward</span></div></li>
+              <li><span class="rkind">Book</span><div><a href="http://csapp.cs.cmu.edu/">Computer Systems: A Programmer's Perspective</a> <span class="by">Bryant &amp; O'Hallaron &middot; if you read one systems book, this</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://cs61c.org/">Berkeley CS 61C</a> <span class="by">Great Ideas in Computer Architecture</span></div></li>
+              <li><span class="rkind">Book</span><div>Computer Organization and Design <span class="by">Patterson &amp; Hennessy &middot; the RISC-V edition</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>The full Nand2Tetris stack: gates, ALU, CPU, assembler, virtual machine, and a compiler for its language. It is the first project most people build that is complex enough to make software engineering feel necessary.</p>
+            <p>Then take one slow program and make it four times faster using only cache locality.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="stage" id="s05" data-stage="05">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 05</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s05" aria-label="Stage 05 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Operating systems and concurrency</h3>
+        <div class="stage-meta"><span><b>2&ndash;3 months</b></span><span><b>150 hours</b></span><span>Requires stage 04</span></div>
+        <p class="stage-why">Every line of code you write is run by an operating system, and most production incidents are arguments with it. Concurrency lives here too, and it is the subject where confident guessing does the most damage.</p>
+        <a class="companion" href="loom.html" data-vol="loom"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Loom</span><span class="cp-m">20 chapters &middot; 20 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Processes: address space, fork and exec, process states, signals</li>
+              <li>Threads, context switching, kernel versus user mode, system calls</li>
+              <li>Scheduling: round robin, priority, multi-level feedback, fairness</li>
+              <li class="key">Concurrency primitives: mutexes, semaphores, condition variables, atomics</li>
+              <li class="key">Race conditions, deadlock, livelock, starvation, and the four Coffman conditions</li>
+              <li>Concurrency models beyond threads: event loops, async/await, actors, CSP channels</li>
+              <li class="key">Virtual memory: paging, page tables, the TLB, page faults, swapping</li>
+              <li>Memory allocation, fragmentation, garbage collection strategies</li>
+              <li>File systems: inodes, directories, journalling, durability and fsync</li>
+              <li>I/O models: blocking, non-blocking, multiplexed, asynchronous; epoll and kqueue</li>
+              <li>Interprocess communication: pipes, sockets, shared memory, message queues</li>
+              <li>Virtualisation and containers: namespaces, cgroups, what Docker actually is</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Book</span><div><a href="https://pages.cs.wisc.edu/~remzi/OSTEP/">Operating Systems: Three Easy Pieces</a> <span class="by">Arpaci-Dusseau &middot; free, excellent, the default choice</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://cs162.org/">Berkeley CS 162</a> <span class="by">lectures that pair with OSTEP</span></div></li>
+              <li><span class="rkind free">Practice</span><div><a href="https://pdos.csail.mit.edu/6.828/">MIT 6.1810 and the xv6 labs</a> <span class="by">a real teaching kernel you modify</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://greenteapress.com/wp/semaphores/">The Little Book of Semaphores</a> <span class="by">Downey &middot; synchronisation puzzles that build intuition</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A shell that supports pipes, redirection, and job control. A thread pool with a work queue. Then complete the xv6 labs, adding at least one system call of your own.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 ============ -->
+    <section class="stage" id="s06" data-stage="06">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 06</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s06" aria-label="Stage 06 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Networking and the web</h3>
+        <div class="stage-meta"><span><b>6&ndash;8 weeks</b></span><span><b>120 hours</b></span><span>Requires stage 04</span></div>
+        <p class="stage-why">Almost everything you build will be reached over a network, and almost every mysterious latency problem lives in this stage. Learn it top-down, starting from HTTP, which is where your work touches it.</p>
+        <a class="companion" href="exchange.html" data-vol="exch"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Exchange</span><span class="cp-m">20 chapters &middot; 23 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>The layered model and encapsulation; what each layer is actually responsible for</li>
+              <li class="key">HTTP in depth: methods, status codes, headers, caching, cookies, content negotiation</li>
+              <li>HTTP/2 multiplexing and HTTP/3 over QUIC; head-of-line blocking</li>
+              <li class="key">TCP: the handshake, sequence numbers, retransmission, flow control, congestion control</li>
+              <li>UDP and when losing packets is the right trade</li>
+              <li>IP addressing, subnets, routing, NAT, IPv6</li>
+              <li class="key">DNS: resolution, record types, TTLs, and why it is always DNS</li>
+              <li>TLS: handshake, certificates, chains of trust, certificate authorities, mTLS</li>
+              <li>Sockets: the API underneath every client and server you have used</li>
+              <li>Real-time transports: WebSockets, server-sent events, long polling, WebRTC</li>
+              <li>RPC over the network: gRPC, protocol buffers, schema evolution</li>
+              <li>CDNs, edge caching, anycast, and load balancers at layers 4 and 7</li>
+              <li>Network diagnosis: <b>dig</b>, <b>traceroute</b>, <b>tcpdump</b>, Wireshark, browser dev tools</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind">Book</span><div>Computer Networking: A Top-Down Approach <span class="by">Kurose &amp; Ross &middot; do the Wireshark labs, they are the course</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://cs144.github.io/">Stanford CS 144</a> <span class="by">the lab where you implement TCP is worth the whole stage</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://hpbn.co/">High Performance Browser Networking</a> <span class="by">Ilya Grigorik &middot; free online</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP">MDN HTTP reference</a> <span class="by">the working reference you will return to for years</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>An HTTP/1.1 server written directly on TCP sockets, handling keep-alive, chunked encoding and concurrent connections, with no web framework. Then implement a working TCP stack in the CS 144 labs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="stage" id="s07" data-stage="07">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 07</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s07" aria-label="Stage 07 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Languages, interpreters and compilers</h3>
+        <div class="stage-meta"><span><b>6&ndash;8 weeks</b></span><span><b>120 hours</b></span><span>Requires stages 01, 04</span></div>
+        <p class="stage-why">Understanding how a language is implemented makes every language easier to pick up and makes your own code better, because you stop guessing what the runtime does. It is also the most enjoyable stage in this document.</p>
+        <a class="companion" href="press.html" data-vol="press"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Press</span><span class="cp-m">20 chapters &middot; 20 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Lexing, parsing, grammars, abstract syntax trees</li>
+              <li>Recursive descent and precedence climbing; parser generators and their trade-offs</li>
+              <li>Semantic analysis, scope resolution, symbol tables</li>
+              <li class="key">Type systems: static and dynamic, strong and weak, inference, generics, variance</li>
+              <li>Tree-walking interpreters versus bytecode virtual machines</li>
+              <li>Intermediate representations, optimisation passes, code generation, register allocation</li>
+              <li class="key">Runtime memory management: reference counting, tracing collectors, generational GC</li>
+              <li>Closures, first-class functions, tail calls, continuations</li>
+              <li>Paradigms compared: imperative, object-oriented, functional, logic</li>
+              <li>Immutability, algebraic data types, pattern matching, and what they buy you</li>
+              <li>Foreign function interfaces and language interoperation</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Book</span><div><a href="https://craftinginterpreters.com/">Crafting Interpreters</a> <span class="by">Bob Nystrom &middot; free, beautifully written, do both halves</span></div></li>
+              <li><span class="rkind">Course</span><div><a href="https://www.edx.org/learn/computer-programming/stanford-university-compilers">Stanford Compilers</a> <span class="by">Alex Aiken</span></div></li>
+              <li><span class="rkind">Book</span><div>Compilers: Principles, Techniques and Tools <span class="by">the Dragon Book &middot; cherry-pick chapters, do not read it straight through</span></div></li>
+              <li><span class="rkind free">Practice</span><div><a href="https://exercism.org/tracks/elixir">A second paradigm</a> <span class="by">learn Haskell, OCaml, Elixir or Clojure until it changes how you write your first language</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A complete language: scanner, parser, resolver, tree-walking interpreter, then a bytecode virtual machine with its own garbage collector. Add one feature the book does not cover, so you have to design it yourself.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 08 ============ -->
+    <section class="stage" id="s08" data-stage="08">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 08</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s08" aria-label="Stage 08 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Databases and data modelling</h3>
+        <div class="stage-meta"><span><b>2&ndash;3 months</b></span><span><b>180 hours</b></span><span>Requires stage 04</span></div>
+        <p class="stage-why">Data sits at the centre of almost every program worth writing, and very few engineers understand how the database actually executes their query. This stage pays for itself the first time you read an execution plan instead of adding an index at random.</p>
+        <a class="companion" href="ledger.html" data-vol="ledg"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Ledger</span><span class="cp-m">20 chapters &middot; 22 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>The relational model, keys, referential integrity, normal forms, and when to denormalise</li>
+              <li class="key">SQL properly: joins, subqueries, CTEs, window functions, grouping sets, set operations</li>
+              <li class="key">Indexes: B-trees, LSM trees, composite and covering indexes, selectivity, index-only scans</li>
+              <li>Query planning and execution: reading <b>EXPLAIN ANALYZE</b>, join strategies, statistics</li>
+              <li class="key">Transactions and ACID; isolation levels; the anomalies each one permits</li>
+              <li>Concurrency control: two-phase locking, MVCC, optimistic concurrency, deadlock handling</li>
+              <li>Durability: write-ahead logging, checkpoints, crash recovery, replication lag</li>
+              <li>Storage engines: row stores versus column stores, page layout, compression</li>
+              <li>Schema design and safe online migrations under live traffic</li>
+              <li>NoSQL families: document, key-value, wide-column, graph, time-series, and the fit for each</li>
+              <li class="key">Caching: Redis, cache-aside and write-through, TTLs, stampedes, invalidation</li>
+              <li>Full-text search and inverted indexes</li>
+              <li>Analytical data: OLTP versus OLAP, warehouses, star schemas, ETL and ELT</li>
+              <li>The object-relational mismatch, and where ORMs help and where they mislead</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://15445.courses.cs.cmu.edu/">CMU 15-445 Database Systems</a> <span class="by">Andy Pavlo &middot; lectures and projects, all public</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://use-the-index-luke.com/">Use The Index, Luke</a> <span class="by">Markus Winand &middot; indexing explained for developers</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://www.edx.org/learn/relational-databases/stanford-university-databases-relational-databases-and-sql">Stanford Databases</a> <span class="by">Jennifer Widom &middot; the modelling and SQL modules</span></div></li>
+              <li><span class="rkind">Book</span><div>Designing Data-Intensive Applications, chapters 2&ndash;4 <span class="by">Kleppmann &middot; storage, encoding and data models</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A key-value store with a write-ahead log, crash recovery, and a B-tree or LSM index. Then take a slow query in a real dataset of a million rows and bring it under fifty milliseconds, documenting each plan change.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MILESTONE B ============ -->
+    <div class="milestone">
+      <div class="m-name"><span>Milestone B</span>You understand the machine</div>
+      <div class="m-hours">stages 00 &ndash; 08</div>
+      <p>Roughly 1,360 hours. You can reason about a program from the transistor to the HTTP response, and debug it at any layer in between. Most working engineers never reach this point. It is what separates competence from seniority later.</p>
+    </div>
+
+    <!-- ============ 09 ============ -->
+    <section class="stage" id="s09" data-stage="09">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 09</span>
+          <span class="tag">Craft</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s09" aria-label="Stage 09 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Software craft and engineering practice</h3>
+        <div class="stage-meta"><span><b>3&ndash;4 months</b></span><span><b>220 hours</b></span><span>Start early, never finish</span></div>
+        <p class="stage-why">This is where a programmer becomes an engineer. Everything before this stage is about making code work. This stage is about making code that a team can change safely two years from now, which is the actual job.</p>
+        <a class="companion" href="craft.html" data-vol="craft"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Craft</span><span class="cp-m">19 chapters &middot; 83 code examples &middot; 53 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 19 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Naming, function size, and comments that explain why rather than what</li>
+              <li class="key">Managing complexity: deep modules, narrow interfaces, information hiding</li>
+              <li>SOLID principles, read critically rather than as scripture</li>
+              <li>Composition over inheritance, dependency inversion, the seams that make code testable</li>
+              <li>Design patterns, and the far more useful skill of recognising when you do not need one</li>
+              <li class="key">Testing: unit, integration, end-to-end; the test pyramid and its critics</li>
+              <li>Test-driven development, property-based testing, snapshot tests, mutation testing</li>
+              <li>Test doubles: fakes, stubs, mocks, and why over-mocking makes tests useless</li>
+              <li class="key">Refactoring in small safe steps with tests as the net</li>
+              <li>Working with legacy code: characterisation tests, seams, strangler fig migrations</li>
+              <li class="key">Code review: what to look for, how to disagree, how to receive it</li>
+              <li>Branching strategies, trunk-based development, feature flags, semantic versioning</li>
+              <li>Systematic debugging: bisect, reduce, hypothesise, verify. Profiling before optimising</li>
+              <li>Technical writing: READMEs, design documents, architecture decision records, RFCs</li>
+              <li>Estimation, decomposition, scope negotiation, and working in iterations honestly</li>
+              <li>Error handling strategy: where to fail, where to retry, what to log, what to surface</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind">Book</span><div>A Philosophy of Software Design <span class="by">Ousterhout &middot; short, dense, the best book on complexity</span></div></li>
+              <li><span class="rkind">Book</span><div>The Pragmatic Programmer <span class="by">Hunt &amp; Thomas &middot; the 20th anniversary edition</span></div></li>
+              <li><span class="rkind">Book</span><div>Refactoring <span class="by">Martin Fowler &middot; second edition</span></div></li>
+              <li><span class="rkind">Book</span><div>Working Effectively with Legacy Code <span class="by">Michael Feathers &middot; for the job you will actually have</span></div></li>
+              <li><span class="rkind free">Reading</span><div><a href="https://google.github.io/eng-practices/review/">Google's code review guidelines</a> <span class="by">short, practical, free</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Take your worst earlier project and refactor it under a full test suite without changing behaviour. Then make three real pull requests to open-source projects and absorb the review comments without arguing first.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section class="stage" id="s10" data-stage="10">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 10</span>
+          <span class="tag">Applied</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s10" aria-label="Stage 10 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Building and shipping real products</h3>
+        <div class="stage-meta"><span><b>3&ndash;4 months</b></span><span><b>240 hours</b></span><span>Requires stages 06, 08, 09</span></div>
+        <p class="stage-why">Everything so far has been components. This stage is the whole machine, with users, payments, mistakes, and things that break at three in the morning. The hiring market has moved decisively from "I helped on a feature" to "I built this and shipped it."</p>
+        <a class="companion" href="shipyard.html" data-vol="ship"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Shipyard</span><span class="cp-m">20 chapters &middot; 69 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">API design: resources, HTTP semantics, status codes, idempotency, pagination, filtering</li>
+              <li>Versioning and backward compatibility; deprecation without breaking clients</li>
+              <li>GraphQL and gRPC, and the honest trade-offs against REST</li>
+              <li class="key">Authentication and authorisation: sessions, tokens, OAuth 2.0, OIDC, refresh flows</li>
+              <li>Permission models: role-based, attribute-based, multi-tenancy and data isolation</li>
+              <li>Frontend fundamentals: semantic HTML, the CSS box and layout models, the DOM, the event loop</li>
+              <li class="key">Accessibility as a requirement: keyboard navigation, focus, contrast, screen readers, ARIA</li>
+              <li>One component framework well, plus state management and data fetching patterns</li>
+              <li>Rendering strategies: client-side, server-side, static, streaming, hydration cost</li>
+              <li>Build tooling, bundling, code splitting, and the performance budget</li>
+              <li>Background work: job queues, workers, schedulers, retries, dead letter queues</li>
+              <li>Files and media: uploads, object storage, signed URLs, image pipelines, CDNs</li>
+              <li>Integrations: webhooks, third-party APIs, payments, transactional email</li>
+              <li class="key">Rate limiting, pagination at scale, idempotency keys, and defensive input validation</li>
+              <li>Feature flags, analytics, and shipping to a subset of users first</li>
+              <li>Product thinking: what the user is trying to do, and what you can refuse to build</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://fullstackopen.com/en/">Full Stack Open</a> <span class="by">University of Helsinki &middot; modern, free, project-driven</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://www.theodinproject.com/">The Odin Project</a> <span class="by">the closest free thing to how a working developer learns</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://roadmap.sh/backend">roadmap.sh</a> <span class="by">a checklist of the ecosystem, not a curriculum &middot; use it to find gaps</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://www.w3.org/WAI/WCAG22/quickref/">WCAG 2.2 quick reference</a> <span class="by">accessibility as a specification, not an opinion</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>One real product with real users. Accounts, a database, background jobs, payments or another irreversible action, and a deployment you maintain for at least three months.</p>
+            <p>Three to five polished projects beat twenty abandoned ones. Delete the rest.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 11 ============ -->
+    <section class="stage" id="s11" data-stage="11">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 11</span>
+          <span class="tag">Systems</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s11" aria-label="Stage 11 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Distributed systems and architecture</h3>
+        <div class="stage-meta"><span><b>4&ndash;6 months</b></span><span><b>280 hours</b></span><span>Requires stages 05, 06, 08</span></div>
+        <p class="stage-why">Once a second machine is involved, everything you assumed about time, order and failure stops being true. This is the deepest stage in the curriculum and the one that most defines a senior engineer. Do not start it before you have built something real, or none of it will stick.</p>
+        <a class="companion" href="fleet.html" data-vol="fleet"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Fleet</span><span class="cp-m">20 chapters &middot; 30 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>Why distribute at all: throughput, availability, latency, and the cost of each</li>
+              <li class="key">The eight fallacies of distributed computing, and how each one bites</li>
+              <li>Replication: single-leader, multi-leader, leaderless; synchronous and asynchronous trade-offs</li>
+              <li class="key">Partitioning and sharding, rebalancing, consistent hashing, hot keys</li>
+              <li class="key">Consistency models: linearizability, sequential, causal, eventual; read-your-writes</li>
+              <li>CAP and PACELC stated correctly, rather than as a slogan</li>
+              <li class="key">Consensus: leader election, Raft, Paxos, quorums, split brain</li>
+              <li>Time and ordering: clock skew, logical clocks, vector clocks, hybrid clocks</li>
+              <li>Distributed transactions: two-phase commit, sagas, outbox pattern, idempotent consumers</li>
+              <li>Messaging: queues versus logs, Kafka, delivery semantics, and the exactly-once myth</li>
+              <li>Event-driven architecture, CQRS, event sourcing, and their real costs</li>
+              <li class="key">Failure handling: timeouts, retries with jittered backoff, circuit breakers, bulkheads, backpressure</li>
+              <li>Load balancing, service discovery, health checks, graceful degradation</li>
+              <li>Batch and stream processing; windowing, watermarks, late data</li>
+              <li>Architecture styles: monolith, modular monolith, services, serverless, event-driven</li>
+              <li>Domain-driven design: bounded contexts, aggregates, ubiquitous language</li>
+              <li class="key">The system design method: requirements, estimates, API, data model, high level, deep dive, bottlenecks</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind">Book</span><div>Designing Data-Intensive Applications <span class="by">Martin Kleppmann &middot; the central text of this stage. Read it twice</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://pdos.csail.mit.edu/6.824/">MIT 6.5840 Distributed Systems</a> <span class="by">lectures, paper list, and the Raft labs</span></div></li>
+              <li><span class="rkind free">Paper</span><div><a href="https://raft.github.io/raft.pdf">In Search of an Understandable Consensus Algorithm</a> <span class="by">Ongaro &amp; Ousterhout &middot; the Raft paper</span></div></li>
+              <li><span class="rkind">Book</span><div>System Design Interview, volumes 1 and 2 <span class="by">Alex Xu &middot; for the interview framing specifically</span></div></li>
+              <li><span class="rkind">Book</span><div>Fundamentals of Software Architecture <span class="by">Richards &amp; Ford &middot; trade-off analysis as a discipline</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Implement Raft, including leader election, log replication and persistence, and make it survive a partition test. Build a distributed rate limiter. Then write full design documents for five well-known systems and have someone senior tear them apart.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 12 ============ -->
+    <section class="stage" id="s12" data-stage="12">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 12</span>
+          <span class="tag">Applied</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s12" aria-label="Stage 12 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Production, infrastructure and reliability</h3>
+        <div class="stage-meta"><span><b>3&ndash;4 months</b></span><span><b>220 hours</b></span><span>Requires stages 05, 06, 10</span></div>
+        <p class="stage-why">Code that is not running is not doing anything. This stage covers the distance between your laptop and a system that stays up, and it is where engineers who can operate what they build become disproportionately valuable.</p>
+        <a class="companion" href="watch.html" data-vol="watch"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Watch</span><span class="cp-m">20 chapters &middot; 29 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Linux in production: processes, systemd, users and permissions, resource limits, log locations</li>
+              <li>Diagnosing a sick box: <b>top</b>, <b>iostat</b>, <b>ss</b>, <b>strace</b>, <b>perf</b>, flame graphs</li>
+              <li class="key">Containers: images, layers, Dockerfiles, multi-stage builds, Compose, registries</li>
+              <li>Orchestration: pods, deployments, services, ingress, config maps, secrets, autoscaling</li>
+              <li class="key">Continuous integration and delivery: pipelines, caching, artefacts, gated merges</li>
+              <li>Deployment strategies: rolling, blue-green, canary, and safe rollback</li>
+              <li class="key">Infrastructure as code: Terraform, state, modules, drift, plan review as code review</li>
+              <li>One cloud provider in depth: compute, object storage, networking and VPCs, IAM, managed databases</li>
+              <li class="key">Observability: metrics with Prometheus, structured logs, distributed tracing with OpenTelemetry</li>
+              <li>Dashboards that answer a question, and alerts that a human should actually wake up for</li>
+              <li>Service level indicators, objectives and error budgets</li>
+              <li>Incident response: severity, comms, mitigation before diagnosis, blameless postmortems</li>
+              <li>Capacity planning, load testing, and reading a latency histogram rather than an average</li>
+              <li>Cost as an engineering constraint; the bill is a design document</li>
+              <li>Backups, restores you have actually tested, and disaster recovery objectives</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Book</span><div><a href="https://sre.google/books/">Site Reliability Engineering</a> <span class="by">Google &middot; all three volumes free online</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://github.com/milanm/DevOps-Roadmap">DevOps Roadmap</a> <span class="by">Milan Milanovic &middot; tool landscape with resources</span></div></li>
+              <li><span class="rkind">Book</span><div>Systems Performance <span class="by">Brendan Gregg &middot; the reference for performance work on Linux</span></div></li>
+              <li><span class="rkind">Book</span><div>The Phoenix Project <span class="by">Kim, Behr &amp; Spafford &middot; why delivery practice is an organisational problem</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Take the product from stage 10 and put it on real infrastructure defined entirely in code, with a deployment pipeline, metrics, traces, two meaningful alerts, and a runbook. Then break it deliberately and write the postmortem.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 13 ============ -->
+    <section class="stage" id="s13" data-stage="13">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 13</span>
+          <span class="tag">Craft</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s13" aria-label="Stage 13 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Security engineering</h3>
+        <div class="stage-meta"><span><b>6&ndash;8 weeks</b></span><span><b>120 hours</b></span><span>Woven through every stage above</span></div>
+        <p class="stage-why">Security is not a stage you complete, it is a lens you acquire. Concentrate it here once so that it becomes reflex, then apply it to everything you have already built. The exercises below are on deliberately vulnerable targets, which is the only place to practise.</p>
+        <a class="companion" href="citadel.html" data-vol="cita"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Citadel</span><span class="cp-m">20 chapters &middot; 47 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li class="key">Threat modelling: assets, trust boundaries, attacker goals, STRIDE</li>
+              <li class="key">The OWASP Top Ten in practice: broken access control, injection, XSS, SSRF, misconfiguration</li>
+              <li>Input validation and output encoding as distinct defences with distinct placement</li>
+              <li class="key">Authentication done properly: Argon2 or bcrypt, salting, MFA, secure session lifecycle</li>
+              <li>Authorisation bugs, which are the most common serious flaw in real applications</li>
+              <li>Applied cryptography: symmetric and asymmetric, hashing, signing, key exchange, TLS</li>
+              <li>Why you use a vetted library and never design your own scheme</li>
+              <li>Secrets management, key rotation, and keeping credentials out of source control</li>
+              <li>Supply chain: dependency pinning, lockfiles, vulnerability scanning, provenance</li>
+              <li>Browser security model: same-origin policy, CORS, CSP, cookie attributes, CSRF tokens</li>
+              <li>Privacy engineering: data minimisation, retention, PII handling, GDPR obligations</li>
+              <li>Secure defaults, least privilege, and defence in depth as design principles</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://portswigger.net/web-security">PortSwigger Web Security Academy</a> <span class="by">free, hands-on labs &middot; the best security training available at any price</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://owasp.org/www-project-top-ten/">OWASP Top Ten</a> <span class="by">plus the OWASP Cheat Sheet Series</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://www.crypto101.io/">Crypto 101</a> <span class="by">Laurens Van Houtven &middot; cryptography for engineers who must use it</span></div></li>
+              <li><span class="rkind">Book</span><div>The Web Application Hacker's Handbook <span class="by">Stuttard &amp; Pinto &middot; the attacker's view of your stage 10 project</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>Complete the PortSwigger labs for access control, injection and XSS. Then write a threat model for your own product, fix everything it surfaces, and add a dependency scan to the pipeline.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 14 ============ -->
+    <section class="stage" id="s14" data-stage="14">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 14</span>
+          <span class="tag">Applied</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s14" aria-label="Stage 14 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>AI engineering</h3>
+        <div class="stage-meta"><span><b>2&ndash;3 months</b></span><span><b>160 hours</b></span><span>Requires stages 03, 09, 10</span></div>
+        <p class="stage-why">Language models are now a component you integrate, like a database or a payment provider, and integrating them well is an engineering discipline with its own failure modes. The scarce skill is not prompting. It is evaluation: knowing whether the thing you shipped is actually working.</p>
+        <a class="companion" href="foundry.html" data-vol="found"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Foundry</span><span class="cp-m">20 chapters &middot; 27 code examples &middot; 60 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 20 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you learn</h4>
+            <ul class="topics">
+              <li>How a language model works to a useful depth: tokens, context windows, attention, sampling</li>
+              <li>Embeddings and vector similarity; what they represent and where they mislead</li>
+              <li class="key">Prompt engineering as interface design: structure, examples, decomposition, constrained output</li>
+              <li>Structured outputs and schema-validated responses your code can rely on</li>
+              <li class="key">Retrieval-augmented generation: chunking, indexing, hybrid search, reranking, citation</li>
+              <li>Tool use and function calling; agent loops, and recognising when an agent is the wrong shape</li>
+              <li class="key">Evaluation: golden datasets, task-specific metrics, model-as-judge, regression suites in CI</li>
+              <li>Guardrails: prompt injection, jailbreaks, PII redaction, output filtering, human review gates</li>
+              <li>Cost and latency engineering: model routing, caching, batching, streaming, budgets per request</li>
+              <li>Observability for non-deterministic systems: tracing, sampling, replay, drift detection</li>
+              <li>Fine-tuning and distillation, and the narrow cases where they beat better prompting</li>
+              <li class="key">Working with coding agents: writing the spec, reviewing the diff, keeping ownership of the code</li>
+              <li>Classical machine learning literacy: train and test splits, overfitting, metrics, baselines</li>
+              <li>The ethics that are also engineering: bias, attribution, disclosure, informed consent</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind free">Course</span><div><a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a> <span class="by">Andrej Karpathy &middot; build a transformer from scratch</span></div></li>
+              <li><span class="rkind">Book</span><div>AI Engineering <span class="by">Chip Huyen &middot; the systems view of building on foundation models</span></div></li>
+              <li><span class="rkind free">Reference</span><div><a href="https://docs.claude.com/">Anthropic documentation</a> <span class="by">tool use, structured output, prompt caching, agent patterns</span></div></li>
+              <li><span class="rkind free">Course</span><div><a href="https://developers.google.com/machine-learning/crash-course">Machine Learning Crash Course</a> <span class="by">Google &middot; enough classical ML to be literate</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>One AI feature inside the product from stage 10, with a golden dataset of at least fifty cases, an automated eval that runs in CI, tracing, a cost ceiling per request, and a documented fallback for when the model fails.</p>
+            <p>The eval suite is the deliverable. The feature is the excuse to build it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MILESTONE C ============ -->
+    <div class="milestone">
+      <div class="m-name"><span>Milestone C</span>You can be trusted with a system</div>
+      <div class="m-hours">stages 00 &ndash; 14</div>
+      <p>Roughly 2,720 hours. You can design a system, build it, secure it, deploy it, operate it, and explain every decision in it. From here the curriculum stops being a sequence and becomes a direction.</p>
+    </div>
+
+    <!-- ============ 15 ============ -->
+    <section class="stage" id="s15" data-stage="15">
+      <div class="stage-head">
+        <div class="stage-top">
+          <span class="stage-num">STAGE 15</span>
+          <span class="tag">Mastery</span>
+          <label class="done-toggle"><input type="checkbox" data-id="s15" aria-label="Stage 15 done"><span class="box"></span>Done</label>
+        </div>
+        <h3>Expert practice</h3>
+        <div class="stage-meta"><span><b>Continuous</b></span><span><b>The rest of it</b></span><span>Requires everything above</span></div>
+        <p class="stage-why">Expertise is not one more subject. It is depth in a chosen area, taste built from having been wrong, and the ability to move other engineers. The technical half of this is the easy half.</p>
+        <a class="companion" href="guild.html" data-vol="guild"><span class="cp-main"><span class="cp-k">Companion volume</span><span class="cp-t">The Engineer's Guild</span><span class="cp-m">16 chapters &middot; 16 code examples &middot; 48 exercises</span></span><span class="cp-side"><span class="vm-count">0 / 16 read</span><span class="vm-track"><span class="vm-fill"></span></span><span class="cp-go">Open the volume &rarr;</span></span></a>
+      </div>
+
+      <div class="stage-grid">
+        <div>
+          <div class="block">
+            <h4 class="block-h">What you practise</h4>
+            <ul class="topics">
+              <li class="key">Pick one track below and go three levels deeper than your team needs</li>
+              <li class="key">Read primary sources: Dynamo, Bigtable, MapReduce, Spanner, Raft, The Google File System</li>
+              <li>Read production source code of tools you use daily, and fix something in one</li>
+              <li>Contribute to open source until you are trusted with review, not just patches</li>
+              <li class="key">Write design documents that survive contact with sceptical senior engineers</li>
+              <li>Lead a project end to end: scoping, sequencing, risk, stakeholders, landing it</li>
+              <li>Mentor deliberately. Teaching is the fastest way to find the holes in your own model</li>
+              <li class="key">Learn the business: what your company sells, what it costs, where engineering moves the number</li>
+              <li>Develop taste in trade-offs, which means being able to argue both sides honestly</li>
+              <li>Write publicly. A body of written work compounds more than any certification</li>
+              <li>Cultivate the boring virtues: reliability, clear communication, finishing things</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="block">
+            <h4 class="block-h">Resources</h4>
+            <ul class="res">
+              <li><span class="rkind">Book</span><div>The Staff Engineer's Path <span class="by">Tanya Reilly &middot; the most useful book about senior technical work</span></div></li>
+              <li><span class="rkind free">Book</span><div><a href="https://staffeng.com/guides/">Staff Engineer</a> <span class="by">Will Larson &middot; guides free online</span></div></li>
+              <li><span class="rkind free">Community</span><div><a href="https://paperswelove.org/">Papers We Love</a> <span class="by">a curated entry point into the literature</span></div></li>
+              <li><span class="rkind">Book</span><div>The Mythical Man-Month <span class="by">Fred Brooks &middot; fifty years old and still describing your project</span></div></li>
+            </ul>
+          </div>
+          <div class="ship">
+            <h4 class="block-h">Ship this</h4>
+            <p>A body of work rather than a project: a maintained open-source contribution, a written archive others cite, and at least one system in production that other engineers depend on and you did not build alone.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TRACKS ============ -->
+    <section id="tracks">
+      <h2 class="sec">Where to specialise</h2>
+      <div class="prose">
+        <p>Pick one after milestone B, not before. Breadth first makes the depth mean something, and every track below assumes the whole foundation underneath it.</p>
+      </div>
+
+      <div class="tracks">
+        <div class="track">
+          <h3>Backend and distributed systems</h3>
+          <div class="t-what">Build the thing that stays up</div>
+          <p>The default track, and the one with the most demand. Depth in stages 08 and 11.</p>
+          <ul>
+            <li>Storage engine internals</li>
+            <li>Consensus and replication in practice</li>
+            <li>Stream processing at scale</li>
+            <li>A systems language: Go or Rust</li>
+          </ul>
+        </div>
+
+        <div class="track">
+          <h3>Platform and infrastructure</h3>
+          <div class="t-what">Build what other engineers build on</div>
+          <p>For people who like leverage more than features. Depth in stages 05 and 12.</p>
+          <ul>
+            <li>Kubernetes internals and operators</li>
+            <li>Developer experience and build systems</li>
+            <li>Networking, service meshes, eBPF</li>
+            <li>Reliability engineering and capacity</li>
+          </ul>
+        </div>
+
+        <div class="track">
+          <h3>AI engineering</h3>
+          <div class="t-what">Make non-deterministic systems dependable</div>
+          <p>The fastest-growing track. Depth in stages 03 and 14.</p>
+          <ul>
+            <li>Retrieval and ranking quality</li>
+            <li>Evaluation and measurement design</li>
+            <li>Agent architectures and tool design</li>
+            <li>Inference cost and latency engineering</li>
+          </ul>
+        </div>
+
+        <div class="track">
+          <h3>Low-level systems</h3>
+          <div class="t-what">Build the layers everyone assumes</div>
+          <p>Smallest job market, highest barrier, deepest satisfaction. Depth in stages 04, 05 and 07.</p>
+          <ul>
+            <li>Kernels and drivers</li>
+            <li>Database and storage engines</li>
+            <li>Compilers and runtimes</li>
+            <li>Embedded and real-time systems</li>
+          </ul>
+        </div>
+
+        <div class="track">
+          <h3>Product and frontend</h3>
+          <div class="t-what">Own what the user actually touches</div>
+          <p>Underrated, and the track closest to the business. Depth in stages 09 and 10.</p>
+          <ul>
+            <li>Rendering and interaction performance</li>
+            <li>Accessibility and design systems</li>
+            <li>Offline, sync and local-first data</li>
+            <li>Experimentation and measurement</li>
+          </ul>
+        </div>
+
+        <div class="track">
+          <h3>Security engineering</h3>
+          <div class="t-what">Find it before someone else does</div>
+          <p>Two distinct careers, offensive and defensive. Depth in stage 13.</p>
+          <ul>
+            <li>Application and cloud security</li>
+            <li>Detection and incident response</li>
+            <li>Cryptographic engineering</li>
+            <li>Supply chain and software provenance</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TRAPS ============ -->
+    <section id="traps">
+      <h2 class="sec">The ways this goes wrong</h2>
+      <div class="prose">
+        <p>These are the failure modes that end self-directed study. Each one feels like progress while it is happening.</p>
+      </div>
+      <ul class="traps">
+        <li><b>Tutorial hell</b><span>Following along with a video produces the feeling of competence and none of it. The test is whether you can build a variation of the thing without the video. If not, you have not learned it.</span></li>
+        <li><b>Collecting languages and frameworks</b><span>Six languages at a shallow depth is worth less than one at depth, and hiring managers stopped being impressed by long tool lists some years ago.</span></li>
+        <li><b>Skipping the foundations because the assistant writes the code</b><span>An engineer who cannot evaluate generated code is a liability, and the market prices that correctly. Fundamentals are what make the leverage safe.</span></li>
+        <li><b>Reading the advanced book too early</b><span>Designing Data-Intensive Applications is transformative after you have built and operated something, and forgettable before. The same is true of most of the systems canon.</span></li>
+        <li><b>Optimising only for interviews</b><span>Grinding problems without building systems produces candidates who pass the screen and fail the job, which the industry has now adjusted for.</span></li>
+        <li><b>Never shipping to a real user</b><span>A portfolio of unfinished projects signals the one thing employers screen hardest for. Finish three things completely rather than starting twenty.</span></li>
+        <li><b>Learning alone the whole way</b><span>Code review, pair programming and public work correct errors you cannot see from the inside. Find people, even if that means open source rather than a job.</span></li>
+        <li><b>Treating this document as a queue</b><span>It is a map. Loop back, re-read, and let a real problem pull you into a stage early when it does.</span></li>
+      </ul>
+    </section>
+
+    <!-- ============ SHELF ============ -->
+    <section id="shelf">
+      <h2 class="sec">The shelf</h2>
+      <div class="prose">
+        <p>If you read nothing else, read the two in the first row. Between them they cover the machine underneath your program and the systems built on top of it, and they carry more return per hour than anything else on this list.</p>
+      </div>
+
+      <div class="table-wrap" style="margin-top:18px">
+        <table>
+          <thead>
+            <tr><th>Tier</th><th>Book</th><th>Author</th><th>Read at</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="num"><strong>Essential</strong></td><td>Computer Systems: A Programmer's Perspective</td><td>Bryant &amp; O'Hallaron</td><td class="num">Stage 04</td></tr>
+            <tr><td class="num"><strong>Essential</strong></td><td>Designing Data-Intensive Applications</td><td>Kleppmann</td><td class="num">Stage 11</td></tr>
+            <tr><td class="num">Craft</td><td>A Philosophy of Software Design</td><td>Ousterhout</td><td class="num">Stage 09</td></tr>
+            <tr><td class="num">Craft</td><td>The Pragmatic Programmer</td><td>Hunt &amp; Thomas</td><td class="num">Stage 09</td></tr>
+            <tr><td class="num">Craft</td><td>Refactoring</td><td>Fowler</td><td class="num">Stage 09</td></tr>
+            <tr><td class="num">Craft</td><td>Working Effectively with Legacy Code</td><td>Feathers</td><td class="num">Stage 09</td></tr>
+            <tr><td class="num">Theory</td><td>The Algorithm Design Manual</td><td>Skiena</td><td class="num">Stage 02</td></tr>
+            <tr><td class="num">Theory</td><td>Structure and Interpretation of Computer Programs</td><td>Abelson &amp; Sussman</td><td class="num">Stage 01</td></tr>
+            <tr><td class="num">Systems</td><td>Operating Systems: Three Easy Pieces</td><td>Arpaci-Dusseau</td><td class="num">Stage 05</td></tr>
+            <tr><td class="num">Systems</td><td>Computer Networking: A Top-Down Approach</td><td>Kurose &amp; Ross</td><td class="num">Stage 06</td></tr>
+            <tr><td class="num">Systems</td><td>Crafting Interpreters</td><td>Nystrom</td><td class="num">Stage 07</td></tr>
+            <tr><td class="num">Systems</td><td>The Elements of Computing Systems</td><td>Nisan &amp; Schocken</td><td class="num">Stage 04</td></tr>
+            <tr><td class="num">Practice</td><td>Site Reliability Engineering</td><td>Google</td><td class="num">Stage 12</td></tr>
+            <tr><td class="num">Practice</td><td>Systems Performance</td><td>Gregg</td><td class="num">Stage 12</td></tr>
+            <tr><td class="num">Practice</td><td>AI Engineering</td><td>Huyen</td><td class="num">Stage 14</td></tr>
+            <tr><td class="num">Career</td><td>The Staff Engineer's Path</td><td>Reilly</td><td class="num">Stage 15</td></tr>
+            <tr><td class="num">Career</td><td>The Mythical Man-Month</td><td>Brooks</td><td class="num">Stage 15</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="colophon">
+      <p>Sequence and hour budgets synthesised from <a href="https://teachyourselfcs.com/">Teach Yourself Computer Science</a>, the <a href="https://github.com/ossu/computer-science">Open Source Society University</a> curriculum, published university course structures at MIT, Berkeley, Stanford and Carnegie Mellon, and 2026 hiring signal for entry and mid-level engineering roles.</p>
+      <p>Your stage marks are saved in this browser and, when you're signed in to Claude, in your account too, so they follow you to your other devices. Nobody else can see them.</p>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  var CFG = {"ns": "", "resetAsk": "Click again to clear", "spy": "-10% 0px -75% 0px", "vols": [{"slug": "whet", "n": 16}, {"slug": "prim", "n": 20}, {"slug": "work", "n": 8}, {"slug": "comp", "n": 20}, {"slug": "mill", "n": 20}, {"slug": "loom", "n": 20}, {"slug": "exch", "n": 20}, {"slug": "press", "n": 20}, {"slug": "ledg", "n": 20}, {"slug": "craft", "n": 19}, {"slug": "ship", "n": 20}, {"slug": "fleet", "n": 20}, {"slug": "watch", "n": 20}, {"slug": "cita", "n": 20}, {"slug": "found", "n": 20}, {"slug": "guild", "n": 16}]};
+  var LS = "englibrary.v1.", NS = CFG.ns || "", VOLS = CFG.vols || [];
+  function read(k) { try { return window.localStorage.getItem(LS + k); } catch (e) { return null; } }
+  function write(k, v) { try { window.localStorage.setItem(LS + k, v); } catch (e) { /* storage unavailable */ } }
+
+  try { if (window.hljs) window.hljs.highlightAll(); } catch (e) { /* plain code is fine */ }
+
+  // Marks are shared by every page of the book: one storage key per chapter or stage.
+  var boxes = Array.prototype.slice.call(document.querySelectorAll(".done-toggle input[data-id]"));
+  function key(b) { return NS + b.getAttribute("data-id"); }
+  var chap = boxes.filter(function (b) { return /(^|-)ch\d\d$/.test(b.getAttribute("data-id")); });
+  var stages = boxes.filter(function (b) { return /^s\d\d$/.test(b.getAttribute("data-id")); });
+
+  function bar(pctId, fillId, n, total) {
+    var p = document.getElementById(pctId), f = document.getElementById(fillId);
+    if (p) p.textContent = n + " / " + total;
+    if (f) f.style.width = (total ? (n / total) * 100 : 0) + "%";
+  }
+  function volRead(v) {
+    var n = 0;
+    for (var i = 1; i <= v.n; i++) if (read(v.slug + "-ch" + (i < 10 ? "0" : "") + i) === "1") n++;
+    return n;
+  }
+  function refresh() {
+    boxes.forEach(function (b) {
+      var id = b.getAttribute("data-id");
+      var sec = document.getElementById(id);
+      var link = document.querySelector('#railnav a[href="#' + id + '"]');
+      var stage = b.closest(".stage");
+      if (sec) sec.classList.toggle("is-read", b.checked);
+      if (link) link.classList.toggle("read", b.checked);
+      if (stage) stage.classList.toggle("is-done", b.checked);
+    });
+    if (chap.length) {
+      var n = 0; chap.forEach(function (b) { if (b.checked) n++; });
+      bar("pct", "barfill", n, chap.length);
+    } else if (VOLS.length) {
+      var got = 0, all = 0;
+      VOLS.forEach(function (v) { got += volRead(v); all += v.n; });
+      bar("pct", "barfill", got, all);
+    }
+    if (stages.length) {
+      var s = 0; stages.forEach(function (b) { if (b.checked) s++; });
+      bar("pct-stages", "barfill-stages", s, stages.length);
+    }
+    VOLS.forEach(function (v) {
+      var c = volRead(v);
+      Array.prototype.forEach.call(document.querySelectorAll('[data-vol="' + v.slug + '"]'), function (el) {
+        var t = el.querySelector(".vm-count"), f = el.querySelector(".vm-fill");
+        if (t) t.textContent = c + " / " + v.n + " read";
+        if (f) f.style.width = (c / v.n) * 100 + "%";
+      });
+    });
+  }
+  boxes.forEach(function (b) {
+    if (read(key(b)) === "1") b.checked = true;
+    b.addEventListener("change", function () { write(key(b), b.checked ? "1" : "0"); refresh(); });
+  });
+  window.addEventListener("storage", function (e) {
+    if (e.key && e.key.indexOf(LS) !== 0) return;
+    boxes.forEach(function (b) { b.checked = read(key(b)) === "1"; });
+    refresh();
+  });
+  refresh();
+
+  // Reset asks for a second click inside the page, because the viewer blocks dialog boxes.
+  var reset = document.getElementById("resetbtn");
+  if (reset) {
+    var label = reset.textContent, timer = null;
+    var disarm = function () { clearTimeout(timer); timer = null; reset.textContent = label; reset.classList.remove("armed"); };
+    reset.addEventListener("click", function () {
+      if (!timer) {
+        reset.textContent = CFG.resetAsk || "Click again to clear";
+        reset.classList.add("armed");
+        timer = setTimeout(disarm, 4000);
+        return;
+      }
+      disarm();
+      boxes.forEach(function (b) { b.checked = false; write(key(b), "0"); });
+      refresh();
+    });
+  }
+
+  var root = document.documentElement;
+  var stored = read("theme");
+  if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+  var tb = document.getElementById("themebtn");
+  if (tb) tb.addEventListener("click", function () {
+    var now = root.getAttribute("data-theme");
+    var dark = now ? now === "dark"
+      : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    write("theme", next);
+    pressed();
+  });
+  function pressed() {
+    if (!tb) return;
+    var now = root.getAttribute("data-theme");
+    var dark = now ? now === "dark" : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    tb.setAttribute("aria-pressed", dark ? "true" : "false");
+    tb.setAttribute("aria-label", "Dark theme");
+  }
+  pressed();
+
+  var toc = document.querySelector(".toc");
+  if (toc && window.matchMedia) {
+    var narrow = window.matchMedia("(max-width: 1080px)");
+    var syncToc = function () { if (narrow.matches) toc.removeAttribute("open"); else toc.setAttribute("open", ""); };
+    syncToc();
+    if (narrow.addEventListener) narrow.addEventListener("change", syncToc);
+    else if (narrow.addListener) narrow.addListener(syncToc);
+  }
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('#railnav a[href^="#"]'));
+  var targets = links.map(function (a) { try { return document.querySelector(a.getAttribute("href")); } catch (e) { return null; } });
+  if (window.IntersectionObserver) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var i = targets.indexOf(e.target);
+        if (i < 0) return;
+        links.forEach(function (l) { l.classList.remove("on"); });
+        links[i].classList.add("on");
+      });
+    }, { rootMargin: CFG.spy || "-8% 0px -80% 0px" });
+    targets.forEach(function (t) { if (t) io.observe(t); });
+  }
+})();
+
+// Progress follows the reader between devices. Every page keeps its marks, reading places and
+// flashcard schedule in this browser; when the viewer is signed in to Claude, this mirrors them
+// into a record only that viewer can read, and merges in what their other devices saved.
+(function () {
+  var LS = "englibrary.v1.", META = LS + "sync.meta", SKIP = /^(theme$|sync\.)/, TICK = 15000;
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  function parse(s, d) { try { var v = JSON.parse(s); return v == null ? d : v; } catch (e) { return d; } }
+  function local() {
+    var out = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(LS) === 0 && !SKIP.test(k.slice(LS.length))) out[k.slice(LS.length)] = localStorage.getItem(k);
+      }
+    } catch (e) { /* storage unavailable */ }
+    return out;
+  }
+  // meta holds [value, time changed] for every key as of the last merge; a value that differs
+  // from it now was changed on this device since then.
+  function stamp(meta) {
+    var cur = local(), now = Date.now();
+    for (var k in cur) if (!meta[k] || meta[k][0] !== cur[k]) meta[k] = [cur[k], now];
+    return meta;
+  }
+  function sortedJSON(o) { var out = {}; Object.keys(o).sort().forEach(function (k) { out[k] = o[k]; }); return JSON.stringify(out); }
+  // Flashcards merge card by card, so reviews done on two devices both count. A card's entry is
+  // [box, due day]; the later due day wins, and on a tie the side changed most recently.
+  function mergeSrs(a, b) {
+    var newer = a[1] >= b[1] ? a : b, older = newer === a ? b : a;
+    var nv = parse(newer[0], {}), ov = parse(older[0], {}), out = {}, id;
+    if (!Object.keys(nv).length) return newer;              // a reset on the newer side wins
+    for (id in ov) out[id] = ov[id];
+    for (id in nv) if (!out[id] || nv[id][1] >= out[id][1]) out[id] = nv[id];
+    return [sortedJSON(out), newer[1]];
+  }
+  function merge(k, a, b) {
+    if (!a) return b; if (!b || a[0] === b[0]) return a;
+    if (k === "srs") return mergeSrs(a, b);
+    if (k.indexOf("pos.") === 0) return (parse(a[0], {}).t || 0) >= (parse(b[0], {}).t || 0) ? a : b;
+    return a[1] >= b[1] ? a : b;
+  }
+  function mergeAll(meta, remote) {
+    var out = {}, k;
+    for (k in meta) out[k] = merge(k, meta[k], remote[k]);
+    for (k in remote) if (!out[k]) out[k] = remote[k];
+    // the list of recent volumes follows the reading places it points to
+    if (meta.recent && remote.recent && meta.recent[0] !== remote.recent[0]) {
+      var slugs = [];
+      for (k in out) if (k.indexOf("pos.") === 0) slugs.push([k.slice(4), parse(out[k][0], {}).t || 0]);
+      slugs.sort(function (x, y) { return y[1] - x[1]; });
+      out.recent = [JSON.stringify(slugs.slice(0, 16).map(function (x) { return x[0]; })), Math.max(meta.recent[1], remote.recent[1])];
+    }
+    return out;
+  }
+  function same(a, b) {
+    var k;
+    for (k in a) if (!b[k] || b[k][0] !== a[k][0] || b[k][1] !== a[k][1]) return false;
+    for (k in b) if (!a[k]) return false;
+    return true;
+  }
+  function fromDoc(d) {
+    var out = {};
+    ((d && d.entries) || []).forEach(function (e) { if (e && typeof e[0] === "string" && typeof e[1] === "string") out[e[0]] = [e[1], +e[2] || 0]; });
+    return out;
+  }
+  function toDoc(m) { return { v: 1, entries: Object.keys(m).sort().map(function (k) { return [k, m[k][0], m[k][1]]; }) }; }
+
+  var ref = null, remote = {}, writing = false, stopped = false, note = null;
+  function say(text) {
+    if (!note) {
+      var box = document.querySelector(".rail .progress-box"); if (!box) return;
+      note = document.createElement("p"); note.className = "sync-note"; box.parentNode.insertBefore(note, box.nextSibling);
+    }
+    note.textContent = text;
+  }
+  // Bring what other devices saved into this browser, then tell the page to redraw.
+  function pull(doc) {
+    remote = fromDoc(doc);
+    var meta = stamp(parse(localStorage.getItem(META), {})), merged = mergeAll(meta, remote), changed = false;
+    try {
+      for (var k in merged) if (localStorage.getItem(LS + k) !== merged[k][0]) { localStorage.setItem(LS + k, merged[k][0]); changed = true; }
+      localStorage.setItem(META, JSON.stringify(merged));
+    } catch (e) { return; }
+    if (changed) {
+      try { window.dispatchEvent(new StorageEvent("storage", { key: LS + "sync" })); } catch (e) { /* old browser */ }
+      window.dispatchEvent(new CustomEvent("englibrary:sync"));
+    }
+  }
+  // Save this device's changes, at most once a tick and only when something changed.
+  function push() {
+    if (!ref || writing || stopped) return;
+    var meta;
+    try { meta = stamp(parse(localStorage.getItem(META), {})); localStorage.setItem(META, JSON.stringify(meta)); } catch (e) { return; }
+    var merged = mergeAll(meta, remote);
+    if (same(merged, remote)) return;
+    writing = true;
+    ref.set(toDoc(merged)).then(function () {
+      writing = false; remote = merged; say("Progress synced to your account");
+    }, function (e) {
+      writing = false;
+      if (e && (e.code === "invalid_argument" || e.code === "revoked" || e.code === "quota_exceeded" || e.code === "not_granted")) { stopped = true; say("Progress saved in this browser only"); }
+    });
+  }
+  Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (r) {
+    var db = r[0], user = r[1];
+    if (!db || !user) return null;
+    return user.id().then(function (id) {
+      if (!id) return;
+      ref = db.doc("data/users/" + id + "/progress");
+      var first = function (tries) {
+        ref.get().then(function (snap) {
+          pull(snap.exists ? snap.data() : null); say("Progress synced to your account"); push();
+          ref.onSnapshot(function (s) {
+            if (s.metadata.fromCache || s.metadata.hasPendingWrites || writing) return;
+            pull(s.exists ? s.data() : null);
+          }, function () { /* the timer still saves; a later visit subscribes again */ });
+          setInterval(function () { if (document.visibilityState !== "hidden") push(); }, TICK);
+          document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") push(); });
+          window.addEventListener("pagehide", push);
+        }, function (e) {
+          if (e && e.code === "unavailable" && tries < 1) setTimeout(function () { first(tries + 1); }, 1500 + Math.random() * 1500);
+        });
+      };
+      first(0);
+    });
+  }).catch(function () { /* sync is an extra; the page works without it */ });
+})();
+
+// Edition downloads go through the viewer's save prompt where it offers one; anywhere else the
+// links are plain download links.
+(function () {
+  var links = document.querySelectorAll("a[data-dl]");
+  if (!links.length || !window.claude || typeof window.claude.use !== "function") return;
+  var dl = null;
+  window.claude.use("downloads").then(function (d) { dl = d; }, function () {});
+  Array.prototype.forEach.call(links, function (a) {
+    a.addEventListener("click", function (e) {
+      if (!dl) return;
+      e.preventDefault();
+      if (a.classList.contains("busy")) return;
+      a.classList.add("busy");
+      var done = function () { a.classList.remove("busy"); };
+      fetch(a.getAttribute("href")).then(function (r) {
+        if (!r.ok) throw { code: "unavailable" };
+        return r.blob();
+      }).then(function (blob) {
+        return dl.save({ filename: a.getAttribute("data-dl"), data: blob });
+      }).then(done, function (err) {
+        done();
+        var code = err && err.code;
+        if (code === "declined" || code === "rate_limited") return;
+        dl = null; a.click();                       // the viewer can't save it: try the plain link
+      });
+    });
+  });
+})();
+
+// Wide code blocks and tables scroll sideways; each one that does gets a keyboard stop and a
+// name, so it can be scrolled without a mouse. Rechecked when the window changes size.
+(function () {
+  // A region's name says what it holds: the example's file name, or the nearest heading.
+  function about(el) {
+    var fig = el.closest("figure"), file = fig && fig.querySelector(".file");
+    if (file) return file.textContent.trim() + (el.classList.contains("out") ? " output" : "");
+    var n = el;
+    while (n && n !== document.body) {
+      var p = n.previousElementSibling;
+      while (p) {
+        if (/^H[2-5]$/.test(p.tagName)) return p.textContent.trim();
+        var h = p.querySelector && p.querySelector("h2, h3, h4, h5");
+        if (h && p.tagName !== "FIGURE") return h.textContent.trim();
+        p = p.previousElementSibling;
+      }
+      n = n.parentElement;
+    }
+    return "";
+  }
+  function mark() {
+    var used = {};
+    Array.prototype.forEach.call(document.querySelectorAll("[data-scroll-focus]"), function (el) { used[el.getAttribute("aria-label")] = 1; });
+    Array.prototype.forEach.call(document.querySelectorAll("pre, .table-wrap"), function (el) {
+      var wide = el.scrollWidth > el.clientWidth, has = el.hasAttribute("data-scroll-focus");
+      if (wide && !has && !el.hasAttribute("tabindex")) {
+        var base = (el.classList.contains("table-wrap") ? "Table" : "Code") + (about(el) ? ": " + about(el) : ""), name = base, i = 2;
+        while (used[name]) name = base + " (" + (i++) + ")";
+        used[name] = 1;
+        el.setAttribute("tabindex", "0"); el.setAttribute("data-scroll-focus", ""); el.setAttribute("role", "region");
+        el.setAttribute("aria-label", name);
+      } else if (!wide && has) {
+        ["tabindex", "data-scroll-focus", "role", "aria-label"].forEach(function (a) { el.removeAttribute(a); });
+      }
+    });
+  }
+  mark();
+  // Web fonts and the code highlighter can widen blocks after the first check.
+  window.addEventListener("load", mark);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(mark);
+  var t = null;
+  window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(mark, 200); });
+})();
+</script>
+<script>
+(function () {
+  var CFG = {"mode": "hub", "page": "index.html", "vols": [{"slug": "whet", "name": "Whetstone", "page": "whetstone.html", "stage": "00", "title": "The Engineer's Whetstone"}, {"slug": "prim", "name": "Primer", "page": "primer.html", "stage": "01", "title": "The Engineer's Primer"}, {"slug": "work", "name": "Workbench", "page": "workbench.html", "stage": "02", "title": "The Engineer's Workbench"}, {"slug": "comp", "name": "Compass", "page": "compass.html", "stage": "03", "title": "The Engineer's Compass"}, {"slug": "mill", "name": "Mill", "page": "mill.html", "stage": "04", "title": "The Engineer's Mill"}, {"slug": "loom", "name": "Loom", "page": "loom.html", "stage": "05", "title": "The Engineer's Loom"}, {"slug": "exch", "name": "Exchange", "page": "exchange.html", "stage": "06", "title": "The Engineer's Exchange"}, {"slug": "press", "name": "Press", "page": "press.html", "stage": "07", "title": "The Engineer's Press"}, {"slug": "ledg", "name": "Ledger", "page": "ledger.html", "stage": "08", "title": "The Engineer's Ledger"}, {"slug": "craft", "name": "Craft", "page": "craft.html", "stage": "09", "title": "The Engineer's Craft"}, {"slug": "ship", "name": "Shipyard", "page": "shipyard.html", "stage": "10", "title": "The Engineer's Shipyard"}, {"slug": "fleet", "name": "Fleet", "page": "fleet.html", "stage": "11", "title": "The Engineer's Fleet"}, {"slug": "watch", "name": "Watch", "page": "watch.html", "stage": "12", "title": "The Engineer's Watch"}, {"slug": "cita", "name": "Citadel", "page": "citadel.html", "stage": "13", "title": "The Engineer's Citadel"}, {"slug": "found", "name": "Foundry", "page": "foundry.html", "stage": "14", "title": "The Engineer's Foundry"}, {"slug": "guild", "name": "Guild", "page": "guild.html", "stage": "15", "title": "The Engineer's Guild"}]};
+  var LS = "englibrary.v1.", VOLS = CFG.vols, bySlug = {};
+  VOLS.forEach(function (v, i) { v.i = i; bySlug[v.slug] = v; });
+  function read(k) { try { return window.localStorage.getItem(LS + k); } catch (e) { return null; } }
+  function write(k, v) { try { window.localStorage.setItem(LS + k, v); } catch (e) { /* storage unavailable */ } }
+  function readJSON(k, d) { try { var v = JSON.parse(read(k)); return v == null ? d : v; } catch (e) { return d; } }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function ago(t) {
+    var m = Math.round((Date.now() - t) / 60000);
+    if (m < 2) return "just now";
+    if (m < 60) return m + " minutes ago";
+    var h = Math.round(m / 60); if (h < 24) return h + (h === 1 ? " hour ago" : " hours ago");
+    var d = Math.round(h / 24); return d + (d === 1 ? " day ago" : " days ago");
+  }
+
+  // The pages scroll smoothly, which is pleasant for a short hop but never arrives across a
+  // whole volume, so a programmatic jump turns it off for the moment it takes.
+  function jump(id) {
+    var el = document.getElementById(id); if (!el) return false;
+    var root = document.documentElement, prev = root.style.scrollBehavior;
+    if (location.hash !== "#" + id) history.pushState(null, "", "#" + id);
+    root.style.scrollBehavior = "auto"; el.scrollIntoView(); window.scrollBy(0, -16);
+    root.style.scrollBehavior = prev;
+    return true;
+  }
+
+  // ---------- search ----------
+  var ov = null, input, list, status, only, rows = null, loading = false, hits = [], sel = 0, timer = null;
+  function buildOverlay() {
+    if (ov) return;
+    ov = document.createElement("div");
+    ov.className = "sr-overlay"; ov.hidden = true;
+    ov.innerHTML =
+      '<div class="sr-panel" role="dialog" aria-modal="true" aria-label="Search the syllabus">' +
+      '<div class="sr-top"><input class="sr-input" type="search" placeholder="Search every volume" aria-label="Search" autocomplete="off" spellcheck="false">' +
+      '<button class="sr-close" type="button">Esc</button></div>' +
+      '<div class="sr-opts">' + (CFG.slug ? '<label><input type="checkbox" class="sr-only"> Only ' + esc(bySlug[CFG.slug].name) + '</label>' : '<span>All volumes and the syllabus</span>') +
+      '<span class="sr-keys"><span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> to move</span><span><kbd>Enter</kbd> to open</span></span></div>' +
+      '<div class="sr-status" aria-live="polite"></div><ul class="sr-list" role="listbox"></ul></div>';
+    document.body.appendChild(ov);
+    input = ov.querySelector(".sr-input"); list = ov.querySelector(".sr-list");
+    status = ov.querySelector(".sr-status"); only = ov.querySelector(".sr-only");
+    ov.addEventListener("click", function (e) { if (e.target === ov) closeSearch(); });
+    ov.addEventListener("keydown", function (e) {
+      if (e.key !== "Tab") return;
+      var f = Array.prototype.filter.call(ov.querySelectorAll("input, button, a[href]"), function (x) { return x.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    ov.querySelector(".sr-close").addEventListener("click", closeSearch);
+    input.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(run, 90); });
+    if (only) only.addEventListener("change", run);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!hits.length) return;
+        sel = (sel + (e.key === "ArrowDown" ? 1 : hits.length - 1)) % hits.length; mark();
+      } else if (e.key === "Enter") {
+        var a = list.querySelector('[aria-selected="true"]');
+        if (a) { e.preventDefault(); go(a); }
+      }
+    });
+    list.addEventListener("click", function (e) {
+      var a = e.target.closest("a"); if (!a) return;
+      e.preventDefault(); go(a);
+    });
+  }
+  function go(a) {
+    closeSearch();
+    var href = a.getAttribute("href"), hash = href.slice(href.indexOf("#"));
+    if (href.split("#")[0] === CFG.page && jump(hash.slice(1))) return;
+    location.href = href;
+  }
+  var opener = null;
+  function openSearch() {
+    if (ov && !ov.hidden) return;
+    opener = document.activeElement;
+    buildOverlay(); ov.hidden = false; document.documentElement.style.overflow = "hidden";
+    input.focus(); input.select(); load(); run();
+  }
+  function closeSearch() {
+    if (!ov || ov.hidden) return;
+    ov.hidden = true; document.documentElement.style.overflow = "";
+    if (opener && opener.focus && document.contains(opener)) opener.focus();   // back to where the reader was
+    opener = null;
+  }
+  function load() {
+    if (rows || loading) return;
+    loading = true; status.textContent = "Loading the index\u2026";
+    var s = document.createElement("script");
+    s.src = "search-index.js";
+    s.onload = function () {
+      rows = (window.ENG_SEARCH || []).map(function (r) {
+        return { r: r, t: r[4].toLowerCase(), x: r[5].toLowerCase(), l: r[3].toLowerCase() };
+      });
+      loading = false; run();
+    };
+    s.onerror = function () { loading = false; status.textContent = "The search index could not be loaded. Try again in a moment."; };
+    document.head.appendChild(s);
+  }
+  function count(hay, term, cap) {
+    var n = 0, i = hay.indexOf(term);
+    while (i >= 0 && n < cap) { n++; i = hay.indexOf(term, i + term.length); }
+    return n;
+  }
+  // 2 = the term stands as a whole word somewhere, 1 = it starts a word, 0 = only inside words
+  function wordAt(hay, term) {
+    var i = hay.indexOf(term), best = 0;
+    while (i >= 0) {
+      if (i === 0 || /[^a-z0-9]/.test(hay.charAt(i - 1))) {
+        var after = hay.charAt(i + term.length);
+        if (!after || /[^a-z0-9]/.test(after)) return 2;
+        best = 1;
+      }
+      i = hay.indexOf(term, i + 1);
+    }
+    return best;
+  }
+  function run() {
+    if (!ov || ov.hidden) return;
+    var q = input.value.trim().toLowerCase();
+    if (!rows) { list.innerHTML = ""; return; }
+    var terms = q.split(/\s+/).filter(function (t) { return t.length > 0; });
+    if (!terms.length || q.length < 2) {
+      hits = []; list.innerHTML = "";
+      status.textContent = "Type a word or phrase. Every chapter, exercise and solution is searched.";
+      return;
+    }
+    var mine = only && only.checked ? bySlug[CFG.slug].i : null, scored = [];
+    for (var i = 0; i < rows.length; i++) {
+      var e = rows[i], score = 0, ok = true;
+      if (mine !== null && e.r[0] !== mine) continue;
+      for (var j = 0; j < terms.length; j++) {
+        var t = terms[j], n = count(e.x, t, 6), wt = e.t.indexOf(t) >= 0 ? wordAt(e.t, t) + 1 : 0;
+        var wx = n ? wordAt(e.x, t) : 0, wl = e.l.indexOf(t) >= 0 ? wordAt(e.l, t) : 0;
+        if (!wt && !n && !wl) { ok = false; break; }
+        if (t.length <= 2 && wt < 3 && wx < 2 && wl < 2) { ok = false; break; }   // short words must stand alone
+        score += [0, 4, 9, 16][wt] + (n ? 2 + n : 0) + [0, 1, 3][wx] + [0, 2, 5][wl];
+      }
+      if (!ok) continue;
+      if (terms.length > 1) { if (e.t.indexOf(q) >= 0) score += 24; else if (e.x.indexOf(q) >= 0) score += 10; }
+      if (CFG.slug && e.r[0] === bySlug[CFG.slug].i) score += 2;
+      scored.push([score, i]);
+    }
+    scored.sort(function (a, b) { return b[0] - a[0] || a[1] - b[1]; });
+    var total = scored.length;
+    hits = scored.slice(0, 40).map(function (s) { return rows[s[1]]; });
+    sel = 0;
+    status.textContent = total ? (total > 40 ? "Best 40 of " + total + " matches" : total + (total === 1 ? " match" : " matches"))
+                               : "Nothing matches every word. Try fewer or shorter words.";
+    list.innerHTML = hits.map(function (e, k) {
+      var r = e.r, v = r[0] >= 0 ? VOLS[r[0]] : null;
+      var where = v ? "<b>" + esc(v.stage) + "</b> " + esc(v.name) + (r[3] ? " &middot; " + esc(r[3]) : "")
+                    : "<b>Syllabus</b>" + (r[3] ? " &middot; " + esc(r[3]) : "");
+      return '<li><a class="sr-item" role="option" id="sr-' + k + '" href="' + esc(r[1] + "#" + r[2]) + '">' +
+        '<span class="sr-where">' + where + '</span><span class="sr-title">' + hl(r[4], terms) + '</span>' +
+        '<span class="sr-snip">' + snippet(r[5], e.x, terms) + '</span></a></li>';
+    }).join("");
+    mark();
+  }
+  function mark() {
+    Array.prototype.forEach.call(list.querySelectorAll(".sr-item"), function (a, k) {
+      a.setAttribute("aria-selected", k === sel ? "true" : "false");
+      if (k === sel) { input.setAttribute("aria-activedescendant", a.id); a.scrollIntoView({ block: "nearest" }); }
+    });
+  }
+  function hl(text, terms) {
+    var low = text.toLowerCase(), out = "", i = 0;
+    while (i < text.length) {
+      var best = -1, len = 0;
+      for (var j = 0; j < terms.length; j++) {
+        var p = low.indexOf(terms[j], i);
+        if (p >= 0 && (best < 0 || p < best || (p === best && terms[j].length > len))) { best = p; len = terms[j].length; }
+      }
+      if (best < 0) { out += esc(text.slice(i)); break; }
+      out += esc(text.slice(i, best)) + "<mark>" + esc(text.slice(best, best + len)) + "</mark>";
+      i = best + len;
+    }
+    return out;
+  }
+  function snippet(text, low, terms) {
+    var at = -1;
+    terms.forEach(function (t) { var p = low.indexOf(t); if (p >= 0 && (at < 0 || p < at)) at = p; });
+    if (at < 0) at = 0;
+    var a = Math.max(0, at - 70), b = Math.min(text.length, at + 170);
+    if (a > 0) { var sp = text.indexOf(" ", a); if (sp > 0 && sp < at) a = sp + 1; }
+    if (b < text.length) { var sb = text.lastIndexOf(" ", b); if (sb > at) b = sb; }
+    return (a > 0 ? "&hellip; " : "") + hl(text.slice(a, b), terms) + (b < text.length ? " &hellip;" : "");
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-search-open]"), function (b) {
+    b.addEventListener("click", openSearch);
+  });
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target && e.target.tagName) || "";
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (e.target && e.target.isContentEditable);
+    if (e.key === "Escape" && ov && !ov.hidden) { e.preventDefault(); closeSearch(); return; }
+    if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) { e.preventDefault(); openSearch(); return; }
+    if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); openSearch(); }
+  });
+
+  // ---------- continue reading: a volume remembers where you were ----------
+  if (CFG.mode === "vol") {
+    var marks = Array.prototype.slice.call(document.querySelectorAll(
+      "main > section[id], main section.chapter, main section.chapter h4[id]"));
+    var label = function (el) {
+      var ch = el.closest("section.chapter");
+      if (!ch) { var h2 = el.querySelector("h2"); return h2 ? h2.textContent : ""; }
+      var base = "Ch " + parseInt(ch.getAttribute("data-ch") || ch.id.slice(2), 10) + " \u00b7 " + ch.querySelector("h3").textContent;
+      return el.tagName === "H4" ? base + " \u203a " + el.textContent : base;
+    };
+    var saved = readJSON("pos." + CFG.slug, null), last = null, pending = null;
+    var current = function () {
+      var line = window.innerHeight * 0.3, cur = null;
+      for (var i = 0; i < marks.length; i++) { if (marks[i].getBoundingClientRect().top <= line) cur = marks[i]; else if (cur) break; }
+      return cur;
+    };
+    var save = function () {
+      pending = null;
+      var el = current(); if (!el || el.id === last) return;
+      last = el.id;
+      write("pos." + CFG.slug, JSON.stringify({ a: el.id, l: label(el), t: Date.now() }));
+      var rec = readJSON("recent", []).filter(function (s) { return s !== CFG.slug && bySlug[s]; });
+      rec.unshift(CFG.slug); write("recent", JSON.stringify(rec.slice(0, 16)));
+    };
+    var bar = null, startY = window.scrollY;
+    var hideBar = function () { if (bar) { bar.remove(); bar = null; } };
+    window.addEventListener("scroll", function () {
+      if (!pending) pending = setTimeout(save, 600);
+      if (bar && Math.abs(window.scrollY - startY) > window.innerHeight * 1.5) hideBar();
+    }, { passive: true });
+    var flush = function () { if (pending) { clearTimeout(pending); save(); } };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") flush(); });
+    var target = saved && saved.a !== "start" ? document.getElementById(saved.a) : null;
+    if (!location.hash && target) {
+      bar = document.createElement("div");
+      bar.className = "resume-bar"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Continue reading");
+      bar.innerHTML = '<span class="rb-text">Continue at <b>' + esc(saved.l) + '</b></span>' +
+        '<button class="rb-go" type="button">Resume</button><button class="rb-x" type="button" aria-label="Dismiss">&times;</button>';
+      document.body.appendChild(bar);
+      bar.querySelector(".rb-go").addEventListener("click", function () {
+        hideBar(); last = null; jump(saved.a);
+      });
+      bar.querySelector(".rb-x").addEventListener("click", hideBar);
+    }
+  }
+
+  // ---------- continue reading: the hub shows the latest places ----------
+  if (CFG.mode === "hub") {
+    var showResume = function () {
+    var box = document.getElementById("resume");
+    var places = readJSON("recent", []).map(function (s) {
+      var p = readJSON("pos." + s, null); return p && bySlug[s] ? { v: bySlug[s], p: p } : null;
+    }).filter(Boolean);
+    if (box && places.length) {
+      var top = places[0];
+      var html = '<a class="resume-main" href="' + esc(top.v.page + "#" + top.p.a) + '">' +
+        '<span><span class="rs-k">Continue reading</span><br><span class="rs-t">' + esc(top.v.title) + '</span><br>' +
+        '<span class="rs-m">' + esc(top.p.l) + ' &middot; ' + esc(ago(top.p.t)) + '</span></span>' +
+        '<span class="rs-go">Resume &rarr;</span></a>';
+      if (places.length > 1) html += '<div class="resume-more"><span>Also open:</span>' + places.slice(1, 5).map(function (x) {
+        return '<a href="' + esc(x.v.page + "#" + x.p.a) + '" title="' + esc(x.p.l) + '">' + esc(x.v.stage + " " + x.v.name) + '</a>';
+      }).join("") + '</div>';
+      box.innerHTML = html; box.hidden = false;
+    }
+    };
+    showResume();
+    window.addEventListener("englibrary:sync", showResume);
+  }
+})();
+</script>

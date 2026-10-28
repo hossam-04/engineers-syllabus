@@ -1,0 +1,113 @@
+    <section class="chapter prose" id="ch07" data-ch="07">
+      <header class="ch-head">
+        <div class="ch-top"><span class="ch-num">Chapter 7</span><label class="done-toggle"><input type="checkbox" data-id="ch07"><span class="box"></span>Read</label></div>
+        <h3>Processes, the environment and PATH</h3>
+        <div class="ch-meta"><span>{{RT}} min read</span><span>{{EX}} exercises</span></div>
+        <p class="thesis">Every command runs as a <b>process</b>, started by the shell, and each process gets its own copy of the <b>environment</b>, a list of <code>NAME=value</code> strings inherited from its parent. Copies flow down to children and never back up. That's why <code>cd</code> and <code>export</code> must be part of the shell itself, and why a script can't change the folder you're in. <code>PATH</code> is one of those variables: a list of folders searched in order. It explains every "command not found", and every time the wrong version of a program runs.</p>
+      </header>
+
+      <h4>Processes</h4>
+      <p>A process is a running program: its code, its memory, its open files, its current folder, and a number, the process ID, that names it. Every process except the first has a parent, the process that started it, and <code>ps</code>, <code>top</code> or the friendlier <code>htop</code> show them all. When you type a command, the shell makes a copy of itself, and the copy replaces its own program with the one you asked for, keeping its open files, its folder and its environment. That is how a child inherits everything from chapter 2's redirections. When the child exits, the shell receives its exit status, and shows the prompt again.</p>
+      <p>A command ending in <code>&amp;</code> runs in the background while you carry on; <code>jobs</code> lists them, <code>fg</code> brings one back, and Ctrl-Z pauses the current one so that <code>bg</code> can continue it in the background. Processes are stopped with <b>signals</b>. Ctrl-C sends <code>SIGINT</code>, <code>kill 1234</code> sends <code>SIGTERM</code>, a polite request to exit that a program can catch to clean up, as chapter 4's trap did. <code>kill -9 1234</code> sends <code>SIGKILL</code>, which can't be caught and leaves no chance to clean up, so it's the last resort, not the first.</p>
+
+      <h4>Variables and the environment</h4>
+      <p><code>x=1</code> makes a <b>shell variable</b>, which only this shell can see. <code>export x</code>, or <code>export x=1</code> in one go, marks it to be copied into the environment of every program the shell starts from then on. <code>env</code> or <code>printenv</code> lists the current environment, and <code>unset x</code> removes a variable. Putting assignments before a command, <code>LANG=C sort names.txt</code>, sets them in that one command's environment and nowhere else. By convention, environment variables have upper-case names. Some are shared by everything: <code>HOME</code>, <code>PATH</code>, <code>EDITOR</code>, <code>LANG</code> and <code>TZ</code>. Others belong to one program, like the <code>GIT_</code> variables the Git examples use to fix names and dates.</p>
+
+      <h4>Down, never up</h4>
+      <p>A child gets a <i>copy</i> of its parent's environment, at the moment it starts. Whatever it changes afterwards, in its variables or its current folder, changes only its copy, and disappears when it exits. Nothing in the system lets a child reach back into its parent. So <code>cd</code> can't be an ordinary program. A <code>cd</code> program would change its own folder and then exit, leaving yours exactly where it was. That's why <code>cd</code>, <code>export</code>, <code>source</code> and a few others are <b>builtins</b>, commands the shell runs itself. <code>type name</code> says what a name is: a builtin, an alias, a shell function, or a program and where it is.</p>
+      <p>The same rule decides what a script can do to your shell. Running <code>bash setup.sh</code>, or <code>./setup.sh</code>, starts a child, so its <code>cd</code> and <code>export</code> vanish with it. <b>Sourcing</b> it, <code>source setup.sh</code> or <code>. setup.sh</code>, runs its lines in your current shell, as if you'd typed them, so their effects stay. Startup files, and virtual environments' <code>activate</code> scripts, are sourced for exactly this reason.</p>
+      <figure class="diagram">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="On the left, a process tree. Your shell, with x=1 exported and PATH set, starts bash setup.sh, which receives a copy of the environment; the child runs cd sub and export GREETING=hello, and those changes stay in the child and vanish when it exits; an arrow back up to the parent is crossed out. Sourcing setup.sh instead runs the same lines in the parent itself. On the right, looking up the command greet with PATH set to bin2, then bin1, then /usr/bin: bin2 has greet, so it runs; bin1 also has greet, but is never reached; /usr/bin is not searched.">
+          __SVG:fig07__
+        </svg>
+        <figcaption>Environments are copied down at the moment a process starts, and never travel back. PATH is searched left to right, and the first match wins.</figcaption>
+      </figure>
+
+      <h4>PATH</h4>
+      <p>When you type a command name without a <code>/</code> in it, the shell looks in each folder listed in <code>PATH</code>, separated by colons, in order, and runs the first executable file with that name. A name containing a slash, like <code>./tidy</code> or <code>/usr/bin/python3</code>, is used as given, with no search. <code>type -a name</code> lists every match in search order, and <code>command -v name</code> prints the one that would run, which makes it the reliable check in scripts. <code>which</code> is a separate program on many systems and can disagree, because it doesn't know about your aliases and functions. To add a folder, put it at the front, where it wins, in the startup file chapter 8 sets up: <code>export PATH="$HOME/.local/bin:$PATH"</code>. Never add <code>.</code>, the current folder: any folder you <code>cd</code> into could then supply a fake <code>ls</code>.</p>
+      <p>Bash also remembers where it last found each command, so as not to search every time. If you install a program into a folder that comes earlier in <code>PATH</code> than the version you've been running, bash keeps running the old one until you type <code>hash -r</code> (in zsh, <code>rehash</code>) or open a new shell. Changing <code>PATH</code> itself clears that memory. Version managers for Python, Node and the rest, and Python's virtual environments, all work the same way: they put their own folder at the front of <code>PATH</code>.</p>
+      <p>The example builds two folders, <code>bin1</code> and <code>bin2</code>, each with its own program called <code>greet</code>. It runs them with <code>PATH</code> in each order, passes variables to child shells, runs and sources a script, and finally starts bash in four ways, with startup files that announce themselves.</p>
+      __EXAMPLE:ch07_env|env.py &middot; PATH order and type, variables exported or not, changes that don't flow back, a script run and sourced, and which startup files bash reads__
+
+      <h4>What the example shows</h4>
+      <p><b>The first match wins, and builtins aren't on PATH at all.</b> With <code>bin1</code> first, <code>greet</code> ran <code>bin1</code>'s program; reversed, <code>bin2</code>'s, and <code>type -a</code> listed both in order. With neither folder on <code>PATH</code>, status 127. <code>type</code> called <code>cd</code> and <code>export</code> builtins, which is why no <code>PATH</code> change can ever break them.</p>
+      <p><b>Only exported variables reach a child, and nothing comes back.</b> The unexported <code>x</code> was invisible to the child bash; exported, it arrived. <code>x=2 bash -c ...</code> gave the child a value the parent never had. The child's <code>x=99</code> and <code>cd /</code> changed its copy only. Running <code>setup.sh</code> left <code>GREETING</code> empty and the folder unchanged, and sourcing it did both.</p>
+      <p><b>Startup files depend on how the shell started.</b> A script reads no startup files. A <b>login</b> shell, which is what you get when you log in, read <code>~/.bash_profile</code>; an <b>interactive</b> shell, one you type into, read <code>~/.bashrc</code>. And an interactive login shell read only <code>~/.bash_profile</code>, which is the surprise. Terminal on a Mac starts a login shell in every window, so settings put only in <code>.bashrc</code> seem to be ignored there, while most Linux terminals start non-login shells, which read only <code>.bashrc</code>. The usual fix is a line in <code>~/.bash_profile</code> that sources <code>~/.bashrc</code>. Zsh, the default on Macs since 2019, has its own set: <code>~/.zshenv</code> always, <code>~/.zprofile</code> for login shells, and <code>~/.zshrc</code> for interactive ones. Put environment settings such as <code>PATH</code> in the login file, and interactive ones, aliases and the prompt, in the rc file.</p>
+
+      <div class="traps">
+        <h5 class="block-h">Common traps</h5>
+        <ul>
+          <li><b>Expecting a script to change your shell's folder or variables:</b> source it, or make it a function.</li>
+          <li><b>Setting a variable without <code>export</code></b> and wondering why a program can't see it.</li>
+          <li><b>Adding to <code>PATH</code> in a file that every nested shell reads,</b> so it grows each time.</li>
+          <li><b>Trusting <code>which</code></b> over <code>type -a</code>, which knows about aliases, functions and order.</li>
+          <li><b>A stale command</b> after installing a new version: <code>hash -r</code> or a new shell.</li>
+        </ul>
+      </div>
+
+      <div class="exercises">
+        <h5 class="block-h">Exercises</h5>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.1</span><span class="ex-title">The wrong Python</span></div>
+          <p>You installed Python 3.13, but <code>python3 --version</code> still says 3.9. How do you find out why, and fix it?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-bash">type -a python3            # every python3 on PATH, in the order they're searched
+echo "$PATH" | tr ':' '\n' # the folders, one per line
+hash -r                    # forget remembered locations, then try again
+# if the new folder is after the old one, put it first, in ~/.zprofile or ~/.bash_profile:
+export PATH="/opt/homebrew/bin:$PATH"</code></pre>
+            <p>Either the new Python's folder comes later in <code>PATH</code> than the old one's, so the old one wins, or bash remembered the old location. <code>type -a</code> tells you which. In a test with an old <code>python3</code> already found once, and a new one then installed into a folder earlier on <code>PATH</code>, the shell kept running the old one, and <code>type</code> said <code>python3 is hashed</code> with the old path, until <code>hash -r</code>. If the order is the problem, change <code>PATH</code> in your login startup file and open a new terminal. Don't fix it by deleting or renaming the system's Python, which other programs rely on. For projects, a virtual environment, from chapter 16 of <i>The Engineer's Primer</i>, puts the right Python first automatically.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.2</span><span class="ex-title">The script that wouldn't move</span></div>
+          <p>A script called <code>proj</code> contains <code>cd ~/code/"$1"</code>. Running <code>proj shop</code> prints nothing, and leaves you where you were. Why, and what should it be instead?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-bash"># in ~/.zshrc or ~/.bashrc
+proj() {
+  cd ~/code/"$1" || return
+}</code></pre>
+            <p>The script ran as a child process. It changed its own folder, which it's allowed to do, then exited, and its folder went with it. Your shell's folder was never touched, because a child can't change its parent. A <b>function</b> defined in your startup file runs inside your shell, so its <code>cd</code> is your <code>cd</code>. <code>|| return</code> makes it stop with a failure status if the folder doesn't exist. An alias would work for a fixed folder, but can't take an argument in the middle. The same reasoning explains why tools that change your environment, from <code>nvm</code> to Python's <code>activate</code>, are shell functions or sourced scripts, never ordinary programs.</p>
+          </div></details>
+        </div>
+
+        <div class="exercise">
+          <div class="ex-head"><span class="ex-num">Exercise 7.3</span><span class="ex-title">The PATH that grew</span></div>
+          <p>Your <code>~/.zshrc</code> has <code>export PATH="$HOME/bin:$PATH"</code>. After a while you notice <code>$HOME/bin</code> appears in <code>PATH</code> several times. Why, how can you check, and what are two fixes?</p>
+          <details class="solution"><summary>Show solution</summary><div class="sol-body">
+            <pre><code class="language-bash">echo "$PATH" | tr ':' '\n' | sort | uniq -d     # print any folder that appears twice
+
+# fix 1: in zsh, make the path array keep only the first copy of each entry
+typeset -U path
+
+# fix 2, for bash or any shell: only add the folder if it's missing
+add_path() { case ":$PATH:" in *":$1:"*) ;; *) PATH="$1:$PATH" ;; esac; }
+add_path "$HOME/bin"</code></pre>
+            <p><code>.zshrc</code> runs for every interactive shell, and each one inherits the <code>PATH</code> its parent already extended. So a shell started inside another one, in a terminal multiplexer, in an editor's terminal, or by typing <code>zsh</code>, adds the folder again. The duplicates are mostly harmless, but they make <code>PATH</code> hard to read and slow every failed lookup. The check prints each folder that appears more than once. In zsh, <code>path</code> is an array linked to <code>PATH</code>, and <code>typeset -U</code> makes it unique. The <code>case</code> pattern works in any shell: called three times, it added the folder once. Better still, set <code>PATH</code> in the login file, <code>~/.zprofile</code>, which runs once per login rather than once per shell.</p>
+          </div></details>
+        </div>
+      </div>
+
+      <div class="ch-end">
+        <div>
+          <h5 class="block-h">Checklist</h5>
+          <ul class="checklist">
+            <li>Can you explain what a child process inherits, and why nothing flows back?</li>
+            <li>Can you say why <code>cd</code> is a builtin, and when to source a script instead of running it?</li>
+            <li>Can you predict which program a name runs, and check with <code>type -a</code>?</li>
+            <li>Can you add a folder to <code>PATH</code> safely, in the right startup file?</li>
+            <li>Can you stop a process politely with a signal, and say when <code>kill -9</code> is justified?</li>
+          </ul>
+        </div>
+        <div>
+          <h5 class="block-h">Go deeper</h5>
+          <ul class="res">
+            <li><span class="rkind free">Course</span><div><a href="https://missing.csail.mit.edu/2020/command-line/">The Missing Semester: Command-line Environment</a> <span class="by">MIT</span></div></li>
+            <li><span class="rkind free">Docs</span><div><a href="https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html">Bash Reference Manual: Bash Startup Files</a> <span class="by">GNU</span></div></li>
+            <li><span class="rkind free">Docs</span><div><a href="https://zsh.sourceforge.io/Intro/intro_3.html">An Introduction to the Z Shell: Startup Files</a> <span class="by">The Z Shell project</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
